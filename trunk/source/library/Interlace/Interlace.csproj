@@ -1,0 +1,939 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{85E87759-45A5-49A7-BFB0-D9245D6B8D45}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Interlace</RootNamespace>
+    <AssemblyName>Interlace</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AdornedPasteUp\Documents\ClippingHandleFlyweight.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\Document.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\DocumentDeserializationContext.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\DocumentFill.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\DocumentFrame.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\DocumentFrameMemento.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\DocumentImage.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\DocumentReadingException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\DocumentSerializationContext.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\DragController.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\IDocumentObject.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\IHandleFlyweight.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\ImageLink.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\ImageLinkManager.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\LabelDocumentFrame.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\LinkEventArgs.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\MoveCallOutHandleFlyweight.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\MoveHandleFlyweight.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Documents\RectangularDocumentFrame.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Editing\PasteUpControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Editing\PasteUpControl.Designer.cs">
+      <DependentUpon>PasteUpControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Rendering\DocumentPaintResources.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Rendering\ImageLinkCache.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedPasteUp\Rendering\PasteUpRenderer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedRendering\AdornedBrowserController.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedRendering\AdornedBrowserRendering.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedRendering\AdornedFileResolver.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedRendering\AdornedFileResolverFactory.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedRendering\AdornedRenderer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedRendering\AdornedStyles.Designer.cs" />
+    <Compile Include="AdornedRendering\IAdornedReferenceResolverFactory.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedRendering\ITemporaryFileManager.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\AdornedProcessor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\AdornedReferenceResolutionException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\AdornedReferenceResolver.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\AdornedTextParsingException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\AdornedTextStrings.Designer.cs" />
+    <Compile Include="AdornedText\Blocks\Block.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Blocks\BlockSequence.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Blocks\DefinitionListing.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Blocks\DefinitionListItem.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Blocks\ErrorBlock.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Blocks\InlineBlock.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Blocks\Listing.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Blocks\ListingItem.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Blocks\Paragraph.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Blocks\ParseErrorSection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Blocks\Section.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Blocks\Table.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Blocks\TableCell.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Blocks\TableRow.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Blocks\VerbatimBlock.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\IAdornedPreprocessor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\InlineListBuildingVisitor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Line.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\LineClassifier.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\LineClassifierContext.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\NodeVisitor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\NullAdornedPreprocessor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Parser.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\ReferenceListBuildingVisitor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\SpanParser.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Spans\ErrorSpan.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Spans\FormattedSpan.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Spans\ISpanContainer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Spans\ReferenceSpan.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Spans\SequenceSpan.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Spans\Span.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Spans\TextSpan.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\Spans\WrapperSpan.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\TableBuilder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdornedText\XmlRenderer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Amf\AmfAnonymousClassDescriptor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Amf\AmfArray.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Amf\AmfClassAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Amf\AmfClassDescriptor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Amf\AmfException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Amf\AmfMarker.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Amf\AmfObject.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Amf\AmfPropertyAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Amf\AmfPropertyDescriptor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Amf\AmfReader.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Amf\AmfRegistry.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Amf\AmfTraits.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Amf\AmfWriter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Amf\IAmfClassDescriptor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\Bucket.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\BucketSet.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\CactusStack.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\CollectionMerging.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\CountedSet.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\DictionaryOfLists.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\EqualityPartitioner.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\Partitioner.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\PriorityDictionary.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\PriorityQueue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\RemainderBucket.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\Set.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\SetComparison.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\TopologicalSort.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\TopologicalSortException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\TrackedBindingList.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\TrackedBindingListEventArgs.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\TrackedCollection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\TrackedCollectionEventArgs.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Differencing\MatchingBlock.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Differencing\OpCode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Differencing\SequenceMatcher.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DoubleMetaphone\DoubleMetaphone.cs" />
+    <Compile Include="DoubleMetaphone\DoubleMetaphoneIterator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Drawing\Utilities.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Erlang\Atom.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Erlang\CodecException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Erlang\ErlangDictionary.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Erlang\ErlangProcessId.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Erlang\ErlangProtocolException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Erlang\ErlangReference.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Erlang\ITermWritable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Erlang\Tags.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Erlang\TermProtocol.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Erlang\TermReader.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Erlang\TermWriter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Erlang\Tuple.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\AffineTransform.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\Angle.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\Box.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\DouglasPeucker.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\Ellipsoid.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\Indexing\IRTreeBounded.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\Indexing\RTree.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\Indexing\RTreeBoundedsBucket.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\Indexing\RTreeLeaf.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\Indexing\RTreeNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\Indexing\RTreeNonLeaf.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\Indexing\RTreeObject.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\Journey.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\JourneySegment.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\Point.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\Polyline.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\Projection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Geo\Redfearn.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Imaging\GifColourTable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Imaging\GifConstants.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Imaging\GifFrame.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Imaging\GifGraphicsControlExtension.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Imaging\GifImage.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="LinearAlgebra\CholeskyDecomposition.cs" />
+    <Compile Include="LinearAlgebra\EigenvalueDecomposition.cs" />
+    <Compile Include="LinearAlgebra\LUDecomposition.cs" />
+    <Compile Include="LinearAlgebra\Matrix.cs" />
+    <Compile Include="LinearAlgebra\QRDecomposition.cs" />
+    <Compile Include="LinearAlgebra\SingularValueDecomposition.cs" />
+    <Compile Include="LinearAlgebra\Utility\Maths.cs" />
+    <Compile Include="Logging\SynchronisedQueue.cs" />
+    <Compile Include="Logging\SynchronisedQueueException.cs" />
+    <Compile Include="Logging\SynchronisedQueueShutdownException.cs" />
+    <Compile Include="Logging\SynchronisedQueueTimeoutException.cs" />
+    <Compile Include="Mathematics\BitTricks.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mathematics\CombinationGenerator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mathematics\ExtendedRandom.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mathematics\Pert.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Network\DnsApi.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Network\DnsAuthentication.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Network\DnsError.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Network\DnsException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Network\DnsExtensions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Network\DnsRecord.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Network\DnsRecordChain.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Network\DnsRecordCollection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Network\DnsRecordsResponse.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Network\PointerDnsRecord.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Network\TextDnsRecord.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Network\WindowsDnsAuthentication.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PropertyLists\FormattingPropertyDictionaryWrapper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PropertyLists\Lexer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PropertyLists\Parser.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PropertyLists\PropertyArray.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PropertyLists\PropertyBuilders.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PropertyLists\PropertyDictionary.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PropertyLists\PropertyListException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PropertyLists\Token.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PropertyLists\Writer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\CloseReason.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\Connection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\ConnectorHandle.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\DatagramSocketConnection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\DatagramSocketConnector.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\IConnection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\IProtocolFactory.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\IReactor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\NoArgumentProtocolFactory.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\Protocol.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\Reactor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\ReactorQueue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\ReactorSlot.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\RepeatingTimerHandle.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\ServiceExceptionEventArgs.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\SocketConnection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\SocketSendBuffer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\StreamConnection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\StreamSocketClientConnector.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\StreamSocketConnection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\StreamSocketServerConnector.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\TimerHandle.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\TimerQueue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorCore\TimerQueueEntry.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\BlockingReactorThreadInvoker.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\EventReactorThreadInvoker.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\InvokeReactorQueue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\InvokeReactorQueueProxyHandler.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\InvokeReactorQueueRequest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\IService.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\IServiceDependencies.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\IServiceHost.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\ProtocolException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\ReactorInvocationException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\ReactorThreadInvoker.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\ReactorThreadInvokerQueue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\ServiceHost.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\ServiceHostException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\ServiceHostImplementation.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\ServiceHostStateChangedEventArgs.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\ServiceState.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorService\ServiceStateRequest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\BlockingThreadInvoker.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\Deferred.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\DeferredFailure.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\DeferredObject.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\DeferredThreadingPair.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\FrameProtocol.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\IMonitoredOperation.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\IProgressIndicator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\IRemoteFileReceiver.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\ProxiedReturnAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\RemoteFileReceiver.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\RemotingClientProtocolAndFactory.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\RemotingException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\RemotingExceptionResponse.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\RemotingProtocol.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\RemotingProtocolError.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\RemotingProxy.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\RemotingReference.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\RemotingRequest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\RemotingRequestToken.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\RemotingResponse.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\RemotingStub.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\SerializeProtocol.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ReactorUtilities\VoidDeferred.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Threads\ThreadedSlot.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Threads\WorkerThread.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Threads\WorkerThreadPool.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Threads\WorkerThreadShutdownRequest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\AsyncControlThreadInvoker.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\AttributedMethod.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\AttributedProperty.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\BarButtonHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\ByteUtilities.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\Capitalisation.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\ColorMixing.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\ControlThreadInvoker.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\DelayedEvent.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\DisposableContainer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\EnumUtils.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\ExceptionHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\Functional.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\Hotkey.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\HotkeyWindow.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\HtmlBuilder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\HtmlBuilderElement.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\HtmlRenderer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\HtmlWriter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\HumanFormats.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\IProxyHandler.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\IThreadInvoker.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\Memoised.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\MoneyRounding.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\MoneyRoundingMode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\NaturalParsers.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\NaturalStrings.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\NullableDateTime.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\Pair.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\PropertyEventMap.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\Proxies.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\ProxyFactory.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\ProxyFactoryBase.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\ProxyGeneratorCore.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\ReferenceLabeller.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\ReflectionHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\RelativePath.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\ResettableBindingList.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\Resources.Designer.cs" />
+    <Compile Include="Utilities\Screenshot.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\Strings.Designer.cs" />
+    <Compile Include="Utilities\SystemWindow.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\ThreadInvoking.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\UnclosableStream.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\WebControlHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\XmlTransformer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\XmlUtilities.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="AdornedPasteUp\Editing\PasteUpControl.resx">
+      <DependentUpon>PasteUpControl.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AdornedRendering\AdornedStyles.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AdornedText\AdornedTextStrings.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Utilities\Resources.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Utilities\Strings.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="AdornedRendering\HtmlStyle.xslt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AdornedText\adorned-text.atd" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
