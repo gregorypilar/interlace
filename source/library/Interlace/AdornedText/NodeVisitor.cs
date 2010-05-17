@@ -1,0 +1,61 @@
+#region Using Directives and Copyright Notice
+
+// Copyright (c) 2007-2010, Computer Consultancy Pty Ltd
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of the Computer Consultancy Pty Ltd nor the
+//       names of its contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+// ARE DISCLAIMED. IN NO EVENT SHALL COMPUTER CONSULTANCY PTY LTD BE LIABLE 
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
+// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+// OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+// DAMAGE.
+
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+#endregion
+
+namespace Interlace.AdornedText
+{
+    public class NodeVisitor
+    {
+        // Block visitors, placed in a partial ordering such that base classes are earlier in the list:
+        public virtual void VisitBlock(Block block) { }
+        public virtual void VisitBlockSequence(BlockSequence sequence) { }
+        public virtual void VisitDefinitionListing(DefinitionListing listing) { }
+        public virtual void VisitDefinitionListingItem(DefinitionListItem listingItem) { }
+        public virtual void VisitListing(Listing listing) { }
+        public virtual void VisitListingItem(Listing listing) { }
+        public virtual void VisitParagraph(Paragraph paragraph) { }
+        public virtual void VisitSection(Section section) { }
+        public virtual void VisitTable(Table table) { }
+        public virtual void VisitTableRow(TableRow row) { }
+        public virtual void VisitTableCell(TableRow cell) { }
+        public virtual void VisitVerbatimBlock(VerbatimBlock verbatimBlock) { }
+        public virtual void VisitInlineBlock(InlineBlock inlineBlock) { }
+
+        // Span visitors, also placed in the base class earliest partial ordering:
+        public virtual void VisitSpan(Span span) { }
+        public virtual void VisitTextSpan(TextSpan textSpan) { }
+        public virtual void VisitSequenceSpan(SequenceSpan sequenceSpan) { }
+        public virtual void VisitFormattedSpan(FormattedSpan formattedSpan) { }
+        public virtual void VisitReferenceSpan(ReferenceSpan referenceSpan) { }
+    }
+}

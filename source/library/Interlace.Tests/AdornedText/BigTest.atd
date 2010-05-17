@@ -1,0 +1,50 @@
+= Title 1 =
+
+This is a test.
+
+The big test is a test of the adorned
+text format. This line ends in whitespace   
+
+[image adorned://TestImage]
+
+== Title 2 ==
+
+This is a list:
+
+- One
+- Two
+
+- Three
+  - Three.One
+  - Three.Two
+  
+    I like lists.
+    They're fun!
+    
+- Four
+  - Four.One
+    - Four.Two
+
+
+End of the list!
+
+```int c = 4;```
+
+```
+  int j = 2;
+  int k = 4 + j;
+```
+
+Here are some definitions:
+
+: Apple
+A computer of legendary performance and usability. Not to be confused
+with a lemon.
+: Vista
+A breathtaking view, or;
+
+A failed Microsoft attempt at "Profit Enhancement".
+% Comments have feelings, too.
+
+
+Bye!

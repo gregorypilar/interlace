@@ -1,0 +1,13 @@
+= Parsing Phases =
+
+Parsing is done in a number of phases. The input to parsing is a sequence
+of lines (using CR, LF or just LF line endings) that is streamed in. The phases are:
+
+: Line Classification
+Lines are classified in to exactly one class, "Unclassified", or some other classification
+such as "Comment" or "ListItem".
+: Block Classification
+Lines are fed to a state machine with the line classification as an input. Blocks are produced,
+each block also having a classification.
+: Comment Stripping
+Comments are removed from all blocks except for verbatim blocks.
