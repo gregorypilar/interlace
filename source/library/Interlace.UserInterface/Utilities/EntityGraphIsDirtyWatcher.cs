@@ -119,7 +119,9 @@ namespace Interlace.Utilities
 
         void entity_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            foreach (IEntityRelation relation in _boundTo.GetAllRelations())
+            IEntity2 senderEntity = sender as IEntity2;
+
+            foreach (IEntityRelation relation in senderEntity.GetAllRelations())
             {
                 if (relation.MappedFieldName == e.PropertyName)
                 {
