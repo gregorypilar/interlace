@@ -79,11 +79,17 @@ namespace Interlace.Utilities
             // As a work-around, we watch the focus events too:
             _view.FocusedRowChanged += new FocusedRowChangedEventHandler(_view_FocusedRowChanged);
             _view.GridControl.DataSourceChanged += new EventHandler(_view_DataSourceChanged);
+            _view.ColumnFilterChanged += new EventHandler(_view_ColumnFilterChanged);
 
             _previousSelectionCount = _view.SelectedRowsCount;
 
             _forbidGroupRowSelection = false;
             _lockRowFocusing = false;
+        }
+
+        void _view_ColumnFilterChanged(object sender, EventArgs e)
+        {
+            HandleRowFocusOrSelectionChange();
         }
 
         public bool EnablePostNewRowHack
