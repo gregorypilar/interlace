@@ -1,0 +1,41 @@
+protocol Talcasoft.Pinch.Test (1.1.1) [2]
+{
+	enumeration FixQuality [1]
+	{
+		None [1];
+		Bad [1];
+		Good [1];
+		Excellent [2];
+	}
+	
+	message Message [1]
+	{
+	    required Content Content [1];
+	}
+
+	choice Content [1]
+	{
+	    Fixes Fixes [1];
+	    Exception Exception [1];
+	    Exception Exception2 [1];
+	}
+	
+	structure Exception [1]
+	{
+	    required string Message [1];
+	}
+	
+	structure Fixes [1]
+	{
+	    list<required Fix> Fix [1];
+	}
+
+	structure Fix [1]
+	{
+	    required float32 Latitude [2];
+	    required float32 Longitude [2];
+	    required float32 X [1, removed 2];
+	    required float32 Y [1, removed 2];
+		optional float32 HDOP [1, removed 2];
+	}
+}

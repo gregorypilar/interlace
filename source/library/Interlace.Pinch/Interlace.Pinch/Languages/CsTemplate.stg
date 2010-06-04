@@ -1,0 +1,377 @@
+group CsTemplate;
+
+file(Document) ::= <<
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+
+using Talcasoft.Pinch.Implementation;
+
+<Document.Protocols:protocol()>
+>>
+
+protocol(Protocol) ::= <<
+namespace <Protocol.Name>
+{
+<Protocol.Declarations:declaration()>
+}
+
+>>
+
+declaration(Declaration) ::= <<
+<Declaration:(Declaration.KindTag)()>
+
+>>
+
+structure(Structure) ::= <<
+    public class <Structure.Identifier>Factory : IPinchableFactory
+    {
+        static <Structure.Identifier>Factory _instance = new <Structure.Identifier>Factory();
+        
+        public object Create(IPinchDecodingContext context)
+        {
+            return new <Structure.Identifier>(context);
+        }
+        
+        public static IPinchableFactory Instance
+        {
+            get
+            {
+                return _instance;
+            }
+        }
+    }
+    
+    public partial class <Structure.Identifier> : IPinchable, INotifyPropertyChanged
+    {
+        <Structure.Members:{ m | <m.Implementation.TypeName> <m.Implementation.FieldIdentifier>; }; separator="\r\n">
+
+        <Structure.Members:{ m | static PinchFieldProperties <m.Implementation.FieldIdentifier>Properties = new PinchFieldProperties(<m.Number>, <m.Implementation.AddedInVersion>, <m.Implementation.RemovedInVersion>); }; separator="\r\n">
+        
+        public <Structure.Identifier>()
+        {
+            <Structure.Members:structure_field_constructor(); separator="\r\n">
+        }
+    
+        public <Structure.Identifier>(IPinchDecodingContext context)
+        {
+        }
+        
+        <Structure.Members:structure_properties(); separator="\r\n\r\n">
+        
+        int IPinchable.ProtocolVersion
+        {
+            get 
+            {
+                return <Structure.Parent.Version>;
+            }
+        }
+    
+        void IPinchable.Encode(IPinchEncoder encoder)
+        {
+            encoder.OpenUncountedContainer();
+            
+            <Structure.CodingOrderMembers:structure_member_prepare_encode(); separator="\r\n">
+            
+            encoder.PrepareContainer();
+            
+            <Structure.CodingOrderMembers:structure_member_encode(); separator="\r\n">
+            
+            encoder.CloseContainer();
+        }
+        
+        void IPinchable.Decode(IPinchDecoder decoder)
+        {
+            decoder.OpenUncountedContainer();
+            
+            <Structure.CodingOrderMembers:structure_member_prepare_decode(); separator="\r\n">
+            
+            decoder.PrepareContainer();
+            
+            <Structure.CodingOrderMembers:structure_member_decode(); separator="\r\n">
+            
+            decoder.CloseContainer();
+        }
+        
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void FirePropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #endregion
+    }
+
+>>
+
+structure_member_action_arguments(Member) ::= <<
+<Member.Implementation.FieldIdentifier>Properties
+>>
+
+structure_member_prepare_encode(Member) ::= <<
+<if(Member.Implementation.ContainerIsScalar)>
+encoder.PrepareEncode<Member.Implementation.CodecMethodSuffix>(<Member.Implementation.FieldIdentifier>, <Member:structure_member_action_arguments()>);
+<endif>
+>>
+
+structure_field_constructor(Member) ::= <<
+<if(!Member.Implementation.ContainerIsScalar)>
+<Member.Implementation.FieldIdentifier> = new <Member.Implementation.TypeName>();
+<endif>
+>>
+
+structure_member_encode_list(Member) ::= <<
+
+encoder.OpenCountedContainer(<Member.Implementation.FieldIdentifier>.Count);
+
+foreach (<Member.Implementation.InnerTypeName> value in <Member.Implementation.FieldIdentifier>)
+{
+    encoder.PrepareEncode<Member.Implementation.CodecMethodSuffix>(value, <Member:structure_member_action_arguments()>);
+}
+
+encoder.PrepareContainer();
+
+foreach (<Member.Implementation.InnerTypeName> value in <Member.Implementation.FieldIdentifier>)
+{
+    encoder.Encode<Member.Implementation.CodecMethodSuffix>(value, <Member:structure_member_action_arguments()>);
+}
+
+encoder.CloseContainer();
+
+>>
+
+structure_member_encode(Member) ::= <<
+<if(Member.Implementation.ContainerIsScalar)>
+encoder.Encode<Member.Implementation.CodecMethodSuffix>(<Member.Implementation.FieldIdentifier>, <Member:structure_member_action_arguments()>);
+<else>
+<Member:("structure_member_encode_" + Member.Implementation.ContainerTag)()>
+<endif>
+>>
+
+structure_member_decode_list(Member) ::= <<
+int <Member.Implementation.CountVariableName> = decoder.OpenCountedContainer();
+
+for (int i = 0; i \< <Member.Implementation.CountVariableName>; i++)
+{
+    decoder.PrepareDecode<Member.Implementation.CodecMethodSuffix>(<Member:structure_member_action_arguments()>);
+}
+
+decoder.PrepareContainer();
+
+<Member.Implementation.FieldIdentifier> = new <Member.Implementation.TypeName>();
+
+for (int i = 0; i \< <Member.Implementation.CountVariableName>; i++)
+{
+    <Member.Implementation.FieldIdentifier>.Add(<Member:structure_member_decode_expression()>);
+}
+
+decoder.CloseContainer();
+>>
+
+structure_member_prepare_decode(Member) ::= <<
+<if(Member.Implementation.ContainerIsScalar)>
+decoder.PrepareDecode<Member.Implementation.CodecMethodSuffix>(<Member:structure_member_action_arguments()>);
+<endif>
+>>
+
+structure_member_decode_expression(Member) ::= <<
+(<Member.Implementation.InnerTypeName>)decoder.Decode<Member.Implementation.CodecMethodSuffix>(<if(Member.Implementation.IsInnerTypeStructure)><Member.Implementation.InnerTypeName>Factory.Instance, <endif><Member:structure_member_action_arguments()>)
+>>
+
+structure_member_decode(Member) ::= <<
+<if(Member.Implementation.ContainerIsScalar)>
+<Member.Implementation.FieldIdentifier> = <Member:structure_member_decode_expression()>;
+<else>
+<Member:("structure_member_decode_" + Member.Implementation.ContainerTag)()>
+<endif>
+>>
+
+structure_properties(Member) ::= <<
+public <Member.Implementation.TypeName> <Member.Implementation.PropertyIdentifier>
+{
+    get { return <Member.Implementation.FieldIdentifier>; }
+    set 
+    { 
+        <Member.Implementation.FieldIdentifier> = value; 
+        
+        FirePropertyChanged("<Member.Implementation.PropertyIdentifier>");
+    }
+}
+>>
+
+choice_structure_properties(Member) ::= <<
+public <Member.Implementation.TypeName> <Member.Implementation.PropertyIdentifier>
+{
+    get { return _valueKind == <Member.Parent.Identifier>Kind.<Member.Identifier> ? (<Member.Implementation.TypeName>)_value : null; }
+    set 
+    { 
+        <Member.Parent.Identifier>Kind existingKind = _valueKind;
+        
+        _value = value; 
+        _valueKind = <Member.Parent.Identifier>Kind.<Member.Identifier>;
+        
+        if (existingKind != _valueKind) FirePropertyChanged(existingKind);
+        FirePropertyChanged(_valueKind);
+    }
+}
+>>
+
+enumeration(Enumeration) ::= <<
+    public enum <Enumeration.Identifier>
+    {
+    <Enumeration.Members:enumeration_member(); separator=",\r\n">
+    }
+    
+>>
+
+enumeration_member(Member) ::= <<
+    <Member.Identifier> = <Member.Number>
+>>
+
+choice(Structure) ::= <<
+    public class <Structure.Identifier>Factory : IPinchableFactory
+    {
+        static <Structure.Identifier>Factory _instance = new <Structure.Identifier>Factory();
+        
+        public object Create(IPinchDecodingContext context)
+        {
+            return new <Structure.Identifier>(context);
+        }
+        
+        public static IPinchableFactory Instance
+        {
+            get
+            {
+                return _instance;
+            }
+        }
+    }
+    
+    public enum <Structure.Identifier>Kind
+    {
+        None = 0,
+        
+        <Structure.Members:{ m | <m.Identifier> = <m.Number>, }; separator="\r\n">
+    }
+    
+    public partial class <Structure.Identifier> : IPinchable, INotifyPropertyChanged
+    {
+        object _value;
+        <Structure.Identifier>Kind _valueKind;
+        
+        <Structure.Members:{ m | static PinchFieldProperties <m.Implementation.FieldIdentifier>Properties = new PinchFieldProperties(<m.Number>, <m.Implementation.AddedInVersion>, <m.Implementation.RemovedInVersion>); }; separator="\r\n">
+        
+        <Structure.Members:{ m | public <Structure.Identifier>(<m.Implementation.TypeName> value)
+\{
+    _value = value;
+    _valueKind = <Structure.Identifier>Kind.<m.Identifier>;
+\}
+
+public static implicit operator <Structure.Identifier>(<m.Implementation.TypeName> value)
+\{
+    return new <Structure.Identifier>(value);
+\}
+
+}; separator="\r\n">
+    
+        public <Structure.Identifier>()
+        {
+            _value = null;
+            _valueKind = <Structure.Identifier>Kind.None;
+        }
+    
+        public <Structure.Identifier>(IPinchDecodingContext context)
+        {
+        }
+        
+        public object Value 
+        {
+            get { return _value; }
+        }
+        
+        public <Structure.Identifier>Kind ValueKind
+        {
+            get { return _valueKind; }
+        }
+        
+        <Structure.Members:choice_structure_properties(); separator="\r\n\r\n">
+        
+        int IPinchable.ProtocolVersion
+        {
+            get 
+            {
+                return <Structure.Parent.Version>;
+            }
+        }
+        
+        public void FirePropertyChanged(<Structure.Identifier>Kind kind)
+        {
+            switch (kind)
+            {
+                case <Structure.Identifier>Kind.None:
+                    break;
+                    
+                <Structure.Members:{ m | case <Structure.Identifier>Kind.<m.Identifier>:
+    FirePropertyChanged("<m.Identifier>");
+    break; 
+    }; separator="\r\n">
+                default:
+                    break;
+            }
+        }
+    
+        void IPinchable.Encode(IPinchEncoder encoder)
+        {
+            encoder.OpenCountedContainer((int)_valueKind);
+            
+            switch (_valueKind)
+            {
+                case <Structure.Identifier>Kind.None:
+                    throw new PinchNullRequiredFieldException();
+                    
+                <Structure.Members:{ m | case <Structure.Identifier>Kind.<m.Identifier>:
+    encoder.PrepareEncodeRequiredStructure((IPinchable)_value, <m:structure_member_action_arguments()>);
+    encoder.PrepareContainer();
+    encoder.EncodeRequiredStructure((IPinchable)_value, <m:structure_member_action_arguments()>);
+    break; 
+    }; separator="\r\n">
+            }
+            
+            encoder.CloseContainer();
+        }
+        
+        void IPinchable.Decode(IPinchDecoder decoder)
+        {
+            _valueKind = (<Structure.Identifier>Kind)decoder.OpenCountedContainer();
+            
+            switch (_valueKind)
+            {
+                <Structure.Members:{ m | case <Structure.Identifier>Kind.<m.Identifier>:
+    decoder.PrepareDecodeRequiredStructure(<m:structure_member_action_arguments()>);
+    decoder.PrepareContainer();
+    _value = decoder.DecodeRequiredStructure(<m.Implementation.InnerTypeName>Factory.Instance, <m:structure_member_action_arguments()>);
+    break; 
+    }; separator="\r\n">
+                default:
+                    throw new PinchInvalidCodingException();
+            }
+            
+            decoder.CloseContainer();
+        }
+        
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void FirePropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #endregion
+    }
+
+>>

@@ -1,0 +1,255 @@
+group CppTemplate;
+
+h(Document) ::= <<
+#pragma once
+
+#include "Pinch/Pinch.h"
+
+<Document.Protocols:protocol_h()>
+>>
+
+protocol_h(Protocol) ::= <<
+<Protocol.Declarations:{ d | <d:(d.KindTag + "_forward_h")()> }; separator="\r\n">
+
+<Protocol.Declarations:{ d | <d:(d.KindTag + "_h")()> }>
+
+>>
+
+structure_forward_h(Structure) ::= <<
+class <Structure.Implementation.ClassName>;
+>>
+
+enumeration_forward_h(Structure) ::= ""
+
+structure_h(Structure) ::= <<
+class <Structure.Implementation.FactoryClassName> : public CPinchableFactory
+{
+private:
+    static <Structure.Implementation.FactoryClassName> m_Instance;
+    
+public:
+    static const <Structure.Implementation.FactoryClassName> &GetInstance()
+    {
+        return m_Instance;
+    }
+        
+    virtual CPinchable *Create(CPinchDecodingContext &context) const;
+};
+
+class <Structure.Implementation.ClassName> : public CPinchable
+{
+private:
+    <Structure.Members:{ m | <m.Implementation.OuterValueTypeName> <m.Implementation.FieldIdentifier>; }; separator="\r\n">
+
+protected:
+    <Structure.Members:{ m | static CPinchFieldProperties <m.Implementation.FieldIdentifier>Properties; }; separator="\r\n">
+    
+public:
+    <Structure.Implementation.ClassName>()
+    {
+    }
+
+    <Structure.Implementation.ClassName>(CPinchDecodingContext &context)
+    {
+    }
+    
+    <Structure.Members:structure_properties(); separator="\r\n\r\n">
+
+    virtual int GetProtocolVersion() const { return <Structure.Parent.Version>; }
+    virtual void Encode(CPinchEncoder &encoder) const;
+    virtual void Decode(CPinchDecoder &decoder);
+};
+
+>>
+
+structure_properties(Member) ::= <<
+<Member.Implementation.OuterReferenceTypeName> Get<Member.Implementation.PropertyIdentifier>() { return <Member.Implementation.FieldIdentifier>; }
+<if(Member.Implementation.ContainerIsScalar)>
+void Set<Member.Implementation.PropertyIdentifier>(<Member.Implementation.OuterReferenceTypeName> value) { <Member.Implementation.FieldIdentifier> = value; }
+<endif>
+>>
+
+enumeration_h(Enumeration) ::= <<
+class C<Enumeration.Identifier>
+{
+public:
+    enum Enumeration
+    {
+    <Enumeration.Members:enumeration_member(); separator=",\r\n">
+    };
+};
+    
+>>
+
+enumeration_member(Member) ::= <<
+    <Member.Identifier> = <Member.Number>
+>>
+
+cpp(Document) ::= <<
+#include "EnvoyLibraryStandard.h"
+#include "Pinch/Pinch.h"
+#include "<Document.BaseName>.h"
+
+<Document.Protocols:protocol_cpp()>
+>>
+
+protocol_cpp(Protocol) ::= <<
+<Protocol.Declarations:declaration_cpp()>
+
+>>
+
+declaration_cpp(Declaration) ::= <<
+<Declaration:(Declaration.KindTag + "_cpp")()>
+
+>>
+
+structure_cpp(Structure) ::= <<
+<Structure.Implementation.FactoryClassName> <Structure.Implementation.FactoryClassName>::m_Instance;
+    
+CPinchable *<Structure.Implementation.FactoryClassName>::Create(CPinchDecodingContext &context) const
+{
+    return new <Structure.Implementation.ClassName>(context);
+}
+    
+<Structure.Members:{ m | CPinchFieldProperties <Structure.Implementation.ClassName>::<m.Implementation.FieldIdentifier>Properties(<m.Number>, <m.Implementation.AddedInVersion>, <m.Implementation.RemovedInVersion>); }; separator="\r\n">
+
+void <Structure.Implementation.ClassName>::Encode(CPinchEncoder &encoder) const
+{
+    encoder.OpenUncountedContainer();
+            
+    <Structure.CodingOrderMembers:structure_member_prepare_encode(); separator="\r\n">
+            
+    encoder.PrepareContainer();
+            
+    <Structure.CodingOrderMembers:structure_member_encode(); separator="\r\n">
+            
+    encoder.CloseContainer();
+}
+
+void <Structure.Implementation.ClassName>::Decode(CPinchDecoder &decoder)
+{
+    decoder.OpenUncountedContainer();
+    
+    <Structure.CodingOrderMembers:structure_member_prepare_decode(); separator="\r\n">
+    
+    decoder.PrepareContainer();
+    
+    <Structure.CodingOrderMembers:structure_member_decode(); separator="\r\n">
+    
+    decoder.CloseContainer();
+}
+
+>>
+
+enumeration_cpp(Structure) ::= <<
+>>
+
+structure_member_action_arguments(Member) ::= <<
+<Member.Implementation.FieldIdentifier>Properties
+>>
+
+cast_for_encode(Identifier) ::= <<
+<if(it.Implementation.IsStructure)>
+boost::static_pointer_cast\<CPinchable\>(<Identifier>)
+<endif>
+<if(it.Implementation.IsEnumeration)>
+<if(it.Implementation.IsRequired)>
+(int)<Identifier>
+<else>
+CNullable\<int\>(<Identifier>)
+<endif>
+<endif>
+<if(it.Implementation.IsIntrinsic)>
+<Identifier>
+<endif>
+>>
+
+structure_member_prepare_encode(Member) ::= <<
+<if(Member.Implementation.ContainerIsScalar)>
+encoder.PrepareEncode<Member.Implementation.CodecMethodSuffix>(<Member:cast_for_encode(Member.Implementation.FieldIdentifier)>, <Member:structure_member_action_arguments()>);
+<endif>
+>>
+
+structure_member_encode_list(Member) ::= <<
+
+encoder.OpenCountedContainer((int)<Member.Implementation.FieldIdentifier>.GetCount());
+
+POSITION <Member.Implementation.PositionVariableName> = <Member.Implementation.FieldIdentifier>.GetHeadPosition();
+
+while (<Member.Implementation.PositionVariableName> != NULL)
+{
+    <Member.Implementation.ReferenceTypeName> value(<Member.Implementation.FieldIdentifier>.GetNext(<Member.Implementation.PositionVariableName>));
+    encoder.PrepareEncode<Member.Implementation.CodecMethodSuffix>(<Member:cast_for_encode("value")>, <Member:structure_member_action_arguments()>);
+}
+
+encoder.PrepareContainer();
+
+<Member.Implementation.PositionVariableName> = <Member.Implementation.FieldIdentifier>.GetHeadPosition();
+
+while (<Member.Implementation.PositionVariableName> != NULL)
+{
+    <Member.Implementation.ReferenceTypeName> value(<Member.Implementation.FieldIdentifier>.GetNext(<Member.Implementation.PositionVariableName>));
+    encoder.Encode<Member.Implementation.CodecMethodSuffix>(<Member:cast_for_encode("value")>, <Member:structure_member_action_arguments()>);
+}
+
+encoder.CloseContainer();
+
+>>
+
+structure_member_encode(Member) ::= <<
+<if(Member.Implementation.ContainerIsScalar)>
+encoder.Encode<Member.Implementation.CodecMethodSuffix>(<Member:cast_for_encode(Member.Implementation.FieldIdentifier)>, <Member:structure_member_action_arguments()>);
+<else>
+<Member:("structure_member_encode_" + Member.Implementation.ContainerTag)()>
+<endif>
+>>
+
+structure_member_decode_list(Member) ::= <<
+int <Member.Implementation.CountVariableName> = decoder.OpenCountedContainer();
+
+for (int i = 0; i \< <Member.Implementation.CountVariableName>; i++)
+{
+    decoder.PrepareDecode<Member.Implementation.CodecMethodSuffix>(<Member:structure_member_action_arguments()>);
+}
+
+decoder.PrepareContainer();
+
+<Member.Implementation.FieldIdentifier>.RemoveAll();
+
+for (int i = 0; i \< <Member.Implementation.CountVariableName>; i++)
+{
+    <Member.Implementation.FieldIdentifier>.AddTail(<Member:structure_member_decode_expression()>);
+}
+
+decoder.CloseContainer();
+>>
+
+structure_member_prepare_decode(Member) ::= <<
+<if(Member.Implementation.ContainerIsScalar)>
+decoder.PrepareDecode<Member.Implementation.CodecMethodSuffix>(<Member:structure_member_action_arguments()>);
+<endif>
+>>
+
+structure_member_decode_expression_inner(Member) ::= <<
+decoder.Decode<Member.Implementation.CodecMethodSuffix>(<if(Member.Implementation.IsInnerTypeStructure)><Member.Implementation.ClassName>Factory::GetInstance(), <endif><Member:structure_member_action_arguments()>)
+>>
+
+structure_member_decode_expression(Member) ::= <<
+<if(Member.Implementation.IsStructure)>
+boost::static_pointer_cast\<<Member.Implementation.ClassName>\>(<Member:structure_member_decode_expression_inner()>)
+<endif>
+<if(Member.Implementation.IsEnumeration)>
+(<Member.Implementation.ValueTypeName>)<Member:structure_member_decode_expression_inner()>
+<endif>
+<if(Member.Implementation.IsIntrinsic)>
+<Member:structure_member_decode_expression_inner()>
+<endif>
+>>
+
+structure_member_decode(Member) ::= <<
+<if(Member.Implementation.ContainerIsScalar)>
+<Member.Implementation.FieldIdentifier> = <Member:structure_member_decode_expression()>;
+<else>
+<Member:("structure_member_decode_" + Member.Implementation.ContainerTag)()>
+<endif>
+>>
