@@ -1,0 +1,115 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{59DAB14A-5062-4447-A111-62422E052ADF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Interlace.Pinch</RootNamespace>
+    <AssemblyName>Interlace.Pinch</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="antlr.runtime, Version=2.7.7.3, Culture=neutral, PublicKeyToken=d7701e059243744f">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Third Party\antlr.runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Interlace, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Interlace\bin\Debug\Interlace.dll</HintPath>
+    </Reference>
+    <Reference Include="ShiftReduceParser, Version=0.0.0.0, Culture=neutral, PublicKeyToken=ff8fabef79b9cbb4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Third Party\gppg\binaries\ShiftReduceParser.dll</HintPath>
+    </Reference>
+    <Reference Include="StringTemplate, Version=3.0.1.6846, Culture=neutral, PublicKeyToken=beee492b52c41e85, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Third Party\StringTemplate.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Analysis\Compilation.cs" />
+    <Compile Include="Analysis\IVersionable.cs" />
+    <Compile Include="Analysis\SemanticException.cs" />
+    <Compile Include="Analysis\VersionableUtilities.cs" />
+    <Compile Include="Dom\ContainerType.cs" />
+    <Compile Include="Dom\Declaration.cs" />
+    <Compile Include="Dom\DeclarationMember.cs" />
+    <Compile Include="Dom\DeclarationTypeReference.cs" />
+    <Compile Include="Dom\Document.cs" />
+    <Compile Include="Dom\Enumeration.cs" />
+    <Compile Include="Dom\EnumerationMember.cs" />
+    <Compile Include="Dom\FieldModifier.cs" />
+    <Compile Include="Dom\IntrinsicType.cs" />
+    <Compile Include="Dom\IntrinsicTypeReference.cs" />
+    <Compile Include="Dom\NamespaceName.cs" />
+    <Compile Include="Dom\Protocol.cs" />
+    <Compile Include="Dom\ProtocolIdentifier.cs" />
+    <Compile Include="Dom\Structure.cs" />
+    <Compile Include="Dom\StructureKind.cs" />
+    <Compile Include="Dom\StructureMember.cs" />
+    <Compile Include="Dom\TypeReference.cs" />
+    <Compile Include="Dom\Versioning.cs" />
+    <Compile Include="Generation\Generator.cs" />
+    <Compile Include="Generation\Language.cs" />
+    <Compile Include="Generation\LanguageOutput.cs" />
+    <Compile Include="Generation\NullableIntegerRenderer.cs" />
+    <Compile Include="Languages\BaseStructureMember.cs" />
+    <Compile Include="Languages\CppLanguage.cs" />
+    <Compile Include="Languages\CppStructure.cs" />
+    <Compile Include="Languages\CppStructureMember.cs" />
+    <Compile Include="Languages\CppType.cs" />
+    <Compile Include="Languages\CsLanguage.cs" />
+    <Compile Include="Languages\CsStructureMember.cs" />
+    <Compile Include="Languages\CsType.cs" />
+    <Compile Include="Languages\Templates.Designer.cs" />
+    <Compile Include="Parsing\ParsingException.cs" />
+    <Compile Include="Parsing\PinchLexer.cs" />
+    <Compile Include="Parsing\PinchParser.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Languages\CppTemplate.stg" />
+    <None Include="Languages\CsTemplate.stg" />
+    <None Include="Parsing\build.bat" />
+    <None Include="Parsing\PinchLexer.l" />
+    <None Include="Parsing\PinchParser.y" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Languages\Templates.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Encoding.txt" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
