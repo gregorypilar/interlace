@@ -57,6 +57,7 @@ namespace Interlace.ReactorCore
 
         ConnectorHandle ListenStream(IProtocolFactory factory, int port, IPAddress address);
         ConnectorHandle ListenStream(IProtocolFactory factory, int port);
+        ConnectorHandle ListenStream(IProtocolFactory factory);
 
         void AttachStream(IProtocolFactory factory, Stream stream);
         void AttachStream(IProtocolFactory factory, Stream readStream, Stream writeStream);

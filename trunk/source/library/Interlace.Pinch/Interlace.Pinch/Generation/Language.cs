@@ -53,11 +53,6 @@ namespace Interlace.Pinch.Generation
             get { return new CsLanguage(); }
         }
 
-        public static Language Cpp
-        {
-            get { return new CppLanguage(); }
-        }
-
         public string Name
         { 	 
             get { return _name; }

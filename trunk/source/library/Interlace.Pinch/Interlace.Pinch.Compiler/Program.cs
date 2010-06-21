@@ -46,7 +46,7 @@ namespace Interlace.Pinch.Compiler
             string documentPath = Path.GetFullPath(args[0]);
             string destinationPath = args.Length >= 2 ? Path.GetFullPath(args[1]) : Path.GetDirectoryName(documentPath);
 
-            Generator.Generate(Language.Cpp, documentPath, destinationPath);
+            Generator.Generate(Language.Cs, documentPath, destinationPath);
         }
     }
 }

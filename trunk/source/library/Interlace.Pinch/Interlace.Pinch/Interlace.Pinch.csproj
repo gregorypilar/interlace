@@ -69,6 +69,7 @@
     <Compile Include="Dom\Structure.cs" />
     <Compile Include="Dom\StructureKind.cs" />
     <Compile Include="Dom\StructureMember.cs" />
+    <Compile Include="Dom\StructureMemberVersionGroup.cs" />
     <Compile Include="Dom\TypeReference.cs" />
     <Compile Include="Dom\Versioning.cs" />
     <Compile Include="Generation\Generator.cs" />
@@ -76,10 +77,6 @@
     <Compile Include="Generation\LanguageOutput.cs" />
     <Compile Include="Generation\NullableIntegerRenderer.cs" />
     <Compile Include="Languages\BaseStructureMember.cs" />
-    <Compile Include="Languages\CppLanguage.cs" />
-    <Compile Include="Languages\CppStructure.cs" />
-    <Compile Include="Languages\CppStructureMember.cs" />
-    <Compile Include="Languages\CppType.cs" />
     <Compile Include="Languages\CsLanguage.cs" />
     <Compile Include="Languages\CsStructureMember.cs" />
     <Compile Include="Languages\CsType.cs" />
@@ -90,7 +87,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Languages\CppTemplate.stg" />
     <None Include="Languages\CsTemplate.stg" />
     <None Include="Parsing\build.bat" />
     <None Include="Parsing\PinchLexer.l" />

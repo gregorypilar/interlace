@@ -89,19 +89,17 @@ namespace Interlace.Pinch.Tests
         [Test]
         public void TestEncodingAndDecoding()
         {
-            byte protocolVersion = 3;
+            AssertEncodesAndDecodesTo(0M, 0xc1, 0x82, 0, 0);
+            AssertEncodesAndDecodesTo(1M, 0xc1, 0x83, 0, 0, 1);
+            AssertEncodesAndDecodesTo(1.0M, 0xc1, 0x83, 1, 0, 10);
+            AssertEncodesAndDecodesTo(-1.0M, 0xc1, 0x83, 1, 0x80, 10);
 
-            AssertEncodesAndDecodesTo(0M, protocolVersion, 0, 0);
-            AssertEncodesAndDecodesTo(1M, protocolVersion, 1, 0);
-            AssertEncodesAndDecodesTo(1.0M, protocolVersion, 10, 1 << 1);
-            AssertEncodesAndDecodesTo(-1.0M, protocolVersion, 10, (1 << 1) | 1);
+            AssertEncodesAndDecodesTo(decimal.MaxValue, 0xc1, 0x8e, 0, 0, 
+                0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
+                0xff, 0xff, 0xff, 0xff);
 
-            AssertEncodesAndDecodesTo(decimal.MaxValue, protocolVersion, 
-                0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-                0xff, 0xff, 0xff, 0x1f, 0);
-
-            AssertEncodesAndDecodesTo(0.0000000000000000000000000001M, protocolVersion, 1, 28 << 1);
-            AssertEncodesAndDecodesTo(-0.0000000000000000000000000001M, protocolVersion, 1, (28 << 1) | 1);
+            AssertEncodesAndDecodesTo(0.0000000000000000000000000001M, 0xc1, 0x83, 28, 0, 1);
+            AssertEncodesAndDecodesTo(-0.0000000000000000000000000001M, 0xc1, 0x83, 28, 0x80, 1);
         }
 
         public void AssertEncodesAndDecodesTo(decimal value, params byte[] bytes)

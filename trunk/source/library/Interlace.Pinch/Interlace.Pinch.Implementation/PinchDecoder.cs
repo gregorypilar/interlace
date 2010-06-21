@@ -42,24 +42,105 @@ namespace Interlace.Pinch.Implementation
         byte[] _streamBuffer;
         byte[] _intelOrderBuffer;
 
-        byte[] _bottomSmallCachedHeader;
-
-        PinchDecoderHeader _header;
-        Stack<PinchDecoderHeader> _headerStack;
-
-        int _headerPrepareBitCount;
-
         public PinchDecoder(Stream stream)
         {
             _stream = stream;
             _streamBuffer = new byte[8];
             _intelOrderBuffer = new byte[8];
-
-            _bottomSmallCachedHeader = new byte[32];
-
-            _header = null;
-            _headerStack = new Stack<PinchDecoderHeader>();
         }
+
+        #region Decoding Primitives
+
+        enum TokenKind
+        {
+            Sequence, // (The argument is the number of tokens in the sequence, which must then be read.)
+            PrimitiveBuffer, // (The argument is the number of bytes that follow in the buffer.)
+            PrimitivePackedOrdinal, // (The argument is the ordinal value; nothing needs to be read.)
+            PrimitiveTaggedOrdinal, // (No argument; the ordinal value must be read.)
+            Choice, // (The value kind is the argument; the structure follows.)
+            Null // (No argument and nothing to read after.)
+        }
+
+        bool _readRequired = true;
+        TokenKind _readTokenKind;
+        int _readTokenArgument;
+
+        void ReadTokenInternal()
+        {
+            int readByte = _stream.ReadByte();
+
+            if (readByte == -1) throw new PinchEndOfStreamException();
+
+            byte tokenByte = (byte)readByte;
+            byte maskedTokenByte = (byte)(tokenByte & PinchAssignedNumbers.PackedByteKindMask);
+
+            switch (maskedTokenByte)
+            {
+                case PinchAssignedNumbers.PackedPrimativeOrdinalByte:
+                    _readTokenKind = TokenKind.PrimitivePackedOrdinal;
+                    _readTokenArgument = tokenByte & PinchAssignedNumbers.PackedByteValueMask;
+                    break;
+
+                case PinchAssignedNumbers.PackedPrimativeBufferByte:
+                    _readTokenKind = TokenKind.PrimitiveBuffer;
+                    _readTokenArgument = tokenByte & PinchAssignedNumbers.PackedByteValueMask;
+                    break;
+
+                case PinchAssignedNumbers.PackedSequenceByte:
+                    _readTokenKind = TokenKind.Sequence;
+                    _readTokenArgument = tokenByte & PinchAssignedNumbers.PackedByteValueMask;
+                    break;
+
+                default:
+                    switch (tokenByte)
+                    {
+                        case PinchAssignedNumbers.Null:
+                            _readTokenKind = TokenKind.Null;
+                            break;
+
+                        case PinchAssignedNumbers.TaggedPrimativeOrdinalByte:
+                            _readTokenKind = TokenKind.PrimitiveTaggedOrdinal;
+                            break;
+
+                        case PinchAssignedNumbers.TaggedPrimativeBufferByte:
+                            _readTokenKind = TokenKind.PrimitiveBuffer;
+                            _readTokenArgument = (int)ReadUnsignedTag();
+                            break;
+
+                        case PinchAssignedNumbers.TaggedSequenceByte:
+                            _readTokenArgument = (int)ReadUnsignedTag();
+                            _readTokenKind = TokenKind.PrimitiveBuffer;
+                            break;
+
+                        case PinchAssignedNumbers.TaggedChoiceByte:
+                            _readTokenKind = TokenKind.Choice;
+                            _readTokenArgument = (int)ReadUnsignedTag();
+                            break;
+                    }
+
+                    break;
+            }
+        }
+
+        TokenKind PeekToken()
+        {
+            if (_readRequired) ReadTokenInternal();
+
+            _readRequired = false;
+
+            return _readTokenKind;
+        }
+
+        TokenKind ReadToken()
+        {
+            if (_readRequired) ReadTokenInternal();
+
+            _readRequired = true;
+
+            return _readTokenKind;
+        }
+
+        #endregion
 
         #region Decoding Utilities
 
@@ -95,10 +176,10 @@ namespace Interlace.Pinch.Implementation
             return bytes;
         }
 
-        int ReadUnsignedTag()
+        uint ReadUnsignedTag()
         {
         	int shift = 0;
-        	int tag = 0;
+        	uint tag = 0;
             int readByte;
 
             do
@@ -108,7 +189,7 @@ namespace Interlace.Pinch.Implementation
                 if (readByte == -1) throw new PinchEndOfStreamException();
                 if (shift >= 31) throw new PinchInvalidCodingException();
 
-                tag |= (readByte & 0x7f) << shift;
+                tag |= (uint)(readByte & 0x7f) << shift;
 
                 shift += 7;
             }
@@ -163,213 +244,165 @@ namespace Interlace.Pinch.Implementation
 
         decimal ReadDecimal()
         {
+            // Read the buffer token and length, ensuring it has enough bytes to be valid:
+            TokenKind token = ReadToken();
+
+            if (token != TokenKind.PrimitiveBuffer || _readTokenArgument < 2) throw new PinchInvalidCodingException();
+
+            BufferBytes(2);
+
+            byte scale = _streamBuffer[0];
+            bool isNegative = (_streamBuffer[1] & 0x80) != 0;
+
+            int bufferLength = _readTokenArgument;
+            int bufferUsed = 2;
+
             // Read the low bits:
         	int lowShift = 0;
             int lowReadByte;
-        	long low = 0;
+        	ulong low = 0;
 
-            do
+            while (lowShift != 64 && bufferUsed != bufferLength)
             {
                 lowReadByte = _stream.ReadByte();
+                bufferUsed++;
 
                 if (lowReadByte == -1) throw new PinchEndOfStreamException();
 
-                low |= (long)(lowReadByte & 0x7f) << lowShift;
+                low |= (ulong)((byte)lowReadByte) << lowShift;
 
-                lowShift += 7;
+                lowShift += 8;
             }
-            while ((lowReadByte & 0x80) != 0 && (lowShift < 49));
 
             // If the last low octet had a continuation bit, continue reading into high:
-            long high = 0;
+            int highShift = 0;
+            int highReadByte;
+            uint high = 0;
 
-            if ((lowReadByte & 0x80) != 0)
+            while (bufferUsed != bufferLength)
             {
-            	int highShift = 0;
-                int highReadByte;
+                highReadByte = _stream.ReadByte();
+                bufferUsed++;
 
-                do
-                {
-                    highReadByte = _stream.ReadByte();
+                if (highReadByte == -1) throw new PinchEndOfStreamException();
+                if (highShift == 32) throw new PinchInvalidCodingException();
 
-                    if (highReadByte == -1) throw new PinchEndOfStreamException();
-                    if (highShift >= 49) throw new PinchInvalidCodingException();
+                high |= (uint)((byte)highReadByte) << highShift;
 
-                    high |= (long)(highReadByte & 0x7f) << highShift;
-
-                    highShift += 7;
-                }
-                while ((highReadByte & 0x80) != 0);
+                highShift += 8;
             }
 
-            int intLow = (int)(low & 0xffffffffL);
-            int intMiddle = 
-                (int)((low & 0x1ffff00000000L) >> 32) | 
-                (int)((high & 0x0000000000007fffL) << 17);
-            int intHigh = (int)(high >> 15);
+            int intLow = (int)(uint)low;
+            int intMiddle = (int)(uint)(low >> 32);
+            int intHigh = (int)high;
 
-            int scale = ReadSignedTag();
-            bool isNegative = scale < 0;
+            return new decimal(intLow, intMiddle, intHigh, isNegative, scale);
+        }
 
-            if (isNegative) scale = ~scale;
+        #endregion
 
-            return new decimal(intLow, intMiddle, intHigh, isNegative, (byte)scale);
+        #region Decoding Assistants
+
+        void BufferPrimitiveBuffer(int expectedLength)
+        {
+            if (expectedLength > _streamBuffer.Length) throw new InvalidOperationException();
+
+            TokenKind token = ReadToken();
+
+            if (token != TokenKind.PrimitiveBuffer) throw new PinchInvalidCodingException();
+            if (_readTokenArgument != expectedLength) throw new PinchInvalidCodingException();
+
+            BufferBytes(expectedLength);
+        }
+
+        byte[] ReadPrimitiveBuffer()
+        {
+            TokenKind token = ReadToken();
+
+            if (token != TokenKind.PrimitiveBuffer) throw new PinchInvalidCodingException();
+
+            return ReadBytes(_readTokenArgument);
+        }
+
+        int ReadPrimitiveSignedOrdinal()
+        {
+            TokenKind token = ReadToken();
+
+            if (token == TokenKind.PrimitivePackedOrdinal)
+            {
+                return _readTokenArgument;
+            }
+            else if (token == TokenKind.PrimitiveTaggedOrdinal)
+            {
+                return ReadSignedTag();
+            }
+            else
+            {
+                throw new PinchInvalidCodingException();
+            }
+        }
+
+        uint ReadPrimitiveUnsignedOrdinal()
+        {
+            TokenKind token = ReadToken();
+
+            if (token == TokenKind.PrimitivePackedOrdinal)
+            {
+                return (uint)_readTokenArgument;
+            }
+            else if (token == TokenKind.PrimitiveTaggedOrdinal)
+            {
+                return ReadUnsignedTag();
+            }
+            else
+            {
+                throw new PinchInvalidCodingException();
+            }
+        }
+
+        long ReadPrimitiveLongOrdinal()
+        {
+            TokenKind token = ReadToken();
+
+            if (token == TokenKind.PrimitivePackedOrdinal)
+            {
+                return _readTokenArgument;
+            }
+            else if (token == TokenKind.PrimitiveTaggedOrdinal)
+            {
+                return ReadSignedLongTag();
+            }
+            else
+            {
+                throw new PinchInvalidCodingException();
+            }
         }
 
         #endregion
 
         #region IPinchDecoder Implementation
 
-        public void OpenUncountedContainer()
+        public int OpenSequence()
         {
-            Debug.Assert(_headerPrepareBitCount == 0);
+            TokenKind token = ReadToken();
+
+            if (token != TokenKind.Sequence) throw new PinchInvalidCodingException();
+
+            return _readTokenArgument;
         }
 
-        public int OpenCountedContainer()
+        public int DecodeChoiceMarker()
         {
-            Debug.Assert(_headerPrepareBitCount == 0);
+            TokenKind token = ReadToken();
 
-            return ReadUnsignedTag();
-        }
+            if (token != TokenKind.Choice) throw new PinchInvalidCodingException();
 
-        public void PrepareDecodeRequiredFloat32(PinchFieldProperties properties)
-        {
-            // No header used.
-        }
-
-        public void PrepareDecodeRequiredFloat64(PinchFieldProperties properties)
-        {
-            // No header used.
-        }
-
-        public void PrepareDecodeRequiredInt8(PinchFieldProperties properties)
-        {
-            // No header used.
-        }
-
-        public void PrepareDecodeRequiredInt16(PinchFieldProperties properties)
-        {
-            // No header used.
-        }
-
-        public void PrepareDecodeRequiredInt32(PinchFieldProperties properties)
-        {
-            // No header used.
-        }
-
-        public void PrepareDecodeRequiredInt64(PinchFieldProperties properties)
-        {
-            // No header used.
-        }
-
-        public void PrepareDecodeRequiredDecimal(PinchFieldProperties properties)
-        {
-            // No header used.
-        }
-
-        public void PrepareDecodeRequiredBool(PinchFieldProperties properties)
-        {
-            _headerPrepareBitCount++;
-        }
-
-        public void PrepareDecodeRequiredString(PinchFieldProperties properties)
-        {
-            // No header used.
-        }
-
-        public void PrepareDecodeRequiredBytes(PinchFieldProperties properties)
-        {
-            // No header used.
-        }
-
-        public void PrepareDecodeRequiredEnumeration(PinchFieldProperties properties)
-        {
-            // No header used.
-        }
-
-        public void PrepareDecodeRequiredStructure(PinchFieldProperties properties)
-        {
-            _headerPrepareBitCount += 2;
-        }
-
-        public void PrepareDecodeOptionalFloat32(PinchFieldProperties properties)
-        {
-            _headerPrepareBitCount += 1;
-        }
-
-        public void PrepareDecodeOptionalFloat64(PinchFieldProperties properties)
-        {
-            _headerPrepareBitCount += 1;
-        }
-
-        public void PrepareDecodeOptionalInt8(PinchFieldProperties properties)
-        {
-            _headerPrepareBitCount += 1;
-        }
-
-        public void PrepareDecodeOptionalInt16(PinchFieldProperties properties)
-        {
-            _headerPrepareBitCount += 1;
-        }
-
-        public void PrepareDecodeOptionalInt32(PinchFieldProperties properties)
-        {
-            _headerPrepareBitCount += 1;
-        }
-
-        public void PrepareDecodeOptionalInt64(PinchFieldProperties properties)
-        {
-            _headerPrepareBitCount += 1;
-        }
-
-        public void PrepareDecodeOptionalDecimal(PinchFieldProperties properties)
-        {
-            _headerPrepareBitCount += 1;
-        }
-
-        public void PrepareDecodeOptionalBool(PinchFieldProperties properties)
-        {
-            _headerPrepareBitCount += 2;
-        }
-
-        public void PrepareDecodeOptionalString(PinchFieldProperties properties)
-        {
-            _headerPrepareBitCount += 1;
-        }
-
-        public void PrepareDecodeOptionalBytes(PinchFieldProperties properties)
-        {
-            _headerPrepareBitCount += 1;
-        }
-
-        public void PrepareDecodeOptionalEnumeration(PinchFieldProperties properties)
-        {
-            _headerPrepareBitCount += 1;
-        }
-
-        public void PrepareDecodeOptionalStructure(PinchFieldProperties properties)
-        {
-            _headerPrepareBitCount += 2;
-        }
-
-        public void PrepareContainer()
-        {
-            if (_header == null)
-            {
-                _header = new PinchDecoderHeader(_headerPrepareBitCount, _bottomSmallCachedHeader, _stream);
-            }
-            else
-            {
-                _headerStack.Push(_header);
-                _header = new PinchDecoderHeader(_headerPrepareBitCount, _header.UpperSmallCachedHeader, _stream);
-            }
-
-            _headerPrepareBitCount = 0;
+            return _readTokenArgument;
         }
 
         public float DecodeRequiredFloat32(PinchFieldProperties properties)
         {
-            BufferBytes(4);
+            BufferPrimitiveBuffer(4);
 
             _intelOrderBuffer[0] = _streamBuffer[3];
             _intelOrderBuffer[1] = _streamBuffer[2];
@@ -381,7 +414,7 @@ namespace Interlace.Pinch.Implementation
 
         public double DecodeRequiredFloat64(PinchFieldProperties properties)
         {
-            BufferBytes(8);
+            BufferPrimitiveBuffer(8);
 
             _intelOrderBuffer[0] = _streamBuffer[7];
             _intelOrderBuffer[1] = _streamBuffer[6];
@@ -397,26 +430,22 @@ namespace Interlace.Pinch.Implementation
 
         public byte DecodeRequiredInt8(PinchFieldProperties properties)
         {
-            int value = _stream.ReadByte();
-
-            if (value == -1) throw new PinchEndOfStreamException();
-
-            return (byte)value;
+            return (byte)ReadPrimitiveUnsignedOrdinal();
         }
 
         public short DecodeRequiredInt16(PinchFieldProperties properties)
         {
-            return (short)ReadSignedTag();
+            return (short)ReadPrimitiveSignedOrdinal();
         }
 
         public int DecodeRequiredInt32(PinchFieldProperties properties)
         {
-            return ReadSignedTag();
+            return ReadPrimitiveSignedOrdinal();
         }
 
         public long DecodeRequiredInt64(PinchFieldProperties properties)
         {
-            return ReadSignedLongTag();
+            return ReadPrimitiveLongOrdinal();
         }
 
         public decimal DecodeRequiredDecimal(PinchFieldProperties properties)
@@ -426,40 +455,48 @@ namespace Interlace.Pinch.Implementation
 
         public bool DecodeRequiredBool(PinchFieldProperties properties)
         {
-            return _header.ReadOneHeaderBit();
+            return ReadPrimitiveUnsignedOrdinal() == 1;
         }
 
         public string DecodeRequiredString(PinchFieldProperties properties)
         {
-            int byteCount = ReadUnsignedTag();
-            byte[] bytes = ReadBytes(byteCount);
+            byte[] bytes = ReadPrimitiveBuffer();
 
             return Encoding.UTF8.GetString(bytes);
         }
 
         public byte[] DecodeRequiredBytes(PinchFieldProperties properties)
         {
-            int byteCount = ReadUnsignedTag();
-            return ReadBytes(byteCount);
+            return ReadPrimitiveBuffer();
         }
 
         public int DecodeRequiredEnumeration(PinchFieldProperties properties)
         {
-            return ReadUnsignedTag();
+            return (int)ReadPrimitiveUnsignedOrdinal();
         }
 
         public object DecodeRequiredStructure(IPinchableFactory factory, PinchFieldProperties properties)
         {
-            int flag = _header.ReadTwoHeaderBits();
-
             return PinchDecoder.DecodeStructure(this, factory, false);
+        }
+
+        bool IsOptionalFieldPresent()
+        {
+            return PeekToken() != TokenKind.Null;
+        }
+
+        void ReadNull()
+        {
+            TokenKind token = ReadToken();
+
+            if (token != TokenKind.Null) throw new InvalidOperationException();
         }
 
         public float? DecodeOptionalFloat32(PinchFieldProperties properties)
         {
-            if (_header.ReadOneHeaderBit())
+            if (IsOptionalFieldPresent())
             {
-                BufferBytes(4);
+                BufferPrimitiveBuffer(4);
 
                 _intelOrderBuffer[0] = _streamBuffer[3];
                 _intelOrderBuffer[1] = _streamBuffer[2];
@@ -470,15 +507,17 @@ namespace Interlace.Pinch.Implementation
             }
             else
             {
+                ReadNull();
+
                 return null;
             }
         }
 
         public double? DecodeOptionalFloat64(PinchFieldProperties properties)
         {
-            if (_header.ReadOneHeaderBit())
+            if (IsOptionalFieldPresent())
             {
-                BufferBytes(8);
+                BufferPrimitiveBuffer(8);
 
                 _intelOrderBuffer[0] = _streamBuffer[7];
                 _intelOrderBuffer[1] = _streamBuffer[6];
@@ -493,83 +532,91 @@ namespace Interlace.Pinch.Implementation
             }
             else
             {
+                ReadNull();
+
                 return null;
             }
         }
 
         public byte? DecodeOptionalInt8(PinchFieldProperties properties)
         {
-            if (_header.ReadOneHeaderBit())
+            if (IsOptionalFieldPresent())
             {
-                int value = _stream.ReadByte();
-
-                if (value == -1) throw new PinchEndOfStreamException();
-
-                return (byte)value;
+                return (byte)ReadPrimitiveUnsignedOrdinal();
             }
             else
             {
+                ReadNull();
+
                 return null;
             }
         }
 
         public short? DecodeOptionalInt16(PinchFieldProperties properties)
         {
-            if (_header.ReadOneHeaderBit())
+            if (IsOptionalFieldPresent())
             {
-                return (short)ReadSignedTag();
+                return (short)ReadPrimitiveSignedOrdinal();
             }
             else
             {
+                ReadNull();
+
                 return null;
             }
         }
 
         public int? DecodeOptionalInt32(PinchFieldProperties properties)
         {
-            if (_header.ReadOneHeaderBit())
+            if (IsOptionalFieldPresent())
             {
-                return ReadSignedTag();
+                return ReadPrimitiveSignedOrdinal();
             }
             else
             {
+                ReadNull();
+
                 return null;
             }
         }
 
         public long? DecodeOptionalInt64(PinchFieldProperties properties)
         {
-            if (_header.ReadOneHeaderBit())
+            if (IsOptionalFieldPresent())
             {
-                return ReadSignedLongTag();
+                return ReadPrimitiveLongOrdinal();
             }
             else
             {
+                ReadNull();
+
                 return null;
             }
         }
 
         public decimal? DecodeOptionalDecimal(PinchFieldProperties properties)
         {
-            if (_header.ReadOneHeaderBit())
+            if (IsOptionalFieldPresent())
             {
                 return ReadDecimal();
             }
             else
             {
+                ReadNull();
+
                 return null;
             }
         }
 
         public bool? DecodeOptionalBool(PinchFieldProperties properties)
         {
-            if (_header.ReadOneHeaderBit())
+            if (IsOptionalFieldPresent())
             {
-                return _header.ReadOneHeaderBit();
+                return ReadPrimitiveUnsignedOrdinal() == 1;
             }
             else
             {
-                _header.ReadOneHeaderBit();
+                ReadNull();
 
                 return null;
             }
@@ -577,68 +624,64 @@ namespace Interlace.Pinch.Implementation
 
         public string DecodeOptionalString(PinchFieldProperties properties)
         {
-            if (_header.ReadOneHeaderBit())
+            if (IsOptionalFieldPresent())
             {
-                int byteCount = ReadUnsignedTag();
-                byte[] bytes = ReadBytes(byteCount);
+                byte[] bytes = ReadPrimitiveBuffer();
 
                 return Encoding.UTF8.GetString(bytes);
             }
             else
             {
+                ReadNull();
+
                 return null;
             }
         }
 
         public byte[] DecodeOptionalBytes(PinchFieldProperties properties)
         {
-            if (_header.ReadOneHeaderBit())
+            if (IsOptionalFieldPresent())
             {
-                int byteCount = ReadUnsignedTag();
-                return ReadBytes(byteCount);
+                return ReadPrimitiveBuffer();
             }
             else
             {
+                ReadNull();
+
                 return null;
             }
         }
 
         public int? DecodeOptionalEnumeration(PinchFieldProperties properties)
         {
-            if (_header.ReadOneHeaderBit())
+            if (IsOptionalFieldPresent())
             {
-                return ReadUnsignedTag();
+                return (int)ReadPrimitiveUnsignedOrdinal();
             }
             else
             {
+                ReadNull();
+
                 return null;
             }
         }
 
         public object DecodeOptionalStructure(IPinchableFactory factory, PinchFieldProperties properties)
         {
-            int flag = _header.ReadTwoHeaderBits();
-
-            if (flag != CodedFlags.HeaderStructureNotPresent)
+            if (IsOptionalFieldPresent())
             {
                 return PinchDecoder.DecodeStructure(this, factory, false);
             }
             else
             {
+                ReadNull();
+
                 return null;
             }
         }
 
-        public void CloseContainer()
+        public void CloseSequence()
         {
-            if (_headerStack.Count > 0)
-            {
-                _header = _headerStack.Pop();
-            }
-            else
-            {
-                _header = null;
-            }
         }
 
         #endregion
@@ -651,6 +694,7 @@ namespace Interlace.Pinch.Implementation
             {
                 IPinchable pinchable = value as IPinchable;
 
+                /*
                 if (expectHeader)
                 {
                     int protocolVersion;
@@ -669,6 +713,7 @@ namespace Interlace.Pinch.Implementation
                             "reader, but the encoded data was version {1}.", pinchable.ProtocolVersion, protocolVersion));
                     }
                 }
+                */
 
                 pinchable.Decode(pinchDecoder);
             }
@@ -682,7 +727,7 @@ namespace Interlace.Pinch.Implementation
 
         internal void DecodeHeader(out int protocolVersion)
         {
-            protocolVersion = ReadUnsignedTag();
+            protocolVersion = 0;
         }
     }
 }

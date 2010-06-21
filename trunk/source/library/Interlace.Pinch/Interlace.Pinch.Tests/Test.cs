@@ -1,38 +1,8 @@
-#region Using Directives and Copyright Notice
-
-// Copyright (c) 2007-2010, Computer Consultancy Pty Ltd
-// All rights reserved.
-// 
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-//     * Redistributions of source code must retain the above copyright
-//       notice, this list of conditions and the following disclaimer.
-//     * Redistributions in binary form must reproduce the above copyright
-//       notice, this list of conditions and the following disclaimer in the
-//       documentation and/or other materials provided with the distribution.
-//     * Neither the name of the Computer Consultancy Pty Ltd nor the
-//       names of its contributors may be used to endorse or promote products
-//       derived from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
-// ARE DISCLAIMED. IN NO EVENT SHALL COMPUTER CONSULTANCY PTY LTD BE LIABLE 
-// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
-// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
-// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
-// OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-// DAMAGE.
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
 using Interlace.Pinch.Implementation;
-
-#endregion
 
 namespace Interlace.Pinch.Tests
 {
@@ -109,35 +79,50 @@ namespace Interlace.Pinch.Tests
                 return 3;
             }
         }
+        
+        protected virtual void OnMissingNewFields(int decodedUpToVersion, int decodingVersion)
+        {
+        }
+        
+        protected virtual void OnAdditionalFutureFields(IPinchDecoder decoder)
+        {
+        }
     
         void IPinchable.Encode(IPinchEncoder encoder)
         {
-            encoder.OpenUncountedContainer();
+            encoder.OpenSequence(2);
             
-            encoder.PrepareEncodeRequiredStructure(_choice, _choiceProperties);
-            encoder.PrepareEncodeRequiredInt32(_test, _testProperties);
-            
-            encoder.PrepareContainer();
-            
+            // Encode fields for version 1:
             encoder.EncodeRequiredStructure(_choice, _choiceProperties);
             encoder.EncodeRequiredInt32(_test, _testProperties);
             
-            encoder.CloseContainer();
+            encoder.CloseSequence();
         }
         
         void IPinchable.Decode(IPinchDecoder decoder)
         {
-            decoder.OpenUncountedContainer();
+            int remainingFields = decoder.OpenSequence();
+            int decodedUpToVersion = 0;
             
-            decoder.PrepareDecodeRequiredStructure(_choiceProperties);
-            decoder.PrepareDecodeRequiredInt32(_testProperties);
+            // Decode members for version 1:
+            if (remainingFields >= 2)
+            {
+                _choice = (ChoiceStructure)decoder.DecodeRequiredStructure(ChoiceStructureFactory.Instance, _choiceProperties);
+                _test = (int)decoder.DecodeRequiredInt32(_testProperties);
             
-            decoder.PrepareContainer();
+                remainingFields -= 2;
+                decodedUpToVersion = 1;
+            }
+            else
+            {
+                if (remainingFields != 0) throw new PinchInvalidCodingException();
+                
+                OnMissingNewFields(decodedUpToVersion, 1);
+            }
             
-            _choice = (ChoiceStructure)decoder.DecodeRequiredStructure(ChoiceStructureFactory.Instance, _choiceProperties);
-            _test = (int)decoder.DecodeRequiredInt32(_testProperties);
+            if (remainingFields > 0) OnAdditionalFutureFields(decoder);
             
-            decoder.CloseContainer();
+            decoder.CloseSequence();
         }
         
         #region INotifyPropertyChanged Members
@@ -357,7 +342,7 @@ namespace Interlace.Pinch.Tests
     
         void IPinchable.Encode(IPinchEncoder encoder)
         {
-            encoder.OpenCountedContainer((int)_valueKind);
+            encoder.EncodeChoiceMarker((int)_valueKind);
             
             switch (_valueKind)
             {
@@ -365,69 +350,49 @@ namespace Interlace.Pinch.Tests
                     throw new PinchNullRequiredFieldException();
                     
                 case ChoiceStructureKind.Small:
-                    encoder.PrepareEncodeRequiredStructure((IPinchable)_value, _smallProperties);
-                    encoder.PrepareContainer();
                     encoder.EncodeRequiredStructure((IPinchable)_value, _smallProperties);
                     break; 
                     
                 case ChoiceStructureKind.RequiredDecimal:
-                    encoder.PrepareEncodeRequiredStructure((IPinchable)_value, _requiredDecimalProperties);
-                    encoder.PrepareContainer();
                     encoder.EncodeRequiredStructure((IPinchable)_value, _requiredDecimalProperties);
                     break; 
                     
                 case ChoiceStructureKind.OptionalDecimal:
-                    encoder.PrepareEncodeRequiredStructure((IPinchable)_value, _optionalDecimalProperties);
-                    encoder.PrepareContainer();
                     encoder.EncodeRequiredStructure((IPinchable)_value, _optionalDecimalProperties);
                     break; 
                     
                 case ChoiceStructureKind.Versioning:
-                    encoder.PrepareEncodeRequiredStructure((IPinchable)_value, _versioningProperties);
-                    encoder.PrepareContainer();
                     encoder.EncodeRequiredStructure((IPinchable)_value, _versioningProperties);
                     break; 
                     
             }
-            
-            encoder.CloseContainer();
         }
         
         void IPinchable.Decode(IPinchDecoder decoder)
         {
-            _valueKind = (ChoiceStructureKind)decoder.OpenCountedContainer();
+            _valueKind = (ChoiceStructureKind)decoder.DecodeChoiceMarker();
             
             switch (_valueKind)
             {
                 case ChoiceStructureKind.Small:
-                    decoder.PrepareDecodeRequiredStructure(_smallProperties);
-                    decoder.PrepareContainer();
                     _value = decoder.DecodeRequiredStructure(SmallStructureFactory.Instance, _smallProperties);
                     break; 
                     
                 case ChoiceStructureKind.RequiredDecimal:
-                    decoder.PrepareDecodeRequiredStructure(_requiredDecimalProperties);
-                    decoder.PrepareContainer();
                     _value = decoder.DecodeRequiredStructure(RequiredDecimalStructureFactory.Instance, _requiredDecimalProperties);
                     break; 
                     
                 case ChoiceStructureKind.OptionalDecimal:
-                    decoder.PrepareDecodeRequiredStructure(_optionalDecimalProperties);
-                    decoder.PrepareContainer();
                     _value = decoder.DecodeRequiredStructure(OptionalDecimalStructureFactory.Instance, _optionalDecimalProperties);
                     break; 
                     
                 case ChoiceStructureKind.Versioning:
-                    decoder.PrepareDecodeRequiredStructure(_versioningProperties);
-                    decoder.PrepareContainer();
                     _value = decoder.DecodeRequiredStructure(VersioningStructureFactory.Instance, _versioningProperties);
                     break; 
                     
                 default:
                     throw new PinchInvalidCodingException();
             }
-            
-            decoder.CloseContainer();
         }
         
         #region INotifyPropertyChanged Members
@@ -492,31 +457,48 @@ namespace Interlace.Pinch.Tests
                 return 3;
             }
         }
+        
+        protected virtual void OnMissingNewFields(int decodedUpToVersion, int decodingVersion)
+        {
+        }
+        
+        protected virtual void OnAdditionalFutureFields(IPinchDecoder decoder)
+        {
+        }
     
         void IPinchable.Encode(IPinchEncoder encoder)
         {
-            encoder.OpenUncountedContainer();
+            encoder.OpenSequence(1);
             
-            encoder.PrepareEncodeRequiredInt8(_test, _testProperties);
-            
-            encoder.PrepareContainer();
-            
+            // Encode fields for version 1:
             encoder.EncodeRequiredInt8(_test, _testProperties);
             
-            encoder.CloseContainer();
+            encoder.CloseSequence();
         }
         
         void IPinchable.Decode(IPinchDecoder decoder)
         {
-            decoder.OpenUncountedContainer();
+            int remainingFields = decoder.OpenSequence();
+            int decodedUpToVersion = 0;
             
-            decoder.PrepareDecodeRequiredInt8(_testProperties);
+            // Decode members for version 1:
+            if (remainingFields >= 1)
+            {
+                _test = (byte)decoder.DecodeRequiredInt8(_testProperties);
             
-            decoder.PrepareContainer();
+                remainingFields -= 1;
+                decodedUpToVersion = 1;
+            }
+            else
+            {
+                if (remainingFields != 0) throw new PinchInvalidCodingException();
+                
+                OnMissingNewFields(decodedUpToVersion, 1);
+            }
             
-            _test = (byte)decoder.DecodeRequiredInt8(_testProperties);
+            if (remainingFields > 0) OnAdditionalFutureFields(decoder);
             
-            decoder.CloseContainer();
+            decoder.CloseSequence();
         }
         
         #region INotifyPropertyChanged Members
@@ -581,31 +563,48 @@ namespace Interlace.Pinch.Tests
                 return 3;
             }
         }
+        
+        protected virtual void OnMissingNewFields(int decodedUpToVersion, int decodingVersion)
+        {
+        }
+        
+        protected virtual void OnAdditionalFutureFields(IPinchDecoder decoder)
+        {
+        }
     
         void IPinchable.Encode(IPinchEncoder encoder)
         {
-            encoder.OpenUncountedContainer();
+            encoder.OpenSequence(1);
             
-            encoder.PrepareEncodeRequiredDecimal(_value, _valueProperties);
-            
-            encoder.PrepareContainer();
-            
+            // Encode fields for version 1:
             encoder.EncodeRequiredDecimal(_value, _valueProperties);
             
-            encoder.CloseContainer();
+            encoder.CloseSequence();
         }
         
         void IPinchable.Decode(IPinchDecoder decoder)
         {
-            decoder.OpenUncountedContainer();
+            int remainingFields = decoder.OpenSequence();
+            int decodedUpToVersion = 0;
             
-            decoder.PrepareDecodeRequiredDecimal(_valueProperties);
+            // Decode members for version 1:
+            if (remainingFields >= 1)
+            {
+                _value = (decimal)decoder.DecodeRequiredDecimal(_valueProperties);
             
-            decoder.PrepareContainer();
+                remainingFields -= 1;
+                decodedUpToVersion = 1;
+            }
+            else
+            {
+                if (remainingFields != 0) throw new PinchInvalidCodingException();
+                
+                OnMissingNewFields(decodedUpToVersion, 1);
+            }
             
-            _value = (decimal)decoder.DecodeRequiredDecimal(_valueProperties);
+            if (remainingFields > 0) OnAdditionalFutureFields(decoder);
             
-            decoder.CloseContainer();
+            decoder.CloseSequence();
         }
         
         #region INotifyPropertyChanged Members
@@ -670,31 +669,48 @@ namespace Interlace.Pinch.Tests
                 return 3;
             }
         }
+        
+        protected virtual void OnMissingNewFields(int decodedUpToVersion, int decodingVersion)
+        {
+        }
+        
+        protected virtual void OnAdditionalFutureFields(IPinchDecoder decoder)
+        {
+        }
     
         void IPinchable.Encode(IPinchEncoder encoder)
         {
-            encoder.OpenUncountedContainer();
+            encoder.OpenSequence(1);
             
-            encoder.PrepareEncodeOptionalDecimal(_value, _valueProperties);
-            
-            encoder.PrepareContainer();
-            
+            // Encode fields for version 1:
             encoder.EncodeOptionalDecimal(_value, _valueProperties);
             
-            encoder.CloseContainer();
+            encoder.CloseSequence();
         }
         
         void IPinchable.Decode(IPinchDecoder decoder)
         {
-            decoder.OpenUncountedContainer();
+            int remainingFields = decoder.OpenSequence();
+            int decodedUpToVersion = 0;
             
-            decoder.PrepareDecodeOptionalDecimal(_valueProperties);
+            // Decode members for version 1:
+            if (remainingFields >= 1)
+            {
+                _value = (decimal?)decoder.DecodeOptionalDecimal(_valueProperties);
             
-            decoder.PrepareContainer();
+                remainingFields -= 1;
+                decodedUpToVersion = 1;
+            }
+            else
+            {
+                if (remainingFields != 0) throw new PinchInvalidCodingException();
+                
+                OnMissingNewFields(decodedUpToVersion, 1);
+            }
             
-            _value = (decimal?)decoder.DecodeOptionalDecimal(_valueProperties);
+            if (remainingFields > 0) OnAdditionalFutureFields(decoder);
             
-            decoder.CloseContainer();
+            decoder.CloseSequence();
         }
         
         #region INotifyPropertyChanged Members
@@ -998,32 +1014,20 @@ namespace Interlace.Pinch.Tests
                 return 3;
             }
         }
+        
+        protected virtual void OnMissingNewFields(int decodedUpToVersion, int decodingVersion)
+        {
+        }
+        
+        protected virtual void OnAdditionalFutureFields(IPinchDecoder decoder)
+        {
+        }
     
         void IPinchable.Encode(IPinchEncoder encoder)
         {
-            encoder.OpenUncountedContainer();
+            encoder.OpenSequence(18);
             
-            encoder.PrepareEncodeOptionalString(_optPointer, _optPointerProperties);
-            encoder.PrepareEncodeOptionalInt8(_optScalar, _optScalarProperties);
-            encoder.PrepareEncodeOptionalStructure(_optStructure, _optStructureProperties);
-            encoder.PrepareEncodeOptionalString(_removedOptPointer, _removedOptPointerProperties);
-            encoder.PrepareEncodeOptionalInt8(_removedOptScalar, _removedOptScalarProperties);
-            encoder.PrepareEncodeOptionalStructure(_removedOptStructure, _removedOptStructureProperties);
-            encoder.PrepareEncodeRequiredString(_removedReqPointer, _removedReqPointerProperties);
-            encoder.PrepareEncodeRequiredInt8(_removedReqScalar, _removedReqScalarProperties);
-            encoder.PrepareEncodeRequiredStructure(_removedReqStructure, _removedReqStructureProperties);
-            encoder.PrepareEncodeRequiredString(_reqPointer, _reqPointerProperties);
-            encoder.PrepareEncodeRequiredInt8(_reqScalar, _reqScalarProperties);
-            encoder.PrepareEncodeRequiredStructure(_reqStructure, _reqStructureProperties);
-            encoder.PrepareEncodeOptionalString(_addedOptPointer, _addedOptPointerProperties);
-            encoder.PrepareEncodeOptionalInt8(_addedOptScalar, _addedOptScalarProperties);
-            encoder.PrepareEncodeOptionalStructure(_addedOptStructure, _addedOptStructureProperties);
-            encoder.PrepareEncodeRequiredString(_addedReqPointer, _addedReqPointerProperties);
-            encoder.PrepareEncodeRequiredInt8(_addedReqScalar, _addedReqScalarProperties);
-            encoder.PrepareEncodeRequiredStructure(_addedReqStructure, _addedReqStructureProperties);
-            
-            encoder.PrepareContainer();
-            
+            // Encode fields for version 1:
             encoder.EncodeOptionalString(_optPointer, _optPointerProperties);
             encoder.EncodeOptionalInt8(_optScalar, _optScalarProperties);
             encoder.EncodeOptionalStructure(_optStructure, _optStructureProperties);
@@ -1036,6 +1040,8 @@ namespace Interlace.Pinch.Tests
             encoder.EncodeRequiredString(_reqPointer, _reqPointerProperties);
             encoder.EncodeRequiredInt8(_reqScalar, _reqScalarProperties);
             encoder.EncodeRequiredStructure(_reqStructure, _reqStructureProperties);
+            
+            // Encode fields for version 2:
             encoder.EncodeOptionalString(_addedOptPointer, _addedOptPointerProperties);
             encoder.EncodeOptionalInt8(_addedOptScalar, _addedOptScalarProperties);
             encoder.EncodeOptionalStructure(_addedOptStructure, _addedOptStructureProperties);
@@ -1043,54 +1049,63 @@ namespace Interlace.Pinch.Tests
             encoder.EncodeRequiredInt8(_addedReqScalar, _addedReqScalarProperties);
             encoder.EncodeRequiredStructure(_addedReqStructure, _addedReqStructureProperties);
             
-            encoder.CloseContainer();
+            encoder.CloseSequence();
         }
         
         void IPinchable.Decode(IPinchDecoder decoder)
         {
-            decoder.OpenUncountedContainer();
+            int remainingFields = decoder.OpenSequence();
+            int decodedUpToVersion = 0;
             
-            decoder.PrepareDecodeOptionalString(_optPointerProperties);
-            decoder.PrepareDecodeOptionalInt8(_optScalarProperties);
-            decoder.PrepareDecodeOptionalStructure(_optStructureProperties);
-            decoder.PrepareDecodeOptionalString(_removedOptPointerProperties);
-            decoder.PrepareDecodeOptionalInt8(_removedOptScalarProperties);
-            decoder.PrepareDecodeOptionalStructure(_removedOptStructureProperties);
-            decoder.PrepareDecodeRequiredString(_removedReqPointerProperties);
-            decoder.PrepareDecodeRequiredInt8(_removedReqScalarProperties);
-            decoder.PrepareDecodeRequiredStructure(_removedReqStructureProperties);
-            decoder.PrepareDecodeRequiredString(_reqPointerProperties);
-            decoder.PrepareDecodeRequiredInt8(_reqScalarProperties);
-            decoder.PrepareDecodeRequiredStructure(_reqStructureProperties);
-            decoder.PrepareDecodeOptionalString(_addedOptPointerProperties);
-            decoder.PrepareDecodeOptionalInt8(_addedOptScalarProperties);
-            decoder.PrepareDecodeOptionalStructure(_addedOptStructureProperties);
-            decoder.PrepareDecodeRequiredString(_addedReqPointerProperties);
-            decoder.PrepareDecodeRequiredInt8(_addedReqScalarProperties);
-            decoder.PrepareDecodeRequiredStructure(_addedReqStructureProperties);
+            // Decode members for version 1:
+            if (remainingFields >= 12)
+            {
+                _optPointer = (string)decoder.DecodeOptionalString(_optPointerProperties);
+                _optScalar = (byte?)decoder.DecodeOptionalInt8(_optScalarProperties);
+                _optStructure = (SmallStructure)decoder.DecodeOptionalStructure(SmallStructureFactory.Instance, _optStructureProperties);
+                _removedOptPointer = (string)decoder.DecodeOptionalString(_removedOptPointerProperties);
+                _removedOptScalar = (byte?)decoder.DecodeOptionalInt8(_removedOptScalarProperties);
+                _removedOptStructure = (SmallStructure)decoder.DecodeOptionalStructure(SmallStructureFactory.Instance, _removedOptStructureProperties);
+                _removedReqPointer = (string)decoder.DecodeRequiredString(_removedReqPointerProperties);
+                _removedReqScalar = (byte)decoder.DecodeRequiredInt8(_removedReqScalarProperties);
+                _removedReqStructure = (SmallStructure)decoder.DecodeRequiredStructure(SmallStructureFactory.Instance, _removedReqStructureProperties);
+                _reqPointer = (string)decoder.DecodeRequiredString(_reqPointerProperties);
+                _reqScalar = (byte)decoder.DecodeRequiredInt8(_reqScalarProperties);
+                _reqStructure = (SmallStructure)decoder.DecodeRequiredStructure(SmallStructureFactory.Instance, _reqStructureProperties);
             
-            decoder.PrepareContainer();
+                remainingFields -= 12;
+                decodedUpToVersion = 1;
+            }
+            else
+            {
+                if (remainingFields != 0) throw new PinchInvalidCodingException();
+                
+                OnMissingNewFields(decodedUpToVersion, 1);
+            }
             
-            _optPointer = (string)decoder.DecodeOptionalString(_optPointerProperties);
-            _optScalar = (byte?)decoder.DecodeOptionalInt8(_optScalarProperties);
-            _optStructure = (SmallStructure)decoder.DecodeOptionalStructure(SmallStructureFactory.Instance, _optStructureProperties);
-            _removedOptPointer = (string)decoder.DecodeOptionalString(_removedOptPointerProperties);
-            _removedOptScalar = (byte?)decoder.DecodeOptionalInt8(_removedOptScalarProperties);
-            _removedOptStructure = (SmallStructure)decoder.DecodeOptionalStructure(SmallStructureFactory.Instance, _removedOptStructureProperties);
-            _removedReqPointer = (string)decoder.DecodeRequiredString(_removedReqPointerProperties);
-            _removedReqScalar = (byte)decoder.DecodeRequiredInt8(_removedReqScalarProperties);
-            _removedReqStructure = (SmallStructure)decoder.DecodeRequiredStructure(SmallStructureFactory.Instance, _removedReqStructureProperties);
-            _reqPointer = (string)decoder.DecodeRequiredString(_reqPointerProperties);
-            _reqScalar = (byte)decoder.DecodeRequiredInt8(_reqScalarProperties);
-            _reqStructure = (SmallStructure)decoder.DecodeRequiredStructure(SmallStructureFactory.Instance, _reqStructureProperties);
-            _addedOptPointer = (string)decoder.DecodeOptionalString(_addedOptPointerProperties);
-            _addedOptScalar = (byte?)decoder.DecodeOptionalInt8(_addedOptScalarProperties);
-            _addedOptStructure = (SmallStructure)decoder.DecodeOptionalStructure(SmallStructureFactory.Instance, _addedOptStructureProperties);
-            _addedReqPointer = (string)decoder.DecodeRequiredString(_addedReqPointerProperties);
-            _addedReqScalar = (byte)decoder.DecodeRequiredInt8(_addedReqScalarProperties);
-            _addedReqStructure = (SmallStructure)decoder.DecodeRequiredStructure(SmallStructureFactory.Instance, _addedReqStructureProperties);
+            // Decode members for version 2:
+            if (remainingFields >= 6)
+            {
+                _addedOptPointer = (string)decoder.DecodeOptionalString(_addedOptPointerProperties);
+                _addedOptScalar = (byte?)decoder.DecodeOptionalInt8(_addedOptScalarProperties);
+                _addedOptStructure = (SmallStructure)decoder.DecodeOptionalStructure(SmallStructureFactory.Instance, _addedOptStructureProperties);
+                _addedReqPointer = (string)decoder.DecodeRequiredString(_addedReqPointerProperties);
+                _addedReqScalar = (byte)decoder.DecodeRequiredInt8(_addedReqScalarProperties);
+                _addedReqStructure = (SmallStructure)decoder.DecodeRequiredStructure(SmallStructureFactory.Instance, _addedReqStructureProperties);
             
-            decoder.CloseContainer();
+                remainingFields -= 6;
+                decodedUpToVersion = 2;
+            }
+            else
+            {
+                if (remainingFields != 0) throw new PinchInvalidCodingException();
+                
+                OnMissingNewFields(decodedUpToVersion, 2);
+            }
+            
+            if (remainingFields > 0) OnAdditionalFutureFields(decoder);
+            
+            decoder.CloseSequence();
         }
         
         #region INotifyPropertyChanged Members
@@ -1513,40 +1528,20 @@ namespace Interlace.Pinch.Tests
                 return 3;
             }
         }
+        
+        protected virtual void OnMissingNewFields(int decodedUpToVersion, int decodingVersion)
+        {
+        }
+        
+        protected virtual void OnAdditionalFutureFields(IPinchDecoder decoder)
+        {
+        }
     
         void IPinchable.Encode(IPinchEncoder encoder)
         {
-            encoder.OpenUncountedContainer();
+            encoder.OpenSequence(26);
             
-            encoder.PrepareEncodeOptionalBool(_optBool, _optBoolProperties);
-            encoder.PrepareEncodeOptionalBytes(_optBytes, _optBytesProperties);
-            encoder.PrepareEncodeOptionalDecimal(_optDecimal, _optDecimalProperties);
-            encoder.PrepareEncodeOptionalEnumeration(_optEnumeration, _optEnumerationProperties);
-            encoder.PrepareEncodeOptionalFloat32(_optFloat32, _optFloat32Properties);
-            encoder.PrepareEncodeOptionalFloat64(_optFloat64, _optFloat64Properties);
-            encoder.PrepareEncodeOptionalInt16(_optInt16, _optInt16Properties);
-            encoder.PrepareEncodeOptionalInt32(_optInt32, _optInt32Properties);
-            encoder.PrepareEncodeOptionalInt64(_optInt64, _optInt64Properties);
-            encoder.PrepareEncodeOptionalInt8(_optInt8, _optInt8Properties);
-            
-            encoder.PrepareEncodeOptionalString(_optString, _optStringProperties);
-            encoder.PrepareEncodeOptionalStructure(_optStructure, _optStructureProperties);
-            encoder.PrepareEncodeRequiredBool(_reqBool, _reqBoolProperties);
-            encoder.PrepareEncodeRequiredBytes(_reqBytes, _reqBytesProperties);
-            encoder.PrepareEncodeRequiredDecimal(_reqDecimal, _reqDecimalProperties);
-            encoder.PrepareEncodeRequiredEnumeration(_reqEnumeration, _reqEnumerationProperties);
-            encoder.PrepareEncodeRequiredFloat32(_reqFloat32, _reqFloat32Properties);
-            encoder.PrepareEncodeRequiredFloat64(_reqFloat64, _reqFloat64Properties);
-            encoder.PrepareEncodeRequiredInt16(_reqInt16, _reqInt16Properties);
-            encoder.PrepareEncodeRequiredInt32(_reqInt32, _reqInt32Properties);
-            encoder.PrepareEncodeRequiredInt64(_reqInt64, _reqInt64Properties);
-            encoder.PrepareEncodeRequiredInt8(_reqInt8, _reqInt8Properties);
-            
-            encoder.PrepareEncodeRequiredString(_reqString, _reqStringProperties);
-            encoder.PrepareEncodeRequiredStructure(_reqStructure, _reqStructureProperties);
-            
-            encoder.PrepareContainer();
-            
+            // Encode fields for version 1:
             encoder.EncodeOptionalBool(_optBool, _optBoolProperties);
             encoder.EncodeOptionalBytes(_optBytes, _optBytesProperties);
             encoder.EncodeOptionalDecimal(_optDecimal, _optDecimalProperties);
@@ -1558,21 +1553,14 @@ namespace Interlace.Pinch.Tests
             encoder.EncodeOptionalInt64(_optInt64, _optInt64Properties);
             encoder.EncodeOptionalInt8(_optInt8, _optInt8Properties);
             
-            encoder.OpenCountedContainer(_optListOfEnum.Count);
-            
-            foreach (SmallStructure value in _optListOfEnum)
-            {
-                encoder.PrepareEncodeOptionalStructure(value, _optListOfEnumProperties);
-            }
-            
-            encoder.PrepareContainer();
+            encoder.OpenSequence(_optListOfEnum.Count);
             
             foreach (SmallStructure value in _optListOfEnum)
             {
                 encoder.EncodeOptionalStructure(value, _optListOfEnumProperties);
             }
             
-            encoder.CloseContainer();
+            encoder.CloseSequence();
             
             encoder.EncodeOptionalString(_optString, _optStringProperties);
             encoder.EncodeOptionalStructure(_optStructure, _optStructureProperties);
@@ -1587,121 +1575,87 @@ namespace Interlace.Pinch.Tests
             encoder.EncodeRequiredInt64(_reqInt64, _reqInt64Properties);
             encoder.EncodeRequiredInt8(_reqInt8, _reqInt8Properties);
             
-            encoder.OpenCountedContainer(_reqListOfEnum.Count);
-            
-            foreach (SmallStructure value in _reqListOfEnum)
-            {
-                encoder.PrepareEncodeRequiredStructure(value, _reqListOfEnumProperties);
-            }
-            
-            encoder.PrepareContainer();
+            encoder.OpenSequence(_reqListOfEnum.Count);
             
             foreach (SmallStructure value in _reqListOfEnum)
             {
                 encoder.EncodeRequiredStructure(value, _reqListOfEnumProperties);
             }
             
-            encoder.CloseContainer();
+            encoder.CloseSequence();
             
             encoder.EncodeRequiredString(_reqString, _reqStringProperties);
             encoder.EncodeRequiredStructure(_reqStructure, _reqStructureProperties);
             
-            encoder.CloseContainer();
+            encoder.CloseSequence();
         }
         
         void IPinchable.Decode(IPinchDecoder decoder)
         {
-            decoder.OpenUncountedContainer();
+            int remainingFields = decoder.OpenSequence();
+            int decodedUpToVersion = 0;
             
-            decoder.PrepareDecodeOptionalBool(_optBoolProperties);
-            decoder.PrepareDecodeOptionalBytes(_optBytesProperties);
-            decoder.PrepareDecodeOptionalDecimal(_optDecimalProperties);
-            decoder.PrepareDecodeOptionalEnumeration(_optEnumerationProperties);
-            decoder.PrepareDecodeOptionalFloat32(_optFloat32Properties);
-            decoder.PrepareDecodeOptionalFloat64(_optFloat64Properties);
-            decoder.PrepareDecodeOptionalInt16(_optInt16Properties);
-            decoder.PrepareDecodeOptionalInt32(_optInt32Properties);
-            decoder.PrepareDecodeOptionalInt64(_optInt64Properties);
-            decoder.PrepareDecodeOptionalInt8(_optInt8Properties);
-            
-            decoder.PrepareDecodeOptionalString(_optStringProperties);
-            decoder.PrepareDecodeOptionalStructure(_optStructureProperties);
-            decoder.PrepareDecodeRequiredBool(_reqBoolProperties);
-            decoder.PrepareDecodeRequiredBytes(_reqBytesProperties);
-            decoder.PrepareDecodeRequiredDecimal(_reqDecimalProperties);
-            decoder.PrepareDecodeRequiredEnumeration(_reqEnumerationProperties);
-            decoder.PrepareDecodeRequiredFloat32(_reqFloat32Properties);
-            decoder.PrepareDecodeRequiredFloat64(_reqFloat64Properties);
-            decoder.PrepareDecodeRequiredInt16(_reqInt16Properties);
-            decoder.PrepareDecodeRequiredInt32(_reqInt32Properties);
-            decoder.PrepareDecodeRequiredInt64(_reqInt64Properties);
-            decoder.PrepareDecodeRequiredInt8(_reqInt8Properties);
-            
-            decoder.PrepareDecodeRequiredString(_reqStringProperties);
-            decoder.PrepareDecodeRequiredStructure(_reqStructureProperties);
-            
-            decoder.PrepareContainer();
-            
-            _optBool = (bool?)decoder.DecodeOptionalBool(_optBoolProperties);
-            _optBytes = (byte[])decoder.DecodeOptionalBytes(_optBytesProperties);
-            _optDecimal = (decimal?)decoder.DecodeOptionalDecimal(_optDecimalProperties);
-            _optEnumeration = (TypesEnumeration?)decoder.DecodeOptionalEnumeration(_optEnumerationProperties);
-            _optFloat32 = (float?)decoder.DecodeOptionalFloat32(_optFloat32Properties);
-            _optFloat64 = (double?)decoder.DecodeOptionalFloat64(_optFloat64Properties);
-            _optInt16 = (short?)decoder.DecodeOptionalInt16(_optInt16Properties);
-            _optInt32 = (int?)decoder.DecodeOptionalInt32(_optInt32Properties);
-            _optInt64 = (long?)decoder.DecodeOptionalInt64(_optInt64Properties);
-            _optInt8 = (byte?)decoder.DecodeOptionalInt8(_optInt8Properties);
-            int optListOfEnumCount = decoder.OpenCountedContainer();
-            
-            for (int i = 0; i < optListOfEnumCount; i++)
+            // Decode members for version 1:
+            if (remainingFields >= 26)
             {
-                decoder.PrepareDecodeOptionalStructure(_optListOfEnumProperties);
+                _optBool = (bool?)decoder.DecodeOptionalBool(_optBoolProperties);
+                _optBytes = (byte[])decoder.DecodeOptionalBytes(_optBytesProperties);
+                _optDecimal = (decimal?)decoder.DecodeOptionalDecimal(_optDecimalProperties);
+                _optEnumeration = (TypesEnumeration?)decoder.DecodeOptionalEnumeration(_optEnumerationProperties);
+                _optFloat32 = (float?)decoder.DecodeOptionalFloat32(_optFloat32Properties);
+                _optFloat64 = (double?)decoder.DecodeOptionalFloat64(_optFloat64Properties);
+                _optInt16 = (short?)decoder.DecodeOptionalInt16(_optInt16Properties);
+                _optInt32 = (int?)decoder.DecodeOptionalInt32(_optInt32Properties);
+                _optInt64 = (long?)decoder.DecodeOptionalInt64(_optInt64Properties);
+                _optInt8 = (byte?)decoder.DecodeOptionalInt8(_optInt8Properties);
+                int optListOfEnumCount = decoder.OpenSequence();
+                
+                _optListOfEnum = new List<SmallStructure>();
+                
+                for (int i = 0; i < optListOfEnumCount; i++)
+                {
+                    _optListOfEnum.Add((SmallStructure)decoder.DecodeOptionalStructure(SmallStructureFactory.Instance, _optListOfEnumProperties));
+                }
+                
+                decoder.CloseSequence();
+                _optString = (string)decoder.DecodeOptionalString(_optStringProperties);
+                _optStructure = (SmallStructure)decoder.DecodeOptionalStructure(SmallStructureFactory.Instance, _optStructureProperties);
+                _reqBool = (bool)decoder.DecodeRequiredBool(_reqBoolProperties);
+                _reqBytes = (byte[])decoder.DecodeRequiredBytes(_reqBytesProperties);
+                _reqDecimal = (decimal)decoder.DecodeRequiredDecimal(_reqDecimalProperties);
+                _reqEnumeration = (TypesEnumeration)decoder.DecodeRequiredEnumeration(_reqEnumerationProperties);
+                _reqFloat32 = (float)decoder.DecodeRequiredFloat32(_reqFloat32Properties);
+                _reqFloat64 = (double)decoder.DecodeRequiredFloat64(_reqFloat64Properties);
+                _reqInt16 = (short)decoder.DecodeRequiredInt16(_reqInt16Properties);
+                _reqInt32 = (int)decoder.DecodeRequiredInt32(_reqInt32Properties);
+                _reqInt64 = (long)decoder.DecodeRequiredInt64(_reqInt64Properties);
+                _reqInt8 = (byte)decoder.DecodeRequiredInt8(_reqInt8Properties);
+                int reqListOfEnumCount = decoder.OpenSequence();
+                
+                _reqListOfEnum = new List<SmallStructure>();
+                
+                for (int i = 0; i < reqListOfEnumCount; i++)
+                {
+                    _reqListOfEnum.Add((SmallStructure)decoder.DecodeRequiredStructure(SmallStructureFactory.Instance, _reqListOfEnumProperties));
+                }
+                
+                decoder.CloseSequence();
+                _reqString = (string)decoder.DecodeRequiredString(_reqStringProperties);
+                _reqStructure = (SmallStructure)decoder.DecodeRequiredStructure(SmallStructureFactory.Instance, _reqStructureProperties);
+            
+                remainingFields -= 26;
+                decodedUpToVersion = 1;
+            }
+            else
+            {
+                if (remainingFields != 0) throw new PinchInvalidCodingException();
+                
+                OnMissingNewFields(decodedUpToVersion, 1);
             }
             
-            decoder.PrepareContainer();
+            if (remainingFields > 0) OnAdditionalFutureFields(decoder);
             
-            _optListOfEnum = new List<SmallStructure>();
-            
-            for (int i = 0; i < optListOfEnumCount; i++)
-            {
-                _optListOfEnum.Add((SmallStructure)decoder.DecodeOptionalStructure(SmallStructureFactory.Instance, _optListOfEnumProperties));
-            }
-            
-            decoder.CloseContainer();
-            _optString = (string)decoder.DecodeOptionalString(_optStringProperties);
-            _optStructure = (SmallStructure)decoder.DecodeOptionalStructure(SmallStructureFactory.Instance, _optStructureProperties);
-            _reqBool = (bool)decoder.DecodeRequiredBool(_reqBoolProperties);
-            _reqBytes = (byte[])decoder.DecodeRequiredBytes(_reqBytesProperties);
-            _reqDecimal = (decimal)decoder.DecodeRequiredDecimal(_reqDecimalProperties);
-            _reqEnumeration = (TypesEnumeration)decoder.DecodeRequiredEnumeration(_reqEnumerationProperties);
-            _reqFloat32 = (float)decoder.DecodeRequiredFloat32(_reqFloat32Properties);
-            _reqFloat64 = (double)decoder.DecodeRequiredFloat64(_reqFloat64Properties);
-            _reqInt16 = (short)decoder.DecodeRequiredInt16(_reqInt16Properties);
-            _reqInt32 = (int)decoder.DecodeRequiredInt32(_reqInt32Properties);
-            _reqInt64 = (long)decoder.DecodeRequiredInt64(_reqInt64Properties);
-            _reqInt8 = (byte)decoder.DecodeRequiredInt8(_reqInt8Properties);
-            int reqListOfEnumCount = decoder.OpenCountedContainer();
-            
-            for (int i = 0; i < reqListOfEnumCount; i++)
-            {
-                decoder.PrepareDecodeRequiredStructure(_reqListOfEnumProperties);
-            }
-            
-            decoder.PrepareContainer();
-            
-            _reqListOfEnum = new List<SmallStructure>();
-            
-            for (int i = 0; i < reqListOfEnumCount; i++)
-            {
-                _reqListOfEnum.Add((SmallStructure)decoder.DecodeRequiredStructure(SmallStructureFactory.Instance, _reqListOfEnumProperties));
-            }
-            
-            decoder.CloseContainer();
-            _reqString = (string)decoder.DecodeRequiredString(_reqStringProperties);
-            _reqStructure = (SmallStructure)decoder.DecodeRequiredStructure(SmallStructureFactory.Instance, _reqStructureProperties);
-            
-            decoder.CloseContainer();
+            decoder.CloseSequence();
         }
         
         #region INotifyPropertyChanged Members

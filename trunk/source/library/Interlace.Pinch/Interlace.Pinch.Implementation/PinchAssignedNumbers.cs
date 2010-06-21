@@ -28,35 +28,27 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Text;
 
 #endregion
 
-namespace Interlace.ReactorCore
+namespace Interlace.Pinch.Implementation
 {
-    public class ConnectorHandle
+    public static class PinchAssignedNumbers
     {
-        StreamSocketServerConnector _connector;
+        public const byte PackedByteKindMask = 0xc0;
+        public const byte PackedByteValueMask = 0x3f;
 
-        internal ConnectorHandle(StreamSocketServerConnector connector)
-        {
-            _connector = connector;
-        }
+        public const byte PackedSequenceByte = 0xc0;
+        public const byte PackedPrimativeBufferByte = 0x80;
+        public const byte PackedPrimativeOrdinalByte = 0x40;
 
-        public IPAddress ListeningOnAddress
-        {
-            get { return _connector.ListeningOnAddress; }
-        }
+        public const byte TaggedSequenceByte = 0x03;
+        public const byte TaggedPrimativeBufferByte = 0x02;
+        public const byte TaggedPrimativeOrdinalByte = 0x01;
 
-        public int ListeningOnPort
-        {
-            get { return _connector.ListeningOnPort; }
-        }
+        public const byte TaggedChoiceByte = 0x04;
 
-        public void Close()
-        {
-            _connector.Close();
-        }
+        public const byte Null = 0x00;
     }
 }

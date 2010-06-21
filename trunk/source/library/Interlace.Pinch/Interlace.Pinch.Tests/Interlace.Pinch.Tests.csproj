@@ -59,4 +59,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <PropertyGroup>
+    <PreBuildEvent>$(SolutionDir)\Interlace.Pinch.Compiler\bin\Debug\Interlace.Pinch.Compiler $(ProjectDir)\Test.pinch $(ProjectDir)\</PreBuildEvent>
+  </PropertyGroup>
 </Project>

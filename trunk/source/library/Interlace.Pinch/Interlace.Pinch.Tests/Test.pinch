@@ -1,4 +1,4 @@
-protocol Talcasoft.Pinch.Tests (1.2.3) [3]
+protocol Interlace.Pinch.Tests (1.2.3) [3]
 {
 	enumeration Enumeration [1]
 	{
