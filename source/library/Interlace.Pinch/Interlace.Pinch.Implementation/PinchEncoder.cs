@@ -39,69 +39,20 @@ namespace Interlace.Pinch.Implementation
     {
         Stream _stream;
         byte[] _streamBuffer;
-
-        int _headerBitsBuffer;
-        int _headerBitsUsed;
+        byte[] _decimalBuffer;
 
         public PinchEncoder(Stream stream)
         {
             _stream = stream;
             _streamBuffer = new byte[8];
-
-            _headerBitsBuffer = 0;
-            _headerBitsUsed = 0;
+            _decimalBuffer = null;
         }
 
         #region Encoding Utilities
 
-        void WriteOneHeaderBit(bool bit)
+        void WriteUnsignedTag(uint tag)
         {
-            int maskedBit = bit ? 1 : 0;
-
-            _headerBitsBuffer |= maskedBit << _headerBitsUsed;
-            _headerBitsUsed++;
-
-            if (_headerBitsUsed == 8)
-            {
-                _stream.WriteByte((byte)_headerBitsBuffer);
-
-                _headerBitsBuffer = 0;
-                _headerBitsUsed = 0;
-            }
-        }
-
-        void WriteTwoHeaderBits(int bits)
-        {
-            int maskedBits = bits & 0x3;
-
-            _headerBitsBuffer |= maskedBits << _headerBitsUsed;
-            _headerBitsUsed += 2;
-
-            if (_headerBitsUsed >= 8)
-            {
-                _stream.WriteByte((byte)_headerBitsBuffer);
-
-                _headerBitsBuffer >>= 8;
-                _headerBitsUsed -= 8;
-            }
-        }
-
-        void FlushHeaderBits()
-        {
-            if (_headerBitsUsed > 0)
-            {
-                _stream.WriteByte((byte)_headerBitsBuffer);
-
-                _headerBitsBuffer = 0;
-                _headerBitsUsed = 0;
-            }
-        }
-
-        void WriteUnsignedTag(int tag)
-        {
-            Debug.Assert(tag >= 0);
-
-            int remaining = tag;
+            uint remaining = tag;
 
             while (remaining > 0x7f)
         	{
@@ -138,6 +89,98 @@ namespace Interlace.Pinch.Implementation
             _stream.WriteByte((byte)remaining);
         }
 
+        #endregion
+
+        #region Encoding Primatives
+
+        void WriteSequenceMarker(int count)
+        {
+            if (count < 64)
+            {
+                _stream.WriteByte((byte)(PinchAssignedNumbers.PackedSequenceByte | count));
+            }
+            else
+            {
+                _stream.WriteByte(PinchAssignedNumbers.TaggedSequenceByte);
+
+                WriteUnsignedTag((uint)count);
+            }
+        }
+
+        void WritePrimativeBuffer(byte[] buffer, int offset, int length)
+        {
+            if (length < 64)
+            {
+                _stream.WriteByte((byte)(PinchAssignedNumbers.PackedPrimativeBufferByte | length));
+            }
+            else
+            {
+                _stream.WriteByte(PinchAssignedNumbers.TaggedPrimativeBufferByte);
+
+                WriteUnsignedTag((uint)length);
+            }
+
+            _stream.Write(buffer, offset, length);
+        }
+
+        void WritePrimativeSignedOrdinal(int ordinal)
+        {
+            if (0 <= ordinal && ordinal < 64)
+            {
+                _stream.WriteByte((byte)(PinchAssignedNumbers.PackedPrimativeOrdinalByte | ordinal));
+            }
+            else
+            {
+                _stream.WriteByte(PinchAssignedNumbers.TaggedPrimativeOrdinalByte);
+
+                WriteSignedTag(ordinal);
+            }
+        }
+
+        void WritePrimativeUnsignedOrdinal(uint ordinal)
+        {
+            if (0 <= ordinal && ordinal < 64)
+            {
+                _stream.WriteByte((byte)(PinchAssignedNumbers.PackedPrimativeOrdinalByte | ordinal));
+            }
+            else
+            {
+                _stream.WriteByte(PinchAssignedNumbers.TaggedPrimativeOrdinalByte);
+
+                WriteUnsignedTag(ordinal);
+            }
+        }
+
+        void WritePrimativeLongOrdinal(long ordinal)
+        {
+            if (0 <= ordinal && ordinal < 64)
+            {
+                _stream.WriteByte((byte)(PinchAssignedNumbers.PackedPrimativeOrdinalByte | ordinal));
+            }
+            else
+            {
+                _stream.WriteByte(PinchAssignedNumbers.TaggedPrimativeOrdinalByte);
+
+                WriteSignedLongTag(ordinal);
+            }
+        }
+
+        void WriteNull()
+        {
+            _stream.WriteByte(PinchAssignedNumbers.Null);
+        }
+
+        public void EncodeChoiceMarker(int valueKind)
+        {
+            _stream.WriteByte(PinchAssignedNumbers.TaggedChoiceByte);
+
+            WriteUnsignedTag((uint)valueKind);
+        }
+
+        #endregion
+
+        #region Scaler Writing
+
         void WriteFloat(float value)
         {
             byte[] intelOrder = BitConverter.GetBytes(value);
@@ -147,7 +190,7 @@ namespace Interlace.Pinch.Implementation
             _streamBuffer[2] = intelOrder[1];
             _streamBuffer[3] = intelOrder[0];
 
-            _stream.Write(_streamBuffer, 0, 4);
+            WritePrimativeBuffer(_streamBuffer, 0, 4);
         }
 
         void WriteDouble(double value)
@@ -163,206 +206,69 @@ namespace Interlace.Pinch.Implementation
             _streamBuffer[6] = intelOrder[1];
             _streamBuffer[7] = intelOrder[0];
 
-            _stream.Write(_streamBuffer, 0, 8);
+            WritePrimativeBuffer(_streamBuffer, 0, 8);
         }
 
         void WriteDecimal(decimal value)
         {
+            if (_decimalBuffer == null) _decimalBuffer = new byte[14];
+
             int[] bits = decimal.GetBits(value);
 
+            // Write the two scale bytes in full:
+            _decimalBuffer[0] = (byte)((bits[3] & 0x00ff0000) >> 16);
+            _decimalBuffer[1] = (byte)((bits[3] & 0xff000000) >> 24);
+
+            int decimalBufferUsed = 2;
+
             // Encode the mantissa:
-            long lowBits = (long)(uint)bits[0];
-            long middleLowBits = (long)((uint)bits[1] & 0x0001ffff) << 32;
-
-            long middleHighBits = (long)((uint)bits[1] & 0xfffe0000) >> 17;
-            long highBits = (long)(uint)bits[2] << 15;
-
-            long low = lowBits | middleLowBits;
-            long high = middleHighBits | highBits;
+            ulong low = ((ulong)(uint)bits[0]) | (((ulong)(uint)bits[1]) << 32);
+            uint high = (uint)bits[2];
 
             if (high == 0)
             {
-                long remaining = low;
+                ulong remaining = low;
 
-                while (remaining > 0x7f)
+                while (remaining > 0)
                 {
-                    _stream.WriteByte((byte)(remaining | 0x80L));
-                    remaining >>= 7;
+                    _decimalBuffer[decimalBufferUsed++] = (byte)remaining;
+                    remaining >>= 8;
                 }
-
-                _stream.WriteByte((byte)remaining);
             }
             else
             {
-                long lowRemaining = low;
-                int remainingOctets = 7;
+                ulong lowRemaining = low;
+                int remainingOctets = 8;
 
                 while (remainingOctets > 0)
                 {
-                    _stream.WriteByte((byte)(lowRemaining | 0x80L));
-                    lowRemaining >>= 7;
+                    _decimalBuffer[decimalBufferUsed++] = (byte)lowRemaining;
+                    lowRemaining >>= 8;
                     remainingOctets--;
                 }
 
                 // Write the high word:
-                long highRemaining = high;
+                uint highRemaining = high;
 
-                while (highRemaining > 0x7f)
+                while (highRemaining > 0)
                 {
-                    _stream.WriteByte((byte)(highRemaining | 0x80L));
-                    highRemaining >>= 7;
+                    _decimalBuffer[decimalBufferUsed++] = (byte)highRemaining;
+                    highRemaining >>= 8;
                 }
-
-                _stream.WriteByte((byte)highRemaining);
             }
 
-            // Encode the scale and sign:
-            int scale = ((bits[3] & 0x7fff0000) >> 16);
-
-            if (bits[3] < 0) scale = ~scale;
-
-            WriteSignedTag(scale);
+            WritePrimativeBuffer(_decimalBuffer, 0, decimalBufferUsed);
         }
 
         #endregion
 
         #region IPinchDecoder Members
 
-        public void OpenUncountedContainer()
-        {
-        }
-
-        public void OpenCountedContainer(int count)
+        public void OpenSequence(int count)
         {
             if (count < 0) throw new ArgumentException("count");
 
-            WriteUnsignedTag(count);
-        }
-
-        public void PrepareEncodeRequiredFloat32(float value, PinchFieldProperties properties)
-        {
-            // No header required.
-        }
-
-        public void PrepareEncodeRequiredFloat64(double value, PinchFieldProperties properties)
-        {
-            // No header required.
-        }
-
-        public void PrepareEncodeRequiredInt8(byte value, PinchFieldProperties properties)
-        {
-            // No header required.
-        }
-
-        public void PrepareEncodeRequiredInt16(short value, PinchFieldProperties properties)
-        {
-            // No header required.
-        }
-
-        public void PrepareEncodeRequiredInt32(int value, PinchFieldProperties properties)
-        {
-            // No header required.
-        }
-
-        public void PrepareEncodeRequiredInt64(long value, PinchFieldProperties properties)
-        {
-            // No header required.
-        }
-
-        public void PrepareEncodeRequiredDecimal(decimal value, PinchFieldProperties properties)
-        {
-            // No header required.
-        }
-
-        public void PrepareEncodeRequiredBool(bool value, PinchFieldProperties properties)
-        {
-            WriteOneHeaderBit(value);
-        }
-
-        public void PrepareEncodeRequiredString(string value, PinchFieldProperties properties)
-        {
-            // No header required.
-        }
-
-        public void PrepareEncodeRequiredBytes(byte[] value, PinchFieldProperties properties)
-        {
-            // No header required.
-        }
-
-        public void PrepareEncodeRequiredEnumeration(object value, PinchFieldProperties properties)
-        {
-            // No header required.
-        }
-
-        public void PrepareEncodeRequiredStructure(object value, PinchFieldProperties properties)
-        {
-            WriteTwoHeaderBits(CodedFlags.HeaderStructurePresent);
-        }
-        
-        public void PrepareEncodeOptionalFloat32(float? value, PinchFieldProperties properties)
-        {
-            WriteOneHeaderBit(value.HasValue);
-        }
-
-        public void PrepareEncodeOptionalFloat64(double? value, PinchFieldProperties properties)
-        {
-            WriteOneHeaderBit(value.HasValue);
-        }
-
-        public void PrepareEncodeOptionalInt8(byte? value, PinchFieldProperties properties)
-        {
-            WriteOneHeaderBit(value.HasValue);
-        }
-
-        public void PrepareEncodeOptionalInt16(short? value, PinchFieldProperties properties)
-        {
-            WriteOneHeaderBit(value.HasValue);
-        }
-
-        public void PrepareEncodeOptionalInt32(int? value, PinchFieldProperties properties)
-        {
-            WriteOneHeaderBit(value.HasValue);
-        }
-
-        public void PrepareEncodeOptionalInt64(long? value, PinchFieldProperties properties)
-        {
-            WriteOneHeaderBit(value.HasValue);
-        }
-
-        public void PrepareEncodeOptionalDecimal(decimal? value, PinchFieldProperties properties)
-        {
-            WriteOneHeaderBit(value.HasValue);
-        }
-
-        public void PrepareEncodeOptionalBool(bool? value, PinchFieldProperties properties)
-        {
-            WriteOneHeaderBit(value.HasValue);
-            WriteOneHeaderBit(value.HasValue ? value.Value : false);
-        }
-
-        public void PrepareEncodeOptionalString(string value, PinchFieldProperties properties)
-        {
-            WriteOneHeaderBit(value != null);
-        }
-
-        public void PrepareEncodeOptionalBytes(byte[] value, PinchFieldProperties properties)
-        {
-            WriteOneHeaderBit(value != null);
-        }
-
-        public void PrepareEncodeOptionalEnumeration(object value, PinchFieldProperties properties)
-        {
-            WriteOneHeaderBit(value != null);
-        }
-
-        public void PrepareEncodeOptionalStructure(object value, PinchFieldProperties properties)
-        {
-            WriteTwoHeaderBits(value != null ? CodedFlags.HeaderStructurePresent : CodedFlags.HeaderStructureNotPresent);
-        }
-
-        public void PrepareContainer()
-        {
-            FlushHeaderBits();
+            WriteSequenceMarker(count);
         }
 
         public void EncodeRequiredFloat32(float value, PinchFieldProperties properties)
@@ -377,22 +283,22 @@ namespace Interlace.Pinch.Implementation
 
         public void EncodeRequiredInt8(byte value, PinchFieldProperties properties)
         {
-            _stream.WriteByte(value);
+            WritePrimativeUnsignedOrdinal((uint)value);
         }
 
         public void EncodeRequiredInt16(short value, PinchFieldProperties properties)
         {
-            WriteSignedTag(value);
+            WritePrimativeSignedOrdinal((int)value);
         }
 
         public void EncodeRequiredInt32(int value, PinchFieldProperties properties)
         {
-            WriteSignedTag(value);
+            WritePrimativeSignedOrdinal(value);
         }
 
         public void EncodeRequiredInt64(long value, PinchFieldProperties properties)
         {
-            WriteSignedLongTag(value);
+            WritePrimativeLongOrdinal(value);
         }
 
         public void EncodeRequiredDecimal(decimal value, PinchFieldProperties properties)
@@ -402,7 +308,7 @@ namespace Interlace.Pinch.Implementation
 
         public void EncodeRequiredBool(bool value, PinchFieldProperties properties)
         {
-            // The boolean is encoded in the bit header.
+            WritePrimativeUnsignedOrdinal(value ? 1u : 0u);
         }
 
         public void EncodeRequiredString(string value, PinchFieldProperties properties)
@@ -411,25 +317,21 @@ namespace Interlace.Pinch.Implementation
 
             byte[] bytes = Encoding.UTF8.GetBytes(value);
 
-            WriteUnsignedTag(bytes.Length);
-
-            _stream.Write(bytes, 0, bytes.Length);
+            WritePrimativeBuffer(bytes, 0, bytes.Length);
         }
 
         public void EncodeRequiredBytes(byte[] value, PinchFieldProperties properties)
         {
             if (value == null) throw new PinchNullRequiredFieldException();
 
-            WriteUnsignedTag(value.Length);
-
-            _stream.Write(value, 0, value.Length);
+            WritePrimativeBuffer(value, 0, value.Length);
         }
 
         public void EncodeRequiredEnumeration(object value, PinchFieldProperties properties)
         {
             if (value == null) throw new PinchNullRequiredFieldException();
 
-            WriteUnsignedTag((int)value);
+            WritePrimativeUnsignedOrdinal((uint)(int)value);
         }
 
         public void EncodeRequiredStructure(object value, PinchFieldProperties properties)
@@ -441,81 +343,151 @@ namespace Interlace.Pinch.Implementation
 
         public void EncodeOptionalFloat32(float? value, PinchFieldProperties properties)
         {
-            if (value.HasValue) WriteFloat(value.Value);
+            if (value.HasValue)
+            {
+                WriteFloat(value.Value);
+            }
+            else
+            {
+                WriteNull();
+            }
         }
 
         public void EncodeOptionalFloat64(double? value, PinchFieldProperties properties)
         {
-            if (value.HasValue) WriteDouble(value.Value);
+            if (value.HasValue)
+            {
+                WriteDouble(value.Value);
+            }
+            else
+            {
+                WriteNull();
+            }
         }
 
         public void EncodeOptionalInt8(byte? value, PinchFieldProperties properties)
         {
-            if (value.HasValue) _stream.WriteByte(value.Value);
+            if (value.HasValue)
+            {
+                WritePrimativeUnsignedOrdinal((uint)value.Value);
+            }
+            else
+            {
+                WriteNull();
+            }
         }
 
         public void EncodeOptionalInt16(short? value, PinchFieldProperties properties)
         {
-            if (value.HasValue) WriteSignedTag(value.Value);
+            if (value.HasValue)
+            {
+                WritePrimativeSignedOrdinal((int)value.Value);
+            }
+            else
+            {
+                WriteNull();
+            }
         }
 
         public void EncodeOptionalInt32(int? value, PinchFieldProperties properties)
         {
-            if (value.HasValue) WriteSignedTag(value.Value);
+            if (value.HasValue)
+            {
+                WritePrimativeSignedOrdinal(value.Value);
+            }
+            else
+            {
+                WriteNull();
+            }
         }
 
         public void EncodeOptionalInt64(long? value, PinchFieldProperties properties)
         {
-            if (value.HasValue) WriteSignedLongTag(value.Value);
+            if (value.HasValue)
+            {
+                WritePrimativeLongOrdinal(value.Value);
+            }
+            else
+            {
+                WriteNull();
+            }
         }
 
         public void EncodeOptionalDecimal(decimal? value, PinchFieldProperties properties)
         {
-            if (value == null) return;
-
-            WriteDecimal(value.Value);
+            if (value.HasValue)
+            {
+                WriteDecimal(value.Value);
+            }
+            else
+            {
+                WriteNull();
+            }
         }
 
         public void EncodeOptionalBool(bool? value, PinchFieldProperties properties)
         {
-            // The boolean is encoded in the bit header.
+            if (value.HasValue)
+            {
+                WritePrimativeUnsignedOrdinal(value.Value ? 1u : 0u);
+            }
+            else
+            {
+                WriteNull();
+            }
         }
 
         public void EncodeOptionalString(string value, PinchFieldProperties properties)
         {
-            if (value == null) return;
+            if (value != null)
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes(value);
 
-            byte[] bytes = Encoding.UTF8.GetBytes(value);
-
-            WriteUnsignedTag(bytes.Length);
-
-            _stream.Write(bytes, 0, bytes.Length);
+                WritePrimativeBuffer(bytes, 0, bytes.Length);
+            }
+            else
+            {
+                WriteNull();
+            }
         }
 
         public void EncodeOptionalBytes(byte[] value, PinchFieldProperties properties)
         {
-            if (value == null) return;
-
-            WriteUnsignedTag(value.Length);
-
-            _stream.Write(value, 0, value.Length);
+            if (value != null)
+            {
+                WritePrimativeBuffer(value, 0, value.Length);
+            }
+            else
+            {
+                WriteNull();
+            }
         }
 
         public void EncodeOptionalEnumeration(object value, PinchFieldProperties properties)
         {
-            if (value == null) return;
-
-            WriteUnsignedTag((int)value);
+            if (value != null)
+            {
+                WritePrimativeUnsignedOrdinal((uint)(int)value);
+            }
+            else
+            {
+                WriteNull();
+            }
         }
 
         public void EncodeOptionalStructure(object value, PinchFieldProperties properties)
         {
-            if (value == null) return;
-
-            EncodeStructure(this, value, false);
+            if (value != null)
+            {
+                EncodeStructure(this, value, false);
+            }
+            else
+            {
+                WriteNull();
+            }
         }
 
-        public void CloseContainer()
+        public void CloseSequence()
         {
         }
 
@@ -541,7 +513,6 @@ namespace Interlace.Pinch.Implementation
 
         internal void EncodeHeader(int protocolVersion)
         {
-            WriteUnsignedTag(protocolVersion);
         }
 
         #endregion

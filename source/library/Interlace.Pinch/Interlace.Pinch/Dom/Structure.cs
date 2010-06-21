@@ -41,6 +41,7 @@ namespace Interlace.Pinch.Dom
     {
         TrackedBindingList<StructureMember> _members;
         List<StructureMember> _codingOrderMembers;
+        List<StructureMemberVersionGroup> _versionGroupedMembers;
         StructureKind _structureKind;
 
         public Structure()
@@ -52,11 +53,13 @@ namespace Interlace.Pinch.Dom
             _members.ListChanged += new System.ComponentModel.ListChangedEventHandler(_members_ListChanged);
 
             _codingOrderMembers = null;
+            _versionGroupedMembers = null;
         }
 
         void _members_ListChanged(object sender, System.ComponentModel.ListChangedEventArgs e)
         {
             _codingOrderMembers = null;
+            _versionGroupedMembers = null;
         }
 
         void _members_Added(object sender, TrackedBindingListEventArgs<StructureMember> e)
@@ -90,6 +93,35 @@ namespace Interlace.Pinch.Dom
                 }
 
                 return _codingOrderMembers;
+            }
+        }
+
+        public IList<StructureMemberVersionGroup> VersionGroupedMembers
+        {
+            get
+            {
+                if (_versionGroupedMembers == null)
+                {
+                    _versionGroupedMembers = new List<StructureMemberVersionGroup>();
+
+                    StructureMemberVersionGroup group = null;
+
+                    foreach (StructureMember member in CodingOrderMembers)
+                    {
+                        int version = member.Versioning.AddedInVersion;
+
+                        if (group == null || group.Version != version)
+                        {
+                            group = new StructureMemberVersionGroup(version);
+
+                            _versionGroupedMembers.Add(group);
+                        }
+
+                        group.Members.Add(member);
+                    }
+                }
+
+                return _versionGroupedMembers;
             }
         }
 

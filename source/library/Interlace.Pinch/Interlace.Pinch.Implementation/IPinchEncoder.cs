@@ -36,35 +36,9 @@ namespace Interlace.Pinch.Implementation
 {
     public interface IPinchEncoder
     {
-        void OpenUncountedContainer();
-        void OpenCountedContainer(int count);
+        void OpenSequence(int count);
 
-        void PrepareEncodeRequiredFloat32(float value, PinchFieldProperties properties);
-        void PrepareEncodeRequiredFloat64(double value, PinchFieldProperties properties);
-        void PrepareEncodeRequiredInt8(byte value, PinchFieldProperties properties);
-        void PrepareEncodeRequiredInt16(short value, PinchFieldProperties properties);
-        void PrepareEncodeRequiredInt32(int value, PinchFieldProperties properties);
-        void PrepareEncodeRequiredInt64(long value, PinchFieldProperties properties);
-        void PrepareEncodeRequiredDecimal(decimal value, PinchFieldProperties properties);
-        void PrepareEncodeRequiredBool(bool value, PinchFieldProperties properties);
-        void PrepareEncodeRequiredString(string value, PinchFieldProperties properties);
-        void PrepareEncodeRequiredBytes(byte[] value, PinchFieldProperties properties);
-        void PrepareEncodeRequiredEnumeration(object value, PinchFieldProperties properties);
-        void PrepareEncodeRequiredStructure(object value, PinchFieldProperties properties);
-        void PrepareEncodeOptionalFloat32(float? value, PinchFieldProperties properties);
-        void PrepareEncodeOptionalFloat64(double? value, PinchFieldProperties properties);
-        void PrepareEncodeOptionalInt8(byte? value, PinchFieldProperties properties);
-        void PrepareEncodeOptionalInt16(short? value, PinchFieldProperties properties);
-        void PrepareEncodeOptionalInt32(int? value, PinchFieldProperties properties);
-        void PrepareEncodeOptionalInt64(long? value, PinchFieldProperties properties);
-        void PrepareEncodeOptionalDecimal(decimal? value, PinchFieldProperties properties);
-        void PrepareEncodeOptionalBool(bool? value, PinchFieldProperties properties);
-        void PrepareEncodeOptionalString(string value, PinchFieldProperties properties);
-        void PrepareEncodeOptionalBytes(byte[] value, PinchFieldProperties properties);
-        void PrepareEncodeOptionalEnumeration(object value, PinchFieldProperties properties);
-        void PrepareEncodeOptionalStructure(object value, PinchFieldProperties properties);
-
-        void PrepareContainer();
+        void EncodeChoiceMarker(int valueKind);
 
         void EncodeRequiredFloat32(float value, PinchFieldProperties properties);
         void EncodeRequiredFloat64(double value, PinchFieldProperties properties);
@@ -91,6 +65,6 @@ namespace Interlace.Pinch.Implementation
         void EncodeOptionalEnumeration(object value, PinchFieldProperties properties);
         void EncodeOptionalStructure(object value, PinchFieldProperties properties);
 
-        void CloseContainer();
+        void CloseSequence();
     }
 }

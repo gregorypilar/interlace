@@ -40,6 +40,7 @@
     <Compile Include="IPinchDecoder.cs" />
     <Compile Include="IPinchDecodingContext.cs" />
     <Compile Include="IPinchEncoder.cs" />
+    <Compile Include="PinchAssignedNumbers.cs" />
     <Compile Include="PinchDecoder.cs" />
     <Compile Include="PinchDecoderHeader.cs" />
     <Compile Include="PinchEncoder.cs" />

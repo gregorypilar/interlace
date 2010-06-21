@@ -115,6 +115,14 @@ namespace Interlace.ReactorCore
             return new ConnectorHandle(connector);
         }
 
+        public ConnectorHandle ListenStream(IProtocolFactory factory)
+        {
+            StreamSocketServerConnector connector = new StreamSocketServerConnector(this);
+            connector.Listen(factory);
+
+            return new ConnectorHandle(connector);
+        }
+
         public void AttachStream(IProtocolFactory factory, Stream stream)
         {
             AttachStream(factory, stream, stream);

@@ -30,73 +30,29 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-using Interlace.Collections;
-
 #endregion
 
 namespace Interlace.Pinch.Dom
 {
-    public class Protocol
+    public class StructureMemberVersionGroup
     {
-        NamespaceName _name;
-        Versioning _versioning;
-        ProtocolIdentifier _protocolIdentifier;
-        TrackedBindingList<Declaration> _declarations;
-        object _implementation;
+        readonly int _version;
+        readonly List<StructureMember> _members;
 
-        public Protocol()
+        public StructureMemberVersionGroup(int version)
         {
-            _declarations = new TrackedBindingList<Declaration>();
-            _declarations.Added += new EventHandler<TrackedBindingListEventArgs<Declaration>>(_declarations_Added);
-            _declarations.Removed += new EventHandler<TrackedBindingListEventArgs<Declaration>>(_declarations_Removed);
-        }
-
-        void _declarations_Added(object sender, TrackedBindingListEventArgs<Declaration> e)
-        {
-            e.Item.Parent = this;
-        }
-
-        void _declarations_Removed(object sender, TrackedBindingListEventArgs<Declaration> e)
-        {
-            e.Item.Parent = null;
-        }
-
-        public NamespaceName Name
-        { 	 
-            get { return _name; }
-            set { _name = value; }
-        }
-
-        public Versioning Versioning
-        {
-            set { _versioning = value; }
+            _version = version;
+            _members = new List<StructureMember>();
         }
 
         public int Version
         {
-            get { return _versioning.AddedInVersion; }
+            get { return _version; }
         }
 
-        public ProtocolIdentifier ProtocolIdentifier
-        { 	 
-            get { return _protocolIdentifier; }
-            set { _protocolIdentifier = value; }
-        }
-
-        public IList<Declaration> Declarations
-        { 	 
-            get { return _declarations; }
-        }
-
-        internal NamespaceName GetFullNameOfDeclaration(Declaration declaration)
+        public List<StructureMember> Members
         {
-            return new NamespaceName(_name, declaration.Identifier);
-        }
-
-        public object Implementation
-        { 	 
-            get { return _implementation; }
-            set { _implementation = value; }
+            get { return _members; }
         }
     }
 }

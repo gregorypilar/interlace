@@ -50,6 +50,11 @@ namespace Interlace.ReactorCore
             _reactor = reactor;
         }
 
+        public void Listen(IProtocolFactory factory)
+        {
+            Listen(factory, 0, IPAddress.Any);
+        }
+
         public void Listen(IProtocolFactory factory, int port)
         {
             Listen(factory, port, IPAddress.Any);
@@ -67,11 +72,48 @@ namespace Interlace.ReactorCore
             StartAccepting();
         }
 
+        public IPAddress ListeningOnAddress
+        {
+            get
+            {
+                IPEndPoint ipEndpoint = _socket.LocalEndPoint as IPEndPoint;
+
+                if (ipEndpoint != null)
+                {
+                    return ipEndpoint.Address;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        public int ListeningOnPort
+        {
+            get
+            {
+                IPEndPoint ipEndpoint = _socket.LocalEndPoint as IPEndPoint;
+
+                if (ipEndpoint != null)
+                {
+                    return ipEndpoint.Port;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
+
         void StartAccepting()
         {
-            IAsyncResult result = _socket.BeginAccept(null, null);
+            if (!_closing)
+            {
+                IAsyncResult result = _socket.BeginAccept(null, null);
 
-            _reactor.AddResult(result, AcceptCompleted);
+                _reactor.AddResult(result, AcceptCompleted);
+            }
         }
 
         void AcceptCompleted(IAsyncResult result, object state)

@@ -36,35 +36,9 @@ namespace Interlace.Pinch.Implementation
 {
     public interface IPinchDecoder
     {
-        void OpenUncountedContainer();
-        int OpenCountedContainer();
+        int OpenSequence();
 
-        void PrepareDecodeRequiredFloat32(PinchFieldProperties properties);
-        void PrepareDecodeRequiredFloat64(PinchFieldProperties properties);
-        void PrepareDecodeRequiredInt8(PinchFieldProperties properties);
-        void PrepareDecodeRequiredInt16(PinchFieldProperties properties);
-        void PrepareDecodeRequiredInt32(PinchFieldProperties properties);
-        void PrepareDecodeRequiredInt64(PinchFieldProperties properties);
-        void PrepareDecodeRequiredDecimal(PinchFieldProperties properties);
-        void PrepareDecodeRequiredBool(PinchFieldProperties properties);
-        void PrepareDecodeRequiredString(PinchFieldProperties properties);
-        void PrepareDecodeRequiredBytes(PinchFieldProperties properties);
-        void PrepareDecodeRequiredEnumeration(PinchFieldProperties properties);
-        void PrepareDecodeRequiredStructure(PinchFieldProperties properties);
-        void PrepareDecodeOptionalFloat32(PinchFieldProperties properties);
-        void PrepareDecodeOptionalFloat64(PinchFieldProperties properties);
-        void PrepareDecodeOptionalInt8(PinchFieldProperties properties);
-        void PrepareDecodeOptionalInt16(PinchFieldProperties properties);
-        void PrepareDecodeOptionalInt32(PinchFieldProperties properties);
-        void PrepareDecodeOptionalInt64(PinchFieldProperties properties);
-        void PrepareDecodeOptionalDecimal(PinchFieldProperties properties);
-        void PrepareDecodeOptionalBool(PinchFieldProperties properties);
-        void PrepareDecodeOptionalString(PinchFieldProperties properties);
-        void PrepareDecodeOptionalBytes(PinchFieldProperties properties);
-        void PrepareDecodeOptionalEnumeration(PinchFieldProperties properties);
-        void PrepareDecodeOptionalStructure(PinchFieldProperties properties);
-
-        void PrepareContainer();
+        int DecodeChoiceMarker();
 
         float DecodeRequiredFloat32(PinchFieldProperties properties);
         double DecodeRequiredFloat64(PinchFieldProperties properties);
@@ -91,6 +65,6 @@ namespace Interlace.Pinch.Implementation
         int? DecodeOptionalEnumeration(PinchFieldProperties properties);
         object DecodeOptionalStructure(IPinchableFactory factory, PinchFieldProperties properties);
 
-        void CloseContainer();
+        void CloseSequence();
     }
 }
