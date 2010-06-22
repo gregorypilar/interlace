@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 using Interlace.Pinch.Implementation;
 
-namespace Interlace.Pinch.Tests
+namespace Interlace.Pinch.TestsVersion3
 {
     public enum Enumeration
     {
@@ -80,10 +80,6 @@ namespace Interlace.Pinch.Tests
             }
         }
         
-        protected virtual void OnMissingNewFields(int decodedUpToVersion, int decodingVersion)
-        {
-        }
-        
         protected virtual void OnAdditionalFutureFields(IPinchDecoder decoder)
         {
         }
@@ -102,7 +98,6 @@ namespace Interlace.Pinch.Tests
         void IPinchable.Decode(IPinchDecoder decoder)
         {
             int remainingFields = decoder.OpenSequence();
-            int decodedUpToVersion = 0;
             
             // Decode members for version 1:
             if (remainingFields >= 2)
@@ -111,16 +106,18 @@ namespace Interlace.Pinch.Tests
                 _test = (int)decoder.DecodeRequiredInt32(_testProperties);
             
                 remainingFields -= 2;
-                decodedUpToVersion = 1;
             }
             else
             {
                 if (remainingFields != 0) throw new PinchInvalidCodingException();
-                
-                OnMissingNewFields(decodedUpToVersion, 1);
             }
             
-            if (remainingFields > 0) OnAdditionalFutureFields(decoder);
+            if (remainingFields > 0) 
+            {
+                OnAdditionalFutureFields(decoder);
+                
+                decoder.SkipFields(remainingFields);
+            }
             
             decoder.CloseSequence();
         }
@@ -458,10 +455,6 @@ namespace Interlace.Pinch.Tests
             }
         }
         
-        protected virtual void OnMissingNewFields(int decodedUpToVersion, int decodingVersion)
-        {
-        }
-        
         protected virtual void OnAdditionalFutureFields(IPinchDecoder decoder)
         {
         }
@@ -479,7 +472,6 @@ namespace Interlace.Pinch.Tests
         void IPinchable.Decode(IPinchDecoder decoder)
         {
             int remainingFields = decoder.OpenSequence();
-            int decodedUpToVersion = 0;
             
             // Decode members for version 1:
             if (remainingFields >= 1)
@@ -487,16 +479,18 @@ namespace Interlace.Pinch.Tests
                 _test = (byte)decoder.DecodeRequiredInt8(_testProperties);
             
                 remainingFields -= 1;
-                decodedUpToVersion = 1;
             }
             else
             {
                 if (remainingFields != 0) throw new PinchInvalidCodingException();
-                
-                OnMissingNewFields(decodedUpToVersion, 1);
             }
             
-            if (remainingFields > 0) OnAdditionalFutureFields(decoder);
+            if (remainingFields > 0) 
+            {
+                OnAdditionalFutureFields(decoder);
+                
+                decoder.SkipFields(remainingFields);
+            }
             
             decoder.CloseSequence();
         }
@@ -564,10 +558,6 @@ namespace Interlace.Pinch.Tests
             }
         }
         
-        protected virtual void OnMissingNewFields(int decodedUpToVersion, int decodingVersion)
-        {
-        }
-        
         protected virtual void OnAdditionalFutureFields(IPinchDecoder decoder)
         {
         }
@@ -585,7 +575,6 @@ namespace Interlace.Pinch.Tests
         void IPinchable.Decode(IPinchDecoder decoder)
         {
             int remainingFields = decoder.OpenSequence();
-            int decodedUpToVersion = 0;
             
             // Decode members for version 1:
             if (remainingFields >= 1)
@@ -593,16 +582,18 @@ namespace Interlace.Pinch.Tests
                 _value = (decimal)decoder.DecodeRequiredDecimal(_valueProperties);
             
                 remainingFields -= 1;
-                decodedUpToVersion = 1;
             }
             else
             {
                 if (remainingFields != 0) throw new PinchInvalidCodingException();
-                
-                OnMissingNewFields(decodedUpToVersion, 1);
             }
             
-            if (remainingFields > 0) OnAdditionalFutureFields(decoder);
+            if (remainingFields > 0) 
+            {
+                OnAdditionalFutureFields(decoder);
+                
+                decoder.SkipFields(remainingFields);
+            }
             
             decoder.CloseSequence();
         }
@@ -670,10 +661,6 @@ namespace Interlace.Pinch.Tests
             }
         }
         
-        protected virtual void OnMissingNewFields(int decodedUpToVersion, int decodingVersion)
-        {
-        }
-        
         protected virtual void OnAdditionalFutureFields(IPinchDecoder decoder)
         {
         }
@@ -691,7 +678,6 @@ namespace Interlace.Pinch.Tests
         void IPinchable.Decode(IPinchDecoder decoder)
         {
             int remainingFields = decoder.OpenSequence();
-            int decodedUpToVersion = 0;
             
             // Decode members for version 1:
             if (remainingFields >= 1)
@@ -699,16 +685,18 @@ namespace Interlace.Pinch.Tests
                 _value = (decimal?)decoder.DecodeOptionalDecimal(_valueProperties);
             
                 remainingFields -= 1;
-                decodedUpToVersion = 1;
             }
             else
             {
                 if (remainingFields != 0) throw new PinchInvalidCodingException();
-                
-                OnMissingNewFields(decodedUpToVersion, 1);
             }
             
-            if (remainingFields > 0) OnAdditionalFutureFields(decoder);
+            if (remainingFields > 0) 
+            {
+                OnAdditionalFutureFields(decoder);
+                
+                decoder.SkipFields(remainingFields);
+            }
             
             decoder.CloseSequence();
         }
@@ -751,12 +739,6 @@ namespace Interlace.Pinch.Tests
         byte? _optScalar; 
         string _optPointer; 
         SmallStructure _optStructure; 
-        byte _removedReqScalar; 
-        string _removedReqPointer; 
-        SmallStructure _removedReqStructure; 
-        byte? _removedOptScalar; 
-        string _removedOptPointer; 
-        SmallStructure _removedOptStructure; 
         byte _addedReqScalar; 
         string _addedReqPointer; 
         SmallStructure _addedReqStructure; 
@@ -764,33 +746,24 @@ namespace Interlace.Pinch.Tests
         string _addedOptPointer; 
         SmallStructure _addedOptStructure; 
 
-        static PinchFieldProperties _reqScalarProperties = new PinchFieldProperties(11, 1, null); 
-        static PinchFieldProperties _reqPointerProperties = new PinchFieldProperties(10, 1, null); 
-        static PinchFieldProperties _reqStructureProperties = new PinchFieldProperties(12, 1, null); 
+        static PinchFieldProperties _reqScalarProperties = new PinchFieldProperties(8, 1, null); 
+        static PinchFieldProperties _reqPointerProperties = new PinchFieldProperties(7, 1, null); 
+        static PinchFieldProperties _reqStructureProperties = new PinchFieldProperties(9, 1, null); 
         static PinchFieldProperties _optScalarProperties = new PinchFieldProperties(2, 1, null); 
         static PinchFieldProperties _optPointerProperties = new PinchFieldProperties(1, 1, null); 
         static PinchFieldProperties _optStructureProperties = new PinchFieldProperties(3, 1, null); 
-        static PinchFieldProperties _removedReqScalarProperties = new PinchFieldProperties(8, 1, 2); 
-        static PinchFieldProperties _removedReqPointerProperties = new PinchFieldProperties(7, 1, 2); 
-        static PinchFieldProperties _removedReqStructureProperties = new PinchFieldProperties(9, 1, 2); 
         static PinchFieldProperties _removedOptScalarProperties = new PinchFieldProperties(5, 1, 2); 
         static PinchFieldProperties _removedOptPointerProperties = new PinchFieldProperties(4, 1, 2); 
         static PinchFieldProperties _removedOptStructureProperties = new PinchFieldProperties(6, 1, 2); 
-        static PinchFieldProperties _addedReqScalarProperties = new PinchFieldProperties(17, 2, null); 
-        static PinchFieldProperties _addedReqPointerProperties = new PinchFieldProperties(16, 2, null); 
-        static PinchFieldProperties _addedReqStructureProperties = new PinchFieldProperties(18, 2, null); 
-        static PinchFieldProperties _addedOptScalarProperties = new PinchFieldProperties(14, 2, null); 
-        static PinchFieldProperties _addedOptPointerProperties = new PinchFieldProperties(13, 2, null); 
-        static PinchFieldProperties _addedOptStructureProperties = new PinchFieldProperties(15, 2, null); 
+        static PinchFieldProperties _addedReqScalarProperties = new PinchFieldProperties(14, 2, null); 
+        static PinchFieldProperties _addedReqPointerProperties = new PinchFieldProperties(13, 2, null); 
+        static PinchFieldProperties _addedReqStructureProperties = new PinchFieldProperties(15, 2, null); 
+        static PinchFieldProperties _addedOptScalarProperties = new PinchFieldProperties(11, 2, null); 
+        static PinchFieldProperties _addedOptPointerProperties = new PinchFieldProperties(10, 2, null); 
+        static PinchFieldProperties _addedOptStructureProperties = new PinchFieldProperties(12, 2, null); 
         
         public VersioningStructure()
         {
-            
-            
-            
-            
-            
-            
             
             
             
@@ -875,72 +848,6 @@ namespace Interlace.Pinch.Tests
             }
         }
         
-        public byte RemovedReqScalar
-        {
-            get { return _removedReqScalar; }
-            set 
-            { 
-                _removedReqScalar = value; 
-                
-                FirePropertyChanged("RemovedReqScalar");
-            }
-        }
-        
-        public string RemovedReqPointer
-        {
-            get { return _removedReqPointer; }
-            set 
-            { 
-                _removedReqPointer = value; 
-                
-                FirePropertyChanged("RemovedReqPointer");
-            }
-        }
-        
-        public SmallStructure RemovedReqStructure
-        {
-            get { return _removedReqStructure; }
-            set 
-            { 
-                _removedReqStructure = value; 
-                
-                FirePropertyChanged("RemovedReqStructure");
-            }
-        }
-        
-        public byte? RemovedOptScalar
-        {
-            get { return _removedOptScalar; }
-            set 
-            { 
-                _removedOptScalar = value; 
-                
-                FirePropertyChanged("RemovedOptScalar");
-            }
-        }
-        
-        public string RemovedOptPointer
-        {
-            get { return _removedOptPointer; }
-            set 
-            { 
-                _removedOptPointer = value; 
-                
-                FirePropertyChanged("RemovedOptPointer");
-            }
-        }
-        
-        public SmallStructure RemovedOptStructure
-        {
-            get { return _removedOptStructure; }
-            set 
-            { 
-                _removedOptStructure = value; 
-                
-                FirePropertyChanged("RemovedOptStructure");
-            }
-        }
-        
         public byte AddedReqScalar
         {
             get { return _addedReqScalar; }
@@ -1015,28 +922,21 @@ namespace Interlace.Pinch.Tests
             }
         }
         
-        protected virtual void OnMissingNewFields(int decodedUpToVersion, int decodingVersion)
-        {
-        }
-        
         protected virtual void OnAdditionalFutureFields(IPinchDecoder decoder)
         {
         }
     
         void IPinchable.Encode(IPinchEncoder encoder)
         {
-            encoder.OpenSequence(18);
+            encoder.OpenSequence(15);
             
             // Encode fields for version 1:
             encoder.EncodeOptionalString(_optPointer, _optPointerProperties);
             encoder.EncodeOptionalInt8(_optScalar, _optScalarProperties);
             encoder.EncodeOptionalStructure(_optStructure, _optStructureProperties);
-            encoder.EncodeOptionalString(_removedOptPointer, _removedOptPointerProperties);
-            encoder.EncodeOptionalInt8(_removedOptScalar, _removedOptScalarProperties);
-            encoder.EncodeOptionalStructure(_removedOptStructure, _removedOptStructureProperties);
-            encoder.EncodeRequiredString(_removedReqPointer, _removedReqPointerProperties);
-            encoder.EncodeRequiredInt8(_removedReqScalar, _removedReqScalarProperties);
-            encoder.EncodeRequiredStructure(_removedReqStructure, _removedReqStructureProperties);
+            encoder.EncodeRemoved();
+            encoder.EncodeRemoved();
+            encoder.EncodeRemoved();
             encoder.EncodeRequiredString(_reqPointer, _reqPointerProperties);
             encoder.EncodeRequiredInt8(_reqScalar, _reqScalarProperties);
             encoder.EncodeRequiredStructure(_reqStructure, _reqStructureProperties);
@@ -1058,22 +958,19 @@ namespace Interlace.Pinch.Tests
             int decodedUpToVersion = 0;
             
             // Decode members for version 1:
-            if (remainingFields >= 12)
+            if (remainingFields >= 9)
             {
                 _optPointer = (string)decoder.DecodeOptionalString(_optPointerProperties);
                 _optScalar = (byte?)decoder.DecodeOptionalInt8(_optScalarProperties);
                 _optStructure = (SmallStructure)decoder.DecodeOptionalStructure(SmallStructureFactory.Instance, _optStructureProperties);
-                _removedOptPointer = (string)decoder.DecodeOptionalString(_removedOptPointerProperties);
-                _removedOptScalar = (byte?)decoder.DecodeOptionalInt8(_removedOptScalarProperties);
-                _removedOptStructure = (SmallStructure)decoder.DecodeOptionalStructure(SmallStructureFactory.Instance, _removedOptStructureProperties);
-                _removedReqPointer = (string)decoder.DecodeRequiredString(_removedReqPointerProperties);
-                _removedReqScalar = (byte)decoder.DecodeRequiredInt8(_removedReqScalarProperties);
-                _removedReqStructure = (SmallStructure)decoder.DecodeRequiredStructure(SmallStructureFactory.Instance, _removedReqStructureProperties);
+                decoder.SkipRemoved();
+                decoder.SkipRemoved();
+                decoder.SkipRemoved();
                 _reqPointer = (string)decoder.DecodeRequiredString(_reqPointerProperties);
                 _reqScalar = (byte)decoder.DecodeRequiredInt8(_reqScalarProperties);
                 _reqStructure = (SmallStructure)decoder.DecodeRequiredStructure(SmallStructureFactory.Instance, _reqStructureProperties);
             
-                remainingFields -= 12;
+                remainingFields -= 9;
                 decodedUpToVersion = 1;
             }
             else
@@ -1103,7 +1000,12 @@ namespace Interlace.Pinch.Tests
                 OnMissingNewFields(decodedUpToVersion, 2);
             }
             
-            if (remainingFields > 0) OnAdditionalFutureFields(decoder);
+            if (remainingFields > 0) 
+            {
+                OnAdditionalFutureFields(decoder);
+                
+                decoder.SkipFields(remainingFields);
+            }
             
             decoder.CloseSequence();
         }
@@ -1529,10 +1431,6 @@ namespace Interlace.Pinch.Tests
             }
         }
         
-        protected virtual void OnMissingNewFields(int decodedUpToVersion, int decodingVersion)
-        {
-        }
-        
         protected virtual void OnAdditionalFutureFields(IPinchDecoder decoder)
         {
         }
@@ -1593,7 +1491,6 @@ namespace Interlace.Pinch.Tests
         void IPinchable.Decode(IPinchDecoder decoder)
         {
             int remainingFields = decoder.OpenSequence();
-            int decodedUpToVersion = 0;
             
             // Decode members for version 1:
             if (remainingFields >= 26)
@@ -1644,16 +1541,18 @@ namespace Interlace.Pinch.Tests
                 _reqStructure = (SmallStructure)decoder.DecodeRequiredStructure(SmallStructureFactory.Instance, _reqStructureProperties);
             
                 remainingFields -= 26;
-                decodedUpToVersion = 1;
             }
             else
             {
                 if (remainingFields != 0) throw new PinchInvalidCodingException();
-                
-                OnMissingNewFields(decodedUpToVersion, 1);
             }
             
-            if (remainingFields > 0) OnAdditionalFutureFields(decoder);
+            if (remainingFields > 0) 
+            {
+                OnAdditionalFutureFields(decoder);
+                
+                decoder.SkipFields(remainingFields);
+            }
             
             decoder.CloseSequence();
         }

@@ -32,6 +32,7 @@ using System.Text;
 
 using Interlace.Pinch.Dom;
 using Interlace.Pinch.Languages;
+using Interlace.PropertyLists;
 
 #endregion
 
@@ -63,19 +64,28 @@ namespace Interlace.Pinch.Generation
             get { return _description; }
         }
 
-        public virtual void CreateDomImplementationHelpers(Document document)
+        public virtual void CreateDomImplementationHelpers(Document document, PropertyDictionary documentOptions)
         {
             foreach (Protocol protocol in document.Protocols)
             {
-                protocol.Implementation = CreateProtocolImplementationHelper(protocol);
+                PropertyDictionary protocolOptions = 
+                    documentOptions.DictionaryFor(protocol.Name.ToString()) ?? PropertyDictionary.EmptyDictionary();
+
+                PropertyDictionary declarationDictionary =
+                    protocolOptions.DictionaryFor("declarations") ?? PropertyDictionary.EmptyDictionary();
+
+                protocol.Implementation = CreateProtocolImplementationHelper(protocol, protocolOptions);
 
                 foreach (Declaration declaration in protocol.Declarations)
                 {
+                    PropertyDictionary declarationOptions =
+                        declarationDictionary.DictionaryFor(declaration.QualifiedName.UnqualifiedName) ?? PropertyDictionary.EmptyDictionary();
+
                     if (declaration is Enumeration)
                     {
                         Enumeration enumeration = (Enumeration)declaration;
 
-                        enumeration.Implementation = CreateEnumerationImplementationHelper(enumeration);
+                        enumeration.Implementation = CreateEnumerationImplementationHelper(enumeration, declarationOptions);
 
                         foreach (EnumerationMember member in enumeration.MemberBases)
                         {
@@ -86,7 +96,7 @@ namespace Interlace.Pinch.Generation
                     {
                         Structure structure = (Structure)declaration;
 
-                        structure.Implementation = CreateStructureImplementationHelper(structure);
+                        structure.Implementation = CreateStructureImplementationHelper(structure, declarationOptions);
 
                         foreach (StructureMember member in structure.Members)
                         {
@@ -97,10 +107,10 @@ namespace Interlace.Pinch.Generation
             }
         }
 
-        public virtual object CreateProtocolImplementationHelper(Protocol protocol) { return null; }
-        public virtual object CreateEnumerationImplementationHelper(Enumeration enumeration) { return null; }
+        public virtual object CreateProtocolImplementationHelper(Protocol protocol, PropertyDictionary options) { return null; }
+        public virtual object CreateEnumerationImplementationHelper(Enumeration enumeration, PropertyDictionary options) { return null; }
         public virtual object CreateEnumerationMemberImplementationHelper(EnumerationMember member) { return null; }
-        public virtual object CreateStructureImplementationHelper(Structure structure) { return null; }
+        public virtual object CreateStructureImplementationHelper(Structure structure, PropertyDictionary options) { return null; }
         public virtual object CreateStructureMemberImplementationHelper(StructureMember member) { return null; }
 
         public abstract IEnumerable<LanguageOutput> GetLanguageOutputs(string baseName, string destinationPath);

@@ -38,11 +38,13 @@ namespace Interlace.Pinch.Dom
     {
         readonly int _version;
         readonly List<StructureMember> _members;
+        readonly Structure _structure;
 
-        public StructureMemberVersionGroup(int version)
+        public StructureMemberVersionGroup(Structure structure, int version)
         {
             _version = version;
             _members = new List<StructureMember>();
+            _structure = structure;
         }
 
         public int Version
@@ -53,6 +55,11 @@ namespace Interlace.Pinch.Dom
         public List<StructureMember> Members
         {
             get { return _members; }
+        }
+
+        public Structure Structure
+        {
+            get { return _structure; }
         }
     }
 }

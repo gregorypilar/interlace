@@ -319,6 +319,14 @@ namespace Interlace.Pinch.Analysis
                             "The member \"{0}\" in the choice \"{1}\" must not have a \"required\" or \"optional\" " +
                             " qualifier.", member.Identifier, declaration.Identifier));
                     }
+
+                    if (member.Modifier == FieldModifier.Required && member.Versioning.RemovedInVersion.HasValue)
+                    {
+                        throw new SemanticException(string.Format(
+                            "The member \"{0}\" in the structure or message \"{1}\" is marked as removed, but can not be " +
+                            "removed because it is a \"required\" field.",
+                            member.Identifier, declaration.Identifier));
+                    }
                 }
             }
         }

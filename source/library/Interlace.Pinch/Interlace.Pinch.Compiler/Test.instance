@@ -1,0 +1,12 @@
+{
+    "Talcasoft.Pinch.Test" = 
+    {
+        declarations =
+        {
+            Exception =
+            {
+                generate-on-missing-new-fields = true;
+            }
+        }
+    }
+}

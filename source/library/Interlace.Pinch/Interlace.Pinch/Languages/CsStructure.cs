@@ -28,34 +28,26 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 
-using Interlace.Pinch.Analysis;
-using Interlace.Pinch.Dom;
-using Interlace.Pinch.Generation;
+using Interlace.PropertyLists;
 
 #endregion
 
-namespace Interlace.Pinch.Compiler
+namespace Interlace.Pinch.Languages
 {
-    class Program
+    public class CsStructure
     {
-        static void Main(string[] args)
+        PropertyDictionary _options;
+
+        public CsStructure(PropertyDictionary options)
         {
-            try
-            {
-                string documentPath = Path.GetFullPath(args[0]);
-                string destinationPath = args.Length >= 2 ? Path.GetFullPath(args[1]) : Path.GetDirectoryName(documentPath);
+            _options = options;
+        }
 
-                Generator.Generate(Language.Cs, documentPath, destinationPath);
-            }
-            catch (ApplicationException e)
-            {
-                Console.WriteLine(e.Message);
-
-                Environment.ExitCode = -1;
-            }
+        public bool GenerateOnMissingNewFields 
+        {
+            get { return _options.BooleanFor("generate-on-missing-new-fields", false); }
         }
     }
 }

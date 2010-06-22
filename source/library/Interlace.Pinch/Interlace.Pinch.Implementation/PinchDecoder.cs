@@ -176,6 +176,30 @@ namespace Interlace.Pinch.Implementation
             return bytes;
         }
 
+        void SkipBytes(int count)
+        {
+            if (_stream.CanSeek && count > 32)
+            {
+                // (Seeking may be more expensive than a small read in some situations.)
+                _stream.Seek(count, SeekOrigin.Current);
+            }
+            else
+            {
+                byte[] bytes = new byte[Math.Min(count, 1024)];
+
+                int totalRead = 0;
+
+                while (totalRead < count)
+                {
+                    int read = _stream.Read(bytes, totalRead, Math.Min(count - totalRead, 1024));
+
+                    if (read == 0) throw new PinchEndOfStreamException();
+
+                    totalRead += read;
+                }
+            }
+        }
+
         uint ReadUnsignedTag()
         {
         	int shift = 0;
@@ -240,6 +264,19 @@ namespace Interlace.Pinch.Implementation
             while ((readByte & 0x80) != 0);
 
             return (long)(tag >> 1) ^ ((long)tag << 63 >> 63);
+        }
+
+        void SkipTag()
+        {
+            int readByte;
+
+            do
+            {
+                readByte = _stream.ReadByte();
+
+                if (readByte == -1) throw new PinchEndOfStreamException();
+            }
+            while ((readByte & 0x80) != 0);
         }
 
         decimal ReadDecimal()
@@ -678,6 +715,45 @@ namespace Interlace.Pinch.Implementation
 
                 return null;
             }
+        }
+
+        public void SkipFields(int remainingFields)
+        {
+            for (int i = 0; i < remainingFields; i++)
+            {
+                TokenKind token = ReadToken();
+
+                switch (token)
+                {
+                    case TokenKind.Sequence:
+                        SkipFields(_readTokenArgument);
+                        break;
+
+                    case TokenKind.PrimitiveBuffer:
+                        SkipBytes(_readTokenArgument);
+                        break;
+
+                    case TokenKind.PrimitivePackedOrdinal:
+                        break;
+
+                    case TokenKind.PrimitiveTaggedOrdinal:
+                        SkipTag();
+                        break;
+
+                    case TokenKind.Choice:
+                        SkipTag();
+                        SkipFields(1);
+                        break;
+
+                    case TokenKind.Null:
+                        break;
+                }
+            }
+        }
+
+        public void SkipRemoved()
+        {
+            SkipFields(1);
         }
 
         public void CloseSequence()

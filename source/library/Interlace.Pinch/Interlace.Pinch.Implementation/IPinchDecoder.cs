@@ -40,6 +40,9 @@ namespace Interlace.Pinch.Implementation
 
         int DecodeChoiceMarker();
 
+        void SkipFields(int remainingFields);
+        void SkipRemoved();
+
         float DecodeRequiredFloat32(PinchFieldProperties properties);
         double DecodeRequiredFloat64(PinchFieldProperties properties);
         byte DecodeRequiredInt8(PinchFieldProperties properties);

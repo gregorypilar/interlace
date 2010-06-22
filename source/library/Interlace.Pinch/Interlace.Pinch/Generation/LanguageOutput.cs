@@ -37,7 +37,6 @@ namespace Interlace.Pinch.Generation
     public enum LanguageOutputTemplateKind
     {
         StringTemplate,
-        Velocity
     }
 
     public class LanguageOutput

@@ -1,11 +1,9 @@
-protocol Interlace.Pinch.Tests (1.2.3) [3]
+protocol Interlace.Pinch.TestsVersion1 (1.2.3) [1]
 {
 	enumeration Enumeration [1]
 	{
 		A [1];
-		B [2];
-		C [1, removed 2]; 
-		D [3];
+		C [1]; 
 	}
 	 
 	message ChoiceMessage [1]
@@ -46,26 +44,14 @@ protocol Interlace.Pinch.Tests (1.2.3) [3]
 	    optional string OptPointer [1];
 	    optional SmallStructure OptStructure [1];
 	    
-	    required int8 RemovedReqScalar [1, removed 2];
-	    required string RemovedReqPointer [1, removed 2];
-	    required SmallStructure RemovedReqStructure [1, removed 2];
-	    optional int8 RemovedOptScalar [1, removed 2];
-	    optional string RemovedOptPointer [1, removed 2];
-	    optional SmallStructure RemovedOptStructure [1, removed 2];
-	    
-	    required int8 AddedReqScalar [2];
-	    required string AddedReqPointer [2];
-	    required SmallStructure AddedReqStructure [2];
-	    optional int8 AddedOptScalar [2];
-	    optional string AddedOptPointer [2];
-	    optional SmallStructure AddedOptStructure [2];
+	    optional int8 RemovedOptScalar [1];
+	    optional string RemovedOptPointer [1];
+	    optional SmallStructure RemovedOptStructure [1];
 	}
 	
 	enumeration TypesEnumeration [1]
 	{
 	    A [1];
-	    B [2];
-	    C [3];
 	}
 	
 	message TypesStructure [1]

@@ -59,6 +59,11 @@ namespace Interlace.Pinch.Dom
             get { return _versioning; }
         }
 
+        public bool IsRemoved
+        {
+            get { return _versioning.RemovedInVersion.HasValue; }
+        }
+
         public object Implementation
         { 	 
             get { return _implementation; }
