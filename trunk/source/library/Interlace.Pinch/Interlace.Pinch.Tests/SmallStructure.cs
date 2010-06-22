@@ -32,7 +32,7 @@ using System.Text;
 
 #endregion
 
-namespace Interlace.Pinch.Tests
+namespace Interlace.Pinch.TestsVersion3
 {
     public partial class SmallStructure
     {

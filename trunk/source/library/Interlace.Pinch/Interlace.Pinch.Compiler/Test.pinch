@@ -34,8 +34,8 @@ protocol Talcasoft.Pinch.Test (1.1.1) [2]
 	{
 	    required float32 Latitude [2];
 	    required float32 Longitude [2];
-	    required float32 X [1, removed 2];
-	    required float32 Y [1, removed 2];
+	    optional float32 X [1, removed 2];
+	    optional float32 Y [1, removed 2];
 		optional float32 HDOP [1, removed 2];
 	}
 }

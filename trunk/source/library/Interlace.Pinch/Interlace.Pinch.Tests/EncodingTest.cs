@@ -34,7 +34,7 @@ using System.Text;
 using MbUnit.Framework;
 
 using Interlace.Pinch.Implementation;
-using Interlace.Pinch.Tests;
+using Interlace.Pinch.TestsVersion3;
 
 #endregion
 

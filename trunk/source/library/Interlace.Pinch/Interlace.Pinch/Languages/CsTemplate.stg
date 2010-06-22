@@ -44,20 +44,20 @@ structure(Structure) ::= <<
     
     public partial class <Structure.Identifier> : IPinchable, INotifyPropertyChanged
     {
-        <Structure.Members:{ m | <m.Implementation.TypeName> <m.Implementation.FieldIdentifier>; }; separator="\r\n">
+        <Structure.NonRemovedMembers:{ m | <m.Implementation.TypeName> <m.Implementation.FieldIdentifier>; }; separator="\r\n">
 
         <Structure.Members:{ m | static PinchFieldProperties <m.Implementation.FieldIdentifier>Properties = new PinchFieldProperties(<m.Number>, <m.Implementation.AddedInVersion>, <m.Implementation.RemovedInVersion>); }; separator="\r\n">
         
         public <Structure.Identifier>()
         {
-            <Structure.Members:structure_field_constructor(); separator="\r\n">
+            <Structure.NonRemovedMembers:structure_field_constructor(); separator="\r\n">
         }
     
         public <Structure.Identifier>(IPinchDecodingContext context)
         {
         }
         
-        <Structure.Members:structure_properties(); separator="\r\n\r\n">
+        <Structure.NonRemovedMembers:structure_properties(); separator="\r\n\r\n">
         
         int IPinchable.ProtocolVersion
         {
@@ -65,10 +65,6 @@ structure(Structure) ::= <<
             {
                 return <Structure.Parent.Version>;
             }
-        }
-        
-        protected virtual void OnMissingNewFields(int decodedUpToVersion, int decodingVersion)
-        {
         }
         
         protected virtual void OnAdditionalFutureFields(IPinchDecoder decoder)
@@ -86,10 +82,17 @@ structure(Structure) ::= <<
         void IPinchable.Decode(IPinchDecoder decoder)
         {
             int remainingFields = decoder.OpenSequence();
+            <if(Structure.Implementation.GenerateOnMissingNewFields)>
             int decodedUpToVersion = 0;
+            <endif>
             <Structure.VersionGroupedMembers:structure_member_group_decode(); separator="\r\n">
             
-            if (remainingFields > 0) OnAdditionalFutureFields(decoder);
+            if (remainingFields > 0) 
+            {
+                OnAdditionalFutureFields(decoder);
+                
+                decoder.SkipFields(remainingFields);
+            }
             
             decoder.CloseSequence();
         }
@@ -138,10 +141,14 @@ structure_member_group_encode(MemberGroup) ::= <<
 >>
 
 structure_member_encode(Member) ::= <<
+<if(Member.IsRemoved)>
+encoder.EncodeRemoved();
+<else>
 <if(Member.Implementation.ContainerIsScalar)>
 encoder.Encode<Member.Implementation.CodecMethodSuffix>(<Member.Implementation.FieldIdentifier>, <Member:structure_member_action_arguments()>);
 <else>
 <Member:("structure_member_encode_" + Member.Implementation.ContainerTag)()>
+<endif>
 <endif>
 >>
 
@@ -170,21 +177,29 @@ if (remainingFields >= <MemberGroup.Members.Count>)
     <MemberGroup.Members:structure_member_decode(); separator="\r\n">
 
     remainingFields -= <MemberGroup.Members.Count>;
+    <if(MemberGroup.Structure.Implementation.GenerateOnMissingNewFields)>
     decodedUpToVersion = <MemberGroup.Version>;
+    <endif>
 }
 else
 {
     if (remainingFields != 0) throw new PinchInvalidCodingException();
+    <if(MemberGroup.Structure.Implementation.GenerateOnMissingNewFields)>
     
     OnMissingNewFields(decodedUpToVersion, <MemberGroup.Version>);
+    <endif>
 }
 >>
 
 structure_member_decode(Member) ::= <<
+<if(Member.IsRemoved)>
+decoder.SkipRemoved();
+<else>
 <if(Member.Implementation.ContainerIsScalar)>
 <Member.Implementation.FieldIdentifier> = <Member:structure_member_decode_expression()>;
 <else>
 <Member:("structure_member_decode_" + Member.Implementation.ContainerTag)()>
+<endif>
 <endif>
 >>
 

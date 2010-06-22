@@ -36,6 +36,7 @@ using Antlr.StringTemplate.Language;
 
 using Interlace.Pinch.Analysis;
 using Interlace.Pinch.Dom;
+using Interlace.PropertyLists;
 
 #endregion
 
@@ -52,14 +53,51 @@ namespace Interlace.Pinch.Generation
 
         public static void Generate(Language language, string documentPath, string destinationPath)
         {
-            Document document = Document.Parse(documentPath);
+            if (!File.Exists(documentPath))
+            {
+                throw new ApplicationException(string.Format(
+                    "The specified input file \"{0}\" does not exist.", documentPath));
+            }
+
+            PropertyDictionary documentOptions;
+            string actualDocumentPath;
+
+            if (string.Compare(Path.GetExtension(documentPath), ".instance", true) == 0)
+            {
+                documentOptions = PropertyDictionary.FromFile(documentPath);
+                actualDocumentPath = Path.ChangeExtension(documentPath, ".pinch");
+
+                if (!File.Exists(actualDocumentPath))
+                {
+                    throw new ApplicationException(string.Format(
+                        "The instance configuration \"{0}\" exists, but not the expected corresponding specification file \"{1}\".", 
+                        documentPath, actualDocumentPath));
+                }
+            }
+            else
+            {
+                actualDocumentPath = documentPath;
+
+                if (File.Exists(Path.ChangeExtension(actualDocumentPath, ".instance")))
+                {
+                    throw new ApplicationException(string.Format(
+                        "An instance configuration for \"{0}\" exists but is not being used. Either remove or rename the " +
+                        "instance configuration file or specify it rather than the specification file.",
+                        documentPath));
+                }
+
+                documentOptions = PropertyDictionary.EmptyDictionary();
+                actualDocumentPath = documentPath;
+            }
+
+            Document document = Document.Parse(actualDocumentPath);
 
             Compilation compilation = new Compilation();
             compilation.AddDocument(document);
             compilation.Resolve();
             compilation.Number();
 
-            language.CreateDomImplementationHelpers(document);
+            language.CreateDomImplementationHelpers(document, documentOptions);
 
             Generator generator = new Generator(language);
 
@@ -75,9 +113,6 @@ namespace Interlace.Pinch.Generation
                     case LanguageOutputTemplateKind.StringTemplate:
                         GenerateFromStringTemplate(document, output);
                         break;
-
-                    case LanguageOutputTemplateKind.Velocity:
-                        throw new NotSupportedException();
                 }
             }
         }

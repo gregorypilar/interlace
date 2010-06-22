@@ -39,6 +39,7 @@ namespace Interlace.Pinch.Implementation
         void OpenSequence(int count);
 
         void EncodeChoiceMarker(int valueKind);
+        void EncodeRemoved();
 
         void EncodeRequiredFloat32(float value, PinchFieldProperties properties);
         void EncodeRequiredFloat64(double value, PinchFieldProperties properties);

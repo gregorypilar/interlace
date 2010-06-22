@@ -33,6 +33,7 @@ using System.Text;
 
 using Interlace.Pinch.Dom;
 using Interlace.Pinch.Generation;
+using Interlace.PropertyLists;
 
 #endregion
 
@@ -60,6 +61,11 @@ namespace Interlace.Pinch.Languages
         public CsLanguage()
             : base("cs", "C#")
         {
+        }
+
+        public override object CreateStructureImplementationHelper(Structure structure, PropertyDictionary options)
+        {
+            return new CsStructure(options);
         }
 
         public override object CreateStructureMemberImplementationHelper(StructureMember member)

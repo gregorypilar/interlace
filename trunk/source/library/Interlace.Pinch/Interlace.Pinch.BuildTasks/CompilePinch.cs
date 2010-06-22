@@ -37,6 +37,7 @@ using Microsoft.Build.Utilities;
 using Interlace.Pinch.Analysis;
 using Interlace.Pinch.Dom;
 using Interlace.Pinch.Generation;
+using Interlace.PropertyLists;
 
 #endregion
 
@@ -84,7 +85,7 @@ namespace Interlace.Pinch.BuildTasks
 
                     Language language = Language.Cs;
 
-                    language.CreateDomImplementationHelpers(document);
+                    language.CreateDomImplementationHelpers(document, PropertyDictionary.EmptyDictionary());
 
                     Generator generator = new Generator(language);
 

@@ -1,0 +1,12 @@
+{
+    "Interlace.Pinch.TestsVersion3" = 
+    {
+        declarations =
+        {
+            VersioningStructure =
+            {
+                generate-on-missing-new-fields = true;
+            }
+        }
+    }
+}

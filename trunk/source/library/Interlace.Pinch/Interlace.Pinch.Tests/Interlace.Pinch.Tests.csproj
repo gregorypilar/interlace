@@ -39,11 +39,16 @@
     <Compile Include="Parsing\TestParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SmallStructure.cs" />
-    <Compile Include="Test.cs" />
+    <Compile Include="TestVersion1.cs" />
+    <Compile Include="TestVersion3.cs" />
+    <Compile Include="VersioningStructure.cs" />
+    <Compile Include="VersioningTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="TestVersion3.instance" />
+    <None Include="TestVersion3.pinch" />
     <None Include="Parsing\GpsTest.pinch" />
-    <None Include="Test.pinch" />
+    <None Include="TestVersion1.pinch" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Interlace.Pinch.Implementation\Interlace.Pinch.Implementation.csproj">
@@ -60,6 +65,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>$(SolutionDir)\Interlace.Pinch.Compiler\bin\Debug\Interlace.Pinch.Compiler $(ProjectDir)\Test.pinch $(ProjectDir)\</PreBuildEvent>
+    <PreBuildEvent>$(SolutionDir)\Interlace.Pinch.Compiler\bin\Debug\Interlace.Pinch.Compiler $(ProjectDir)\TestVersion1.pinch $(ProjectDir)\
+$(SolutionDir)\Interlace.Pinch.Compiler\bin\Debug\Interlace.Pinch.Compiler $(ProjectDir)\TestVersion3.instance $(ProjectDir)\</PreBuildEvent>
   </PropertyGroup>
 </Project>

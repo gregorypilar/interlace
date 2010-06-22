@@ -177,6 +177,11 @@ namespace Interlace.Pinch.Implementation
             WriteUnsignedTag((uint)valueKind);
         }
 
+        public void EncodeRemoved()
+        {
+            _stream.WriteByte(PinchAssignedNumbers.Null);
+        }
+
         #endregion
 
         #region Scaler Writing
