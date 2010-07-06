@@ -16,7 +16,7 @@
     public StructureMember structureMember;
     }
 
-%namespace Talcasoft.Pinch.Parsing
+%namespace Interlace.Pinch.Parsing
 %start document
 
 %token PROTOCOL ENUMERATION MESSAGE STRUCTURE CHOICE
@@ -39,7 +39,7 @@
 %type <structure> structure_member_list 
 %type <structureMember> structure_member 
 
-%using Talcasoft.Pinch.Dom
+%using Interlace.Pinch.Dom
 
 %%
 

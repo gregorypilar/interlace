@@ -1,0 +1,25 @@
+protocol Interlace.Pinch.Test (1.1.1) [1]
+{
+	structure MyDateTime [1]
+	{
+	    required int64 Ticks [1];
+	}
+	
+	structure MyUri [1]
+	{
+	    optional string Address [1];
+	}
+
+	structure BucketOfSurrogates [1]
+	{
+	    required MyDateTime RequiredDateTime [1];
+	    optional MyDateTime OptionalDateTime [1];
+	    list<required MyDateTime> ListOfRequiredDateTime [1];
+	    list<optional MyDateTime> ListOfOptionalDateTime [1];
+	    
+	    required MyUri RequiredUri [1];
+	    optional MyUri OptionalUri [1];
+	    list<required MyUri> ListOfRequiredUri [1];
+	    list<optional MyUri> ListOfOptionalUri [1];
+	}
+}

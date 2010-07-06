@@ -751,6 +751,20 @@
     <Compile Include="ReactorUtilities\VoidDeferred.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Sharpcap\ByteOrder.cs" />
+    <Compile Include="Sharpcap\ICaptureListener.cs" />
+    <Compile Include="Sharpcap\NetworkReader.cs" />
+    <Compile Include="Sharpcap\NetworkReaderTruncationException.cs" />
+    <Compile Include="Sharpcap\NetworkWriter.cs" />
+    <Compile Include="Sharpcap\RemoteCaptureDataProtocol.cs" />
+    <Compile Include="Sharpcap\RemoteCaptureDataProtocolFactory.cs" />
+    <Compile Include="Sharpcap\RemoteCaptureFramingProtocol.cs" />
+    <Compile Include="Sharpcap\RemoteCaptureProtocol.cs" />
+    <Compile Include="Sharpcap\RemoteCaptureProtocolFactory.cs" />
+    <Compile Include="Sharpcap\RemoteCaptureService.cs" />
+    <Compile Include="Sharpcap\UdpCaptureSourceProtocol.cs" />
+    <Compile Include="Sharpcap\UdpCaptureSourceProtocolFactory.cs" />
+    <Compile Include="Sharpcap\UdpCaptureSourceService.cs" />
     <Compile Include="Threads\ThreadedSlot.cs">
       <SubType>Code</SubType>
     </Compile>

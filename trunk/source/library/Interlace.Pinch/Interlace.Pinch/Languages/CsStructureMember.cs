@@ -39,12 +39,14 @@ namespace Interlace.Pinch.Languages
     public class CsStructureMember : BaseStructureMember
     {
         CsType _type;
+        CsStructure _structure;
 
-        public CsStructureMember(StructureMember member, CsType type)
+        public CsStructureMember(StructureMember member, CsType type, CsStructure structure)
             : base(member)
         {
             _member = member;
             _type = type;
+            _structure = structure;
         }
 
         public StructureMember Member
@@ -68,33 +70,39 @@ namespace Interlace.Pinch.Languages
             }
         }
 
-        public string AddedInVersion
+        public bool IsSurrogate
         {
-            get { return _member.Versioning.AddedInVersion.ToString(); }
-        }
+            get
+            {
+                if (_structure == null) return false;
 
-        public string RemovedInVersion
-        {
-            get 
-            { 
-                if (_member.Versioning.RemovedInVersion.HasValue)
-                {
-                    return _member.Versioning.RemovedInVersion.ToString();
-                }
-                else
-                {
-                    return "null";
-                }
+                return _structure.IsSurrogate;
             }
         }
+
+        public string InnerTypeFactoryName
+        {
+            get
+            {
+                return _structure.Identifier + "Factory";
+            }
+        }
+
+        public string InnerTypeCodecName
+        {
+            get
+            {
+                return _structure.Identifier;
+            }
+        }
+
         public string InnerTypeName
         {
             get
             {
                 string postFix;
 
-                if (_member.Modifier == FieldModifier.Optional && !_type.IsReferenceType && 
-                    _member.FieldContainerReference == ContainerType.None)
+                if (_member.Modifier == FieldModifier.Optional && !_type.IsReferenceType)
                 {
                     postFix = "?";
                 }

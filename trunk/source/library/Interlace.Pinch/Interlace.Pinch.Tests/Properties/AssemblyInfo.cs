@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Interlace.Pinch.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Talcasoft")]
+[assembly: AssemblyCompany("Computer Consultancy Pty Ltd")]
 [assembly: AssemblyProduct("Interlace.Pinch.Tests")]
-[assembly: AssemblyCopyright("Copyright © Talcasoft 2010")]
+[assembly: AssemblyCopyright("Copyright © 2007-2010, Computer Consultancy Pty Ltd")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

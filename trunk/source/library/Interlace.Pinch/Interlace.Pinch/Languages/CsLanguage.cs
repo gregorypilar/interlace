@@ -65,7 +65,7 @@ namespace Interlace.Pinch.Languages
 
         public override object CreateStructureImplementationHelper(Structure structure, PropertyDictionary options)
         {
-            return new CsStructure(options);
+            return new CsStructure(structure, options);
         }
 
         public override object CreateStructureMemberImplementationHelper(StructureMember member)
@@ -74,27 +74,40 @@ namespace Interlace.Pinch.Languages
             {
                 IntrinsicTypeReference reference = member.FieldTypeReference as IntrinsicTypeReference;
 
-                return new CsStructureMember(member, _intrinsics[reference.Type]);
+                return new CsStructureMember(member, _intrinsics[reference.Type], null);
             }
             else
             {
                 DeclarationTypeReference reference = member.FieldTypeReference as DeclarationTypeReference;
 
+                NamespaceName name = reference.Declaration.QualifiedName;
+                string codecName = reference.Declaration.Identifier;
+                bool isReferenceType = !(reference.Declaration is Enumeration);
+
+                if (reference.Declaration.Implementation is CsStructure)
+                {
+                    CsStructure structure = (CsStructure)reference.Declaration.Implementation;
+
+                    name = structure.ReferenceTypeName;
+                    codecName = structure.Identifier;
+                    isReferenceType = structure.IsReferenceType;
+                }
+
                 bool isInProtocolNamespace = 
-                    reference.Declaration.QualifiedName.ContainingName.Equals(member.Parent.Parent.Name);
+                    name.ContainingName.Equals(member.Parent.Parent.Name);
 
                 CsType type;
 
                 if (isInProtocolNamespace)
                 {
-                    type = new CsType(reference.Declaration.Identifier, !(reference.Declaration is Enumeration));
+                    type = new CsType(name.UnqualifiedName, isReferenceType);
                 }
                 else
                 {
-                    type = new CsType(reference.Declaration.QualifiedName.ToString(), !(reference.Declaration is Enumeration));
+                    type = new CsType(name.ToString(), isReferenceType);
                 }
 
-                return new CsStructureMember(member, type);
+                return new CsStructureMember(member, type, reference.Declaration.Implementation as CsStructure);
             }
         }
 

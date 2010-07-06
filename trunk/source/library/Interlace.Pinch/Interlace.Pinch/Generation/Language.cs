@@ -94,9 +94,19 @@ namespace Interlace.Pinch.Generation
                     }
                     else if (declaration is Structure)
                     {
+                        // The implementations of structures are created first, before any members:
                         Structure structure = (Structure)declaration;
 
                         structure.Implementation = CreateStructureImplementationHelper(structure, declarationOptions);
+                    }
+                }
+
+                // Now the members of each structure are created:
+                foreach (Declaration declaration in protocol.Declarations)
+                {
+                    if (declaration is Structure)
+                    {
+                        Structure structure = (Structure)declaration;
 
                         foreach (StructureMember member in structure.Members)
                         {

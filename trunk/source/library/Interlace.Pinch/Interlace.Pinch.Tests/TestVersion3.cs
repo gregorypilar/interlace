@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -132,6 +131,7 @@ namespace Interlace.Pinch.TestsVersion3
         }
 
         #endregion
+
     }
 
     public class ChoiceStructureFactory : IPinchableFactory
@@ -505,6 +505,7 @@ namespace Interlace.Pinch.TestsVersion3
         }
 
         #endregion
+
     }
 
     public class RequiredDecimalStructureFactory : IPinchableFactory
@@ -608,6 +609,7 @@ namespace Interlace.Pinch.TestsVersion3
         }
 
         #endregion
+
     }
 
     public class OptionalDecimalStructureFactory : IPinchableFactory
@@ -711,6 +713,7 @@ namespace Interlace.Pinch.TestsVersion3
         }
 
         #endregion
+
     }
 
     public class VersioningStructureFactory : IPinchableFactory
@@ -1020,6 +1023,7 @@ namespace Interlace.Pinch.TestsVersion3
         }
 
         #endregion
+
     }
 
     public enum TypesEnumeration
@@ -1455,7 +1459,7 @@ namespace Interlace.Pinch.TestsVersion3
             
             foreach (SmallStructure value in _optListOfEnum)
             {
-                encoder.EncodeOptionalStructure(value, _optListOfEnumProperties);
+            	encoder.EncodeOptionalStructure(value, _optListOfEnumProperties);
             }
             
             encoder.CloseSequence();
@@ -1477,7 +1481,7 @@ namespace Interlace.Pinch.TestsVersion3
             
             foreach (SmallStructure value in _reqListOfEnum)
             {
-                encoder.EncodeRequiredStructure(value, _reqListOfEnumProperties);
+            	encoder.EncodeRequiredStructure(value, _reqListOfEnumProperties);
             }
             
             encoder.CloseSequence();
@@ -1567,6 +1571,7 @@ namespace Interlace.Pinch.TestsVersion3
         }
 
         #endregion
+
     }
 
 

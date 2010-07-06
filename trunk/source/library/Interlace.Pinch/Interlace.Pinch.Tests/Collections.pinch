@@ -1,0 +1,15 @@
+protocol Interlace.Pinch.TestCollections (1.2.4) [1]
+{
+	message Directory [1]
+	{
+	    list<required RootMessage> Directories [1];
+	} 
+	
+	choice ChoiceStructure [1]
+	{
+	    SmallStructure Small [1];
+	    RequiredDecimalStructure RequiredDecimal [1];
+	    OptionalDecimalStructure OptionalDecimal [1];
+	    VersioningStructure Versioning [1];
+	}
+}

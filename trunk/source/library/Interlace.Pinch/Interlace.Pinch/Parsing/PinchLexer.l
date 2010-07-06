@@ -1,5 +1,5 @@
 %using System.Text;
-%namespace Talcasoft.Pinch.Parsing
+%namespace Interlace.Pinch.Parsing
 
 %%
 protocol		    { return (int)Tokens.PROTOCOL; }
