@@ -3,18 +3,16 @@
     {
         declarations =
         {
-            Exception =
-            {
-                generate-on-missing-new-fields = true;
-            }
-        };
-        
-        declarations =
-        {
-            Timestamp =
+            MyDateTime =
             {
                 surrogate-for = "System.DateTime";
                 surrogate-for-is-reference-type = false;
+            };
+            
+            MyUri =
+            {
+                surrogate-for = "System.Uri";
+                surrogate-for-is-reference-type = true;
             }
         }
     }

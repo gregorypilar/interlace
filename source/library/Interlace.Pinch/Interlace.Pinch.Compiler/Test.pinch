@@ -1,4 +1,4 @@
-protocol Talcasoft.Pinch.Test (1.1.1) [2]
+protocol Interlace.Pinch.Test (1.1.1) [2]
 {
 	enumeration FixQuality [1]
 	{
@@ -29,9 +29,17 @@ protocol Talcasoft.Pinch.Test (1.1.1) [2]
 	{
 	    list<required Fix> Fix [1];
 	}
+	
+	structure Timestamp [1]
+	{
+	    required int64 Ticks [1];
+	}
 
 	structure Fix [1]
 	{
+	    required Timestamp When [1];
+	    optional Timestamp Received [1];
+	    list<optional Timestamp> ReceivedTimes [1];
 	    required float32 Latitude [2];
 	    required float32 Longitude [2];
 	    optional float32 X [1, removed 2];

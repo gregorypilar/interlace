@@ -53,11 +53,16 @@ namespace Interlace.Pinch.Languages
             }
         }
 
+        public string RequiredOptionalModifier
+        {
+            get { return _member.Modifier == FieldModifier.Required ? "Required" : "Optional"; }
+        }
+
         public string CodecMethodSuffix
         {
             get
             {
-                string modifier = (_member.Modifier == FieldModifier.Required) ? "Required" : "Optional";
+                string modifier = RequiredOptionalModifier;
 
                 if (_member.FieldTypeReference is IntrinsicTypeReference)
                 {
@@ -197,6 +202,26 @@ namespace Interlace.Pinch.Languages
 
                     default:
                         throw new InvalidOperationException();
+                }
+            }
+        }
+
+        public string AddedInVersion
+        {
+            get { return _member.Versioning.AddedInVersion.ToString(); }
+        }
+
+        public string RemovedInVersion
+        {
+            get 
+            { 
+                if (_member.Versioning.RemovedInVersion.HasValue)
+                {
+                    return _member.Versioning.RemovedInVersion.ToString();
+                }
+                else
+                {
+                    return "null";
                 }
             }
         }

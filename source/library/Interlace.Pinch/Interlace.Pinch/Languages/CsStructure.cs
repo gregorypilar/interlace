@@ -31,18 +31,99 @@ using System.Collections.Generic;
 using System.Text;
 
 using Interlace.PropertyLists;
+using Interlace.Pinch.Dom;
 
 #endregion
 
 namespace Interlace.Pinch.Languages
 {
-    public class CsStructure
+    public class CsStructure 
     {
+        Structure _structure;
         PropertyDictionary _options;
 
-        public CsStructure(PropertyDictionary options)
+        public CsStructure(Structure structure, PropertyDictionary options)
         {
+            _structure = structure;
             _options = options;
+
+            if (_options.HasStringFor("surrogate-for") && !_options.HasValueFor("surrogate-for-is-reference-type"))
+            {
+                throw new LanguageException("Any use of \"surrogate-for\" must be accompanied with \"surrogate-for-is-reference-type\".");
+            }
+        }
+
+        public bool IsSurrogate
+        {
+            get { return _options.HasStringFor("surrogate-for"); }
+        }
+
+        public bool IsReferenceType
+        {
+            get 
+            {
+                if (IsSurrogate)
+                {
+                    return _options.BooleanFor("surrogate-for-is-reference-type").Value;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+
+        public NamespaceName QualifiedName
+        {
+            get
+            {
+                return new NamespaceName(_structure.QualifiedName.ContainingName, Identifier);
+            }
+        }
+
+        public string Identifier
+        {
+            get 
+            {
+                if (!_options.HasStringFor("surrogate-for")) return _structure.Identifier;
+
+                return string.Format("{0}Surrogate", _structure.Identifier);
+            }
+        }
+
+        public NamespaceName ReferenceTypeName
+        {
+            get
+            {
+                if (IsSurrogate)
+                {
+                    return SurrogateFor;
+                }
+                else
+                {
+                    return QualifiedName;
+                }
+            }
+        }
+
+        public NamespaceName SurrogateFor
+        {
+            get
+            {
+                string identifier = _options.StringFor("surrogate-for", null);
+
+                if (identifier == null) return null;
+
+                return NamespaceName.Parse(identifier);
+            }
+        }
+
+        public string OptionalSurrogateFor
+        {
+            get 
+            {
+                return SurrogateFor.ToString() + (IsReferenceType ? "" : "?");
+            }
         }
 
         public bool GenerateOnMissingNewFields 

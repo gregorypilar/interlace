@@ -8,9 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Interlace.Pinch.BuildTasks")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Talcasoft")]
 [assembly: AssemblyProduct("Interlace.Pinch.BuildTasks")]
-[assembly: AssemblyCopyright("Copyright © Talcasoft 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -1,4 +1,4 @@
-protocol Talcasoft.Avance.JobNotes (1.2.3) [2]
+protocol Interlace.GpsTest (1.2.3) [2]
 {
 	enumeration FixQuality [1]
 	{

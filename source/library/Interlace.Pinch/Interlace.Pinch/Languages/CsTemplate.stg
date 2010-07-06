@@ -1,7 +1,6 @@
 group CsTemplate;
 
 file(Document) ::= <<
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -24,13 +23,13 @@ declaration(Declaration) ::= <<
 >>
 
 structure(Structure) ::= <<
-    public class <Structure.Identifier>Factory : IPinchableFactory
+    public class <Structure.Implementation.Identifier>Factory : IPinchableFactory
     {
-        static <Structure.Identifier>Factory _instance = new <Structure.Identifier>Factory();
+        static <Structure.Implementation.Identifier>Factory _instance = new <Structure.Implementation.Identifier>Factory();
         
         public object Create(IPinchDecodingContext context)
         {
-            return new <Structure.Identifier>(context);
+            return new <Structure.Implementation.Identifier>(context);
         }
         
         public static IPinchableFactory Instance
@@ -42,18 +41,18 @@ structure(Structure) ::= <<
         }
     }
     
-    public partial class <Structure.Identifier> : IPinchable, INotifyPropertyChanged
+    public partial class <Structure.Implementation.Identifier> : IPinchable, INotifyPropertyChanged
     {
         <Structure.NonRemovedMembers:{ m | <m.Implementation.TypeName> <m.Implementation.FieldIdentifier>; }; separator="\r\n">
 
         <Structure.Members:{ m | static PinchFieldProperties <m.Implementation.FieldIdentifier>Properties = new PinchFieldProperties(<m.Number>, <m.Implementation.AddedInVersion>, <m.Implementation.RemovedInVersion>); }; separator="\r\n">
         
-        public <Structure.Identifier>()
+        public <Structure.Implementation.Identifier>()
         {
             <Structure.NonRemovedMembers:structure_field_constructor(); separator="\r\n">
         }
     
-        public <Structure.Identifier>(IPinchDecodingContext context)
+        public <Structure.Implementation.Identifier>(IPinchDecodingContext context)
         {
         }
         
@@ -107,6 +106,60 @@ structure(Structure) ::= <<
         }
 
         #endregion
+
+		<if(Structure.Implementation.IsSurrogate)>
+		#region Surrogate Methods
+		
+		public static <Structure.Implementation.Identifier> ValueToSurrogateOptional(<Structure.Implementation.OptionalSurrogateFor> value)
+		{
+			if (value != null)
+			{
+				<Structure.Implementation.Identifier> surrogate = <Structure.Implementation.Identifier>.ValueToSurrogate((<Structure.Implementation.SurrogateFor>)value);
+
+				if (surrogate == null) throw new PinchNullRequiredFieldException();
+
+				return surrogate;
+			}
+			else
+			{
+				return null;
+			}
+		}
+
+		public static <Structure.Implementation.Identifier> ValueToSurrogateRequired(<Structure.Implementation.SurrogateFor> value)
+		{
+			<Structure.Implementation.Identifier> surrogate = <Structure.Implementation.Identifier>.ValueToSurrogate(value);
+
+			if (surrogate == null) throw new PinchNullRequiredFieldException();
+
+			return surrogate;
+		}
+		
+		public static <Structure.Implementation.OptionalSurrogateFor> SurrogateToValueOptional(<Structure.Implementation.Identifier> surrogate)
+		{
+			if (surrogate != null)
+			{
+				return <Structure.Implementation.Identifier>.SurrogateToValue(surrogate);
+			}
+			else
+			{
+				return null;
+			}
+		}
+
+		public static <Structure.Implementation.SurrogateFor> SurrogateToValueRequired(<Structure.Implementation.Identifier> surrogate)
+		{
+			if (surrogate != null)
+			{
+				return <Structure.Implementation.Identifier>.SurrogateToValue(surrogate);
+			}
+			else
+			{
+				throw new PinchNullRequiredFieldException();
+			}
+		}
+		#endregion
+		<endif>
     }
 
 >>
@@ -121,13 +174,21 @@ structure_field_constructor(Member) ::= <<
 <endif>
 >>
 
+structure_member_encode_scalar(Member) ::= <<
+<if(Member.Implementation.IsSurrogate)>
+encoder.Encode<Member.Implementation.CodecMethodSuffix>(<Member.Implementation.InnerTypeCodecName>.ValueToSurrogate<Member.Implementation.RequiredOptionalModifier>(<if(Member.Implementation.ContainerIsScalar)><Member.Implementation.FieldIdentifier><else>value<endif>), <Member:structure_member_action_arguments()>);
+<else>
+encoder.Encode<Member.Implementation.CodecMethodSuffix>(<if(Member.Implementation.ContainerIsScalar)><Member.Implementation.FieldIdentifier><else>value<endif>, <Member:structure_member_action_arguments()>);
+<endif>
+>>
+
 structure_member_encode_list(Member) ::= <<
 
 encoder.OpenSequence(<Member.Implementation.FieldIdentifier>.Count);
 
 foreach (<Member.Implementation.InnerTypeName> value in <Member.Implementation.FieldIdentifier>)
 {
-    encoder.Encode<Member.Implementation.CodecMethodSuffix>(value, <Member:structure_member_action_arguments()>);
+	<Member:structure_member_encode_scalar()>
 }
 
 encoder.CloseSequence();
@@ -144,11 +205,7 @@ structure_member_encode(Member) ::= <<
 <if(Member.IsRemoved)>
 encoder.EncodeRemoved();
 <else>
-<if(Member.Implementation.ContainerIsScalar)>
-encoder.Encode<Member.Implementation.CodecMethodSuffix>(<Member.Implementation.FieldIdentifier>, <Member:structure_member_action_arguments()>);
-<else>
 <Member:("structure_member_encode_" + Member.Implementation.ContainerTag)()>
-<endif>
 <endif>
 >>
 
@@ -166,7 +223,10 @@ decoder.CloseSequence();
 >>
 
 structure_member_decode_expression(Member) ::= <<
-(<Member.Implementation.InnerTypeName>)decoder.Decode<Member.Implementation.CodecMethodSuffix>(<if(Member.Implementation.IsInnerTypeStructure)><Member.Implementation.InnerTypeName>Factory.Instance, <endif><Member:structure_member_action_arguments()>)
+<if(Member.Implementation.IsSurrogate)>
+<Member.Implementation.InnerTypeCodecName>.SurrogateToValue<Member.Implementation.RequiredOptionalModifier>((<Member.Implementation.InnerTypeCodecName>)decoder.Decode<Member.Implementation.CodecMethodSuffix>(<Member.Implementation.InnerTypeFactoryName>.Instance, <Member:structure_member_action_arguments()>))
+<else>
+(<Member.Implementation.InnerTypeName>)decoder.Decode<Member.Implementation.CodecMethodSuffix>(<if(Member.Implementation.IsInnerTypeStructure)><Member.Implementation.InnerTypeFactoryName>.Instance, <endif><Member:structure_member_action_arguments()>)<endif>
 >>
 
 structure_member_group_decode(MemberGroup) ::= <<
@@ -246,13 +306,13 @@ enumeration_member(Member) ::= <<
 >>
 
 choice(Structure) ::= <<
-    public class <Structure.Identifier>Factory : IPinchableFactory
+    public class <Structure.Implementation.Identifier>Factory : IPinchableFactory
     {
-        static <Structure.Identifier>Factory _instance = new <Structure.Identifier>Factory();
+        static <Structure.Implementation.Identifier>Factory _instance = new <Structure.Implementation.Identifier>Factory();
         
         public object Create(IPinchDecodingContext context)
         {
-            return new <Structure.Identifier>(context);
+            return new <Structure.Implementation.Identifier>(context);
         }
         
         public static IPinchableFactory Instance
@@ -264,40 +324,40 @@ choice(Structure) ::= <<
         }
     }
     
-    public enum <Structure.Identifier>Kind
+    public enum <Structure.Implementation.Identifier>Kind
     {
         None = 0,
         
         <Structure.Members:{ m | <m.Identifier> = <m.Number>, }; separator="\r\n">
     }
     
-    public partial class <Structure.Identifier> : IPinchable, INotifyPropertyChanged
+    public partial class <Structure.Implementation.Identifier> : IPinchable, INotifyPropertyChanged
     {
         object _value;
-        <Structure.Identifier>Kind _valueKind;
+        <Structure.Implementation.Identifier>Kind _valueKind;
         
         <Structure.Members:{ m | static PinchFieldProperties <m.Implementation.FieldIdentifier>Properties = new PinchFieldProperties(<m.Number>, <m.Implementation.AddedInVersion>, <m.Implementation.RemovedInVersion>); }; separator="\r\n">
         
-        <Structure.Members:{ m | public <Structure.Identifier>(<m.Implementation.TypeName> value)
+        <Structure.Members:{ m | public <Structure.Implementation.Identifier>(<m.Implementation.TypeName> value)
 \{
     _value = value;
-    _valueKind = <Structure.Identifier>Kind.<m.Identifier>;
+    _valueKind = <Structure.Implementation.Identifier>Kind.<m.Identifier>;
 \}
 
-public static implicit operator <Structure.Identifier>(<m.Implementation.TypeName> value)
+public static implicit operator <Structure.Implementation.Identifier>(<m.Implementation.TypeName> value)
 \{
-    return new <Structure.Identifier>(value);
+    return new <Structure.Implementation.Identifier>(value);
 \}
 
 }; separator="\r\n">
     
-        public <Structure.Identifier>()
+        public <Structure.Implementation.Identifier>()
         {
             _value = null;
-            _valueKind = <Structure.Identifier>Kind.None;
+            _valueKind = <Structure.Implementation.Identifier>Kind.None;
         }
     
-        public <Structure.Identifier>(IPinchDecodingContext context)
+        public <Structure.Implementation.Identifier>(IPinchDecodingContext context)
         {
         }
         
@@ -306,7 +366,7 @@ public static implicit operator <Structure.Identifier>(<m.Implementation.TypeNam
             get { return _value; }
         }
         
-        public <Structure.Identifier>Kind ValueKind
+        public <Structure.Implementation.Identifier>Kind ValueKind
         {
             get { return _valueKind; }
         }
@@ -321,14 +381,14 @@ public static implicit operator <Structure.Identifier>(<m.Implementation.TypeNam
             }
         }
         
-        public void FirePropertyChanged(<Structure.Identifier>Kind kind)
+        public void FirePropertyChanged(<Structure.Implementation.Identifier>Kind kind)
         {
             switch (kind)
             {
-                case <Structure.Identifier>Kind.None:
+                case <Structure.Implementation.Identifier>Kind.None:
                     break;
                     
-                <Structure.Members:{ m | case <Structure.Identifier>Kind.<m.Identifier>:
+                <Structure.Members:{ m | case <Structure.Implementation.Identifier>Kind.<m.Identifier>:
     FirePropertyChanged("<m.Identifier>");
     break; 
     }; separator="\r\n">
@@ -343,10 +403,10 @@ public static implicit operator <Structure.Identifier>(<m.Implementation.TypeNam
             
             switch (_valueKind)
             {
-                case <Structure.Identifier>Kind.None:
+                case <Structure.Implementation.Identifier>Kind.None:
                     throw new PinchNullRequiredFieldException();
                     
-                <Structure.Members:{ m | case <Structure.Identifier>Kind.<m.Identifier>:
+                <Structure.Members:{ m | case <Structure.Implementation.Identifier>Kind.<m.Identifier>:
     encoder.EncodeRequiredStructure((IPinchable)_value, <m:structure_member_action_arguments()>);
     break; 
     }; separator="\r\n">
@@ -355,11 +415,11 @@ public static implicit operator <Structure.Identifier>(<m.Implementation.TypeNam
         
         void IPinchable.Decode(IPinchDecoder decoder)
         {
-            _valueKind = (<Structure.Identifier>Kind)decoder.DecodeChoiceMarker();
+            _valueKind = (<Structure.Implementation.Identifier>Kind)decoder.DecodeChoiceMarker();
             
             switch (_valueKind)
             {
-                <Structure.Members:{ m | case <Structure.Identifier>Kind.<m.Identifier>:
+                <Structure.Members:{ m | case <Structure.Implementation.Identifier>Kind.<m.Identifier>:
     _value = decoder.DecodeRequiredStructure(<m.Implementation.InnerTypeName>Factory.Instance, <m:structure_member_action_arguments()>);
     break; 
     }; separator="\r\n">

@@ -50,6 +50,25 @@ namespace Interlace.Pinch.Dom
             _name = new CactusStack<string>(identifier);
         }
 
+        public static NamespaceName Parse(string dottedName)
+        {
+            CactusStack<string> top = null;
+
+            foreach (string part in dottedName.Split('.'))
+            {
+                if (top == null) 
+                {
+                    top = new CactusStack<string>(part);
+                }
+                else
+                {
+                    top = top.Push(part);
+                }
+            }
+
+            return new NamespaceName(top);
+        }
+
         public NamespaceName(NamespaceName name, string identifier)
         {
             _name = name._name.Push(identifier);
