@@ -502,6 +502,8 @@ namespace Interlace.Pinch.Implementation
 
         internal static void EncodeStructure(PinchEncoder encoder, object value, bool encodeHeader)
         {
+            if (value == null) throw new ArgumentNullException("value");
+
             if (value is IPinchable)
             {
                 IPinchable pinchable = value as IPinchable;
@@ -512,7 +514,7 @@ namespace Interlace.Pinch.Implementation
             }
             else
             {
-                throw new NotImplementedException("Surrogates are not yet implemented.");
+                throw new InvalidOperationException("An object that could not be encoded by this library has been passed in.");
             }
         }
 

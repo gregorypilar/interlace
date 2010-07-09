@@ -359,6 +359,8 @@
     <Compile Include="DoubleMetaphone\DoubleMetaphoneIterator.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Drawing\DirectText.cs" />
+    <Compile Include="Drawing\HslColor.cs" />
     <Compile Include="Drawing\Utilities.cs">
       <SubType>Code</SubType>
     </Compile>

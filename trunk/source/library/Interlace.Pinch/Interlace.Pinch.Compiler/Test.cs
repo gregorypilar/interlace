@@ -429,4 +429,513 @@ namespace Interlace.Pinch.Test
             
             if (remainingFields > 0) 
             {
-                OnAdditionalFutur
+                OnAdditionalFutureFields(decoder);
+                
+                decoder.SkipFields(remainingFields);
+            }
+            
+            decoder.CloseSequence();
+        }
+        
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void FirePropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #endregion
+
+    }
+
+    public class FixesFactory : IPinchableFactory
+    {
+        static FixesFactory _instance = new FixesFactory();
+        
+        public object Create(IPinchDecodingContext context)
+        {
+            return new Fixes(context);
+        }
+        
+        public static IPinchableFactory Instance
+        {
+            get
+            {
+                return _instance;
+            }
+        }
+    }
+    
+    public partial class Fixes : IPinchable, INotifyPropertyChanged
+    {
+        List<Fix> _fix; 
+
+        static PinchFieldProperties _fixProperties = new PinchFieldProperties(1, 1, null); 
+        
+        public Fixes()
+        {
+            _fix = new List<Fix>();
+        }
+    
+        public Fixes(IPinchDecodingContext context)
+        {
+        }
+        
+        public List<Fix> Fix
+        {
+            get { return _fix; }
+            set 
+            { 
+                _fix = value; 
+                
+                FirePropertyChanged("Fix");
+            }
+        }
+        
+        int IPinchable.ProtocolVersion
+        {
+            get 
+            {
+                return 2;
+            }
+        }
+        
+        protected virtual void OnAdditionalFutureFields(IPinchDecoder decoder)
+        {
+        }
+    
+        void IPinchable.Encode(IPinchEncoder encoder)
+        {
+            encoder.OpenSequence(1);
+            
+            // Encode fields for version 1:
+            
+            encoder.OpenSequence(_fix.Count);
+            
+            foreach (Fix value in _fix)
+            {
+            	encoder.EncodeRequiredStructure(value, _fixProperties);
+            }
+            
+            encoder.CloseSequence();
+
+            
+            encoder.CloseSequence();
+        }
+        
+        void IPinchable.Decode(IPinchDecoder decoder)
+        {
+            int remainingFields = decoder.OpenSequence();
+            
+            // Decode members for version 1:
+            if (remainingFields >= 1)
+            {
+                int fixCount = decoder.OpenSequence();
+                
+                _fix = new List<Fix>();
+                
+                for (int i = 0; i < fixCount; i++)
+                {
+                    _fix.Add((Fix)decoder.DecodeRequiredStructure(FixFactory.Instance, _fixProperties));
+                }
+                
+                decoder.CloseSequence();
+            
+                remainingFields -= 1;
+            }
+            else
+            {
+                if (remainingFields != 0) throw new PinchInvalidCodingException();
+            }
+            
+            if (remainingFields > 0) 
+            {
+                OnAdditionalFutureFields(decoder);
+                
+                decoder.SkipFields(remainingFields);
+            }
+            
+            decoder.CloseSequence();
+        }
+        
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void FirePropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #endregion
+
+    }
+
+    public class TimestampSurrogateFactory : IPinchableFactory
+    {
+        static TimestampSurrogateFactory _instance = new TimestampSurrogateFactory();
+        
+        public object Create(IPinchDecodingContext context)
+        {
+            return new TimestampSurrogate(context);
+        }
+        
+        public static IPinchableFactory Instance
+        {
+            get
+            {
+                return _instance;
+            }
+        }
+    }
+    
+    public partial class TimestampSurrogate : IPinchable, INotifyPropertyChanged
+    {
+        long _ticks; 
+
+        static PinchFieldProperties _ticksProperties = new PinchFieldProperties(1, 1, null); 
+        
+        public TimestampSurrogate()
+        {
+        }
+    
+        public TimestampSurrogate(IPinchDecodingContext context)
+        {
+        }
+        
+        public long Ticks
+        {
+            get { return _ticks; }
+            set 
+            { 
+                _ticks = value; 
+                
+                FirePropertyChanged("Ticks");
+            }
+        }
+        
+        int IPinchable.ProtocolVersion
+        {
+            get 
+            {
+                return 2;
+            }
+        }
+        
+        protected virtual void OnAdditionalFutureFields(IPinchDecoder decoder)
+        {
+        }
+    
+        void IPinchable.Encode(IPinchEncoder encoder)
+        {
+            encoder.OpenSequence(1);
+            
+            // Encode fields for version 1:
+            encoder.EncodeRequiredInt64(_ticks, _ticksProperties);
+            
+            encoder.CloseSequence();
+        }
+        
+        void IPinchable.Decode(IPinchDecoder decoder)
+        {
+            int remainingFields = decoder.OpenSequence();
+            
+            // Decode members for version 1:
+            if (remainingFields >= 1)
+            {
+                _ticks = (long)decoder.DecodeRequiredInt64(_ticksProperties);
+            
+                remainingFields -= 1;
+            }
+            else
+            {
+                if (remainingFields != 0) throw new PinchInvalidCodingException();
+            }
+            
+            if (remainingFields > 0) 
+            {
+                OnAdditionalFutureFields(decoder);
+                
+                decoder.SkipFields(remainingFields);
+            }
+            
+            decoder.CloseSequence();
+        }
+        
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void FirePropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #endregion
+
+		#region Surrogate Methods
+		
+		public static TimestampSurrogate ValueToSurrogateOptional(System.DateTime? value)
+		{
+			if (value != null)
+			{
+				TimestampSurrogate surrogate = TimestampSurrogate.ValueToSurrogate((System.DateTime)value);
+
+				if (surrogate == null) throw new PinchNullRequiredFieldException();
+
+				return surrogate;
+			}
+			else
+			{
+				return null;
+			}
+		}
+
+		public static TimestampSurrogate ValueToSurrogateRequired(System.DateTime value)
+		{
+			TimestampSurrogate surrogate = TimestampSurrogate.ValueToSurrogate(value);
+
+			if (surrogate == null) throw new PinchNullRequiredFieldException();
+
+			return surrogate;
+		}
+		
+		public static System.DateTime? SurrogateToValueOptional(TimestampSurrogate surrogate)
+		{
+			if (surrogate != null)
+			{
+				return TimestampSurrogate.SurrogateToValue(surrogate);
+			}
+			else
+			{
+				return null;
+			}
+		}
+
+		public static System.DateTime SurrogateToValueRequired(TimestampSurrogate surrogate)
+		{
+			if (surrogate != null)
+			{
+				return TimestampSurrogate.SurrogateToValue(surrogate);
+			}
+			else
+			{
+				throw new PinchNullRequiredFieldException();
+			}
+		}
+		#endregion
+    }
+
+    public class FixFactory : IPinchableFactory
+    {
+        static FixFactory _instance = new FixFactory();
+        
+        public object Create(IPinchDecodingContext context)
+        {
+            return new Fix(context);
+        }
+        
+        public static IPinchableFactory Instance
+        {
+            get
+            {
+                return _instance;
+            }
+        }
+    }
+    
+    public partial class Fix : IPinchable, INotifyPropertyChanged
+    {
+        System.DateTime _when; 
+        System.DateTime? _received; 
+        List<System.DateTime?> _receivedTimes; 
+        float _latitude; 
+        float _longitude; 
+
+        static PinchFieldProperties _whenProperties = new PinchFieldProperties(4, 1, null); 
+        static PinchFieldProperties _receivedProperties = new PinchFieldProperties(2, 1, null); 
+        static PinchFieldProperties _receivedTimesProperties = new PinchFieldProperties(3, 1, null); 
+        static PinchFieldProperties _latitudeProperties = new PinchFieldProperties(7, 2, null); 
+        static PinchFieldProperties _longitudeProperties = new PinchFieldProperties(8, 2, null); 
+        static PinchFieldProperties _xProperties = new PinchFieldProperties(5, 1, 2); 
+        static PinchFieldProperties _yProperties = new PinchFieldProperties(6, 1, 2); 
+        static PinchFieldProperties _hDOPProperties = new PinchFieldProperties(1, 1, 2); 
+        
+        public Fix()
+        {
+            
+            
+            _receivedTimes = new List<System.DateTime?>();
+            
+
+        }
+    
+        public Fix(IPinchDecodingContext context)
+        {
+        }
+        
+        public System.DateTime When
+        {
+            get { return _when; }
+            set 
+            { 
+                _when = value; 
+                
+                FirePropertyChanged("When");
+            }
+        }
+        
+        public System.DateTime? Received
+        {
+            get { return _received; }
+            set 
+            { 
+                _received = value; 
+                
+                FirePropertyChanged("Received");
+            }
+        }
+        
+        public List<System.DateTime?> ReceivedTimes
+        {
+            get { return _receivedTimes; }
+            set 
+            { 
+                _receivedTimes = value; 
+                
+                FirePropertyChanged("ReceivedTimes");
+            }
+        }
+        
+        public float Latitude
+        {
+            get { return _latitude; }
+            set 
+            { 
+                _latitude = value; 
+                
+                FirePropertyChanged("Latitude");
+            }
+        }
+        
+        public float Longitude
+        {
+            get { return _longitude; }
+            set 
+            { 
+                _longitude = value; 
+                
+                FirePropertyChanged("Longitude");
+            }
+        }
+        
+        int IPinchable.ProtocolVersion
+        {
+            get 
+            {
+                return 2;
+            }
+        }
+        
+        protected virtual void OnAdditionalFutureFields(IPinchDecoder decoder)
+        {
+        }
+    
+        void IPinchable.Encode(IPinchEncoder encoder)
+        {
+            encoder.OpenSequence(8);
+            
+            // Encode fields for version 1:
+            encoder.EncodeRemoved();
+            encoder.EncodeOptionalStructure(TimestampSurrogate.ValueToSurrogateOptional(_received), _receivedProperties);
+            
+            encoder.OpenSequence(_receivedTimes.Count);
+            
+            foreach (System.DateTime? value in _receivedTimes)
+            {
+            	encoder.EncodeOptionalStructure(TimestampSurrogate.ValueToSurrogateOptional(value), _receivedTimesProperties);
+            }
+            
+            encoder.CloseSequence();
+            
+            encoder.EncodeRequiredStructure(TimestampSurrogate.ValueToSurrogateRequired(_when), _whenProperties);
+            encoder.EncodeRemoved();
+            encoder.EncodeRemoved();
+            
+            // Encode fields for version 2:
+            encoder.EncodeRequiredFloat32(_latitude, _latitudeProperties);
+            encoder.EncodeRequiredFloat32(_longitude, _longitudeProperties);
+            
+            encoder.CloseSequence();
+        }
+        
+        void IPinchable.Decode(IPinchDecoder decoder)
+        {
+            int remainingFields = decoder.OpenSequence();
+            
+            // Decode members for version 1:
+            if (remainingFields >= 6)
+            {
+                decoder.SkipRemoved();
+                _received = TimestampSurrogate.SurrogateToValueOptional((TimestampSurrogate)decoder.DecodeOptionalStructure(TimestampSurrogateFactory.Instance, _receivedProperties));
+                int receivedTimesCount = decoder.OpenSequence();
+                
+                _receivedTimes = new List<System.DateTime?>();
+                
+                for (int i = 0; i < receivedTimesCount; i++)
+                {
+                    _receivedTimes.Add(TimestampSurrogate.SurrogateToValueOptional((TimestampSurrogate)decoder.DecodeOptionalStructure(TimestampSurrogateFactory.Instance, _receivedTimesProperties)));
+                }
+                
+                decoder.CloseSequence();
+                _when = TimestampSurrogate.SurrogateToValueRequired((TimestampSurrogate)decoder.DecodeRequiredStructure(TimestampSurrogateFactory.Instance, _whenProperties));
+                decoder.SkipRemoved();
+                decoder.SkipRemoved();
+            
+                remainingFields -= 6;
+            }
+            else
+            {
+                if (remainingFields != 0) throw new PinchInvalidCodingException();
+            }
+            
+            // Decode members for version 2:
+            if (remainingFields >= 2)
+            {
+                _latitude = (float)decoder.DecodeRequiredFloat32(_latitudeProperties);
+                _longitude = (float)decoder.DecodeRequiredFloat32(_longitudeProperties);
+            
+                remainingFields -= 2;
+            }
+            else
+            {
+                if (remainingFields != 0) throw new PinchInvalidCodingException();
+            }
+            
+            if (remainingFields > 0) 
+            {
+                OnAdditionalFutureFields(decoder);
+                
+                decoder.SkipFields(remainingFields);
+            }
+            
+            decoder.CloseSequence();
+        }
+        
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void FirePropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #endregion
+
+    }
+
+
+}
