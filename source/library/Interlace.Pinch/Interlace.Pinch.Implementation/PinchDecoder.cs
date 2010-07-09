@@ -109,7 +109,7 @@ namespace Interlace.Pinch.Implementation
 
                         case PinchAssignedNumbers.TaggedSequenceByte:
                             _readTokenArgument = (int)ReadUnsignedTag();
-                            _readTokenKind = TokenKind.PrimitiveBuffer;
+                            _readTokenKind = TokenKind.Sequence;
                             break;
 
                         case PinchAssignedNumbers.TaggedChoiceByte:
@@ -795,7 +795,7 @@ namespace Interlace.Pinch.Implementation
             }
             else
             {
-                throw new NotImplementedException("Surrogates are not yet implemented.");
+                throw new InvalidOperationException();
             }
 
             return value;
