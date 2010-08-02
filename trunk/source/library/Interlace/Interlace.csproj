@@ -289,6 +289,7 @@
     <Compile Include="Amf\IAmfClassDescriptor.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Collections\AdapterCollection.cs" />
     <Compile Include="Collections\Bucket.cs">
       <SubType>Code</SubType>
     </Compile>

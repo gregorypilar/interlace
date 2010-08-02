@@ -144,7 +144,7 @@ namespace Interlace.Utilities
 
         public static string FormatTimeUntil(TimeSpan time, FormatTimeFormat format)
         {
-            return FormatTimeUntil(time, format, "{0}", "{1} ago");
+            return FormatTimeUntil(time, format, "{0}", "{0} ago");
         }
 
     	public static string FormatTimeUntil(TimeSpan time, FormatTimeFormat format,
