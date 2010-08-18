@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObviousCode.Interlace.ChatroomServer", "ObviousCode.Interlace.ChatRoomServer\ObviousCode.Interlace.ChatroomServer.csproj", "{85D857B4-A57E-425D-B5EA-5A50061350A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObviousCode.Interlace.Chatroom.Library", "ObviousCode.Interlace.ChatRoom.Library\ObviousCode.Interlace.Chatroom.Library.csproj", "{D46E1F25-84F1-4928-9D05-598BF20B217A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObviousCode.Interlace.ChatroomClient", "ObviousCode.Interlace.ChatRoomClient\ObviousCode.Interlace.ChatroomClient.csproj", "{5908A502-CC1A-4A38-8217-2F73C652CB41}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObviousCode.Interlace.ChatroomServerConsole", "ObviousCode.Interlace.ChatRoomServerConsole\ObviousCode.Interlace.ChatroomServerConsole.csproj", "{5FADC8D1-DABE-4D7E-8997-F28F0C4F1F24}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObviousCode.Interlace.ClientApplication", "ObviousCode.Interlace.ClientApplication\ObviousCode.Interlace.ClientApplication.csproj", "{9BAA005A-E3AE-45B8-8727-AE97349116DF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{85D857B4-A57E-425D-B5EA-5A50061350A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85D857B4-A57E-425D-B5EA-5A50061350A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85D857B4-A57E-425D-B5EA-5A50061350A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85D857B4-A57E-425D-B5EA-5A50061350A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D46E1F25-84F1-4928-9D05-598BF20B217A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D46E1F25-84F1-4928-9D05-598BF20B217A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D46E1F25-84F1-4928-9D05-598BF20B217A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D46E1F25-84F1-4928-9D05-598BF20B217A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5908A502-CC1A-4A38-8217-2F73C652CB41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5908A502-CC1A-4A38-8217-2F73C652CB41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5908A502-CC1A-4A38-8217-2F73C652CB41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5908A502-CC1A-4A38-8217-2F73C652CB41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FADC8D1-DABE-4D7E-8997-F28F0C4F1F24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FADC8D1-DABE-4D7E-8997-F28F0C4F1F24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FADC8D1-DABE-4D7E-8997-F28F0C4F1F24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FADC8D1-DABE-4D7E-8997-F28F0C4F1F24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BAA005A-E3AE-45B8-8727-AE97349116DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BAA005A-E3AE-45B8-8727-AE97349116DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BAA005A-E3AE-45B8-8727-AE97349116DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BAA005A-E3AE-45B8-8727-AE97349116DF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
