@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2FB83CB3-3539-44D6-9B25-C67ECEBC1F75}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ObviousCode.Interlace.BitTunnelLibrary</RootNamespace>
+    <AssemblyName>ObviousCode.Interlace.BitTunnelLibrary</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Interlace, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Interlace\source\library\Interlace\bin\Debug\Interlace.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Collections\BiDirectionalDictionary.cs" />
+    <Compile Include="Events\FileDescriptorEventArgs.cs" />
+    <Compile Include="Events\FileModificationCancelEventArgs.cs" />
+    <Compile Include="Events\FileListEventArgs.cs" />
+    <Compile Include="Events\FileListModificationEventArgs.cs" />
+    <Compile Include="Events\FileRequestEventArgs.cs" />
+    <Compile Include="Events\ExceptionEventArgs.cs" />
+    <Compile Include="Events\FileRequestResponseEventArgs.cs" />
+    <Compile Include="Events\FileTransferCompletedEventArgs.cs" />
+    <Compile Include="Events\FileTransferEventArgs.cs" />
+    <Compile Include="Events\IdentificationEventArgs.cs" />
+    <Compile Include="Events\MessageEventArgs.cs" />
+    <Compile Include="Exceptions\DictionaryDataMissingKeysException.cs" />
+    <Compile Include="File\FileDescriptor.cs" />
+    <Compile Include="File\FileDescriptorLookup.cs" />
+    <Compile Include="File\FileModificationDescriptor.cs" />
+    <Compile Include="File\FileModificationMode.cs" />
+    <Compile Include="File\FileRebuilder.cs" />
+    <Compile Include="Identification\ConnectedClient.cs" />
+    <Compile Include="Interfaces\IBitTunnelService.cs" />
+    <Compile Include="Interfaces\IClientInstance.cs" />
+    <Compile Include="Interfaces\IHeader.cs" />
+    <Compile Include="Interfaces\IInstance.cs" />
+    <Compile Include="Interfaces\IMessage.cs" />
+    <Compile Include="Interfaces\IMessageLogger.cs" />
+    <Compile Include="Interfaces\IServerInstance.cs" />
+    <Compile Include="Messages\BaseHeader.cs" />
+    <Compile Include="Messages\Headers\SimpleMessageHeader.cs" />
+    <Compile Include="Messages\MessageInstances\FileChunkMessage.cs" />
+    <Compile Include="Messages\Headers\FileRequestHeader.cs" />
+    <Compile Include="Messages\Headers\FileChunkHeader.cs" />
+    <Compile Include="Messages\MessageInstances\FileRequestMessage.cs" />
+    <Compile Include="Messages\Headers\FileListHeader.cs" />
+    <Compile Include="Messages\Headers\FileModificationHeader.cs" />
+    <Compile Include="Messages\MessageInstances\FileListMessage.cs" />
+    <Compile Include="Messages\MessageInstances\FileModificationMessage.cs" />
+    <Compile Include="Messages\MessageInstances\IdentificationMessage.cs" />
+    <Compile Include="Messages\MessageInstances\SimpleMessage.cs" />
+    <Compile Include="Messages\MessageKeys.cs" />
+    <Compile Include="Messages\BaseMessage.cs" />
+    <Compile Include="Messages\MessageTypeLookup.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Messages\Protocols\BitTunnelProtocol.cs" />
+    <Compile Include="Messages\Protocols\BitTunnelProtocolFactory.cs" />
+    <Compile Include="Services\BitTunnelService.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Services\FileRebuilderService.cs" />
+    <Compile Include="AppSettings.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\NestedFrames\ObviousCode.Interlace.NestedFrames\ObviousCode.Interlace.NestedFrames\ObviousCode.Interlace.NestedFrames.csproj">
+      <Project>{029954EB-560B-40C2-B0B4-5DB0470DB019}</Project>
+      <Name>ObviousCode.Interlace.NestedFrames</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ObviousCode.Interlace.TunnelSerialiser\ObviousCode.Interlace.TunnelSerialiser.csproj">
+      <Project>{38EEC3AD-8D40-47A4-8DDE-E0AE444A5825}</Project>
+      <Name>ObviousCode.Interlace.TunnelSerialiser</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="File\FileDescriptorLookup.cd" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

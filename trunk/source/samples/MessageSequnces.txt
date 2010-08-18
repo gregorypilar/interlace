@@ -1,0 +1,29 @@
+
+participant ClientService as cs
+participant ClientProtocolFactory as cf
+participant ClientProtocol as cp
+participant ClientSocket as cls
+
+note left of cs : Files Added event received
+cs -> cf : send modification list
+cf -> cp : send modification list
+cp -> cp : build array of tunneled modifications
+cp -> cp : build file modification message
+cp -> cp : Builds Byte Array Message, Byte header, /nFramed Message Header, Framed Message Data
+cp -> cls : send file modification message
+
+---------------------------------------
+
+participant ServerSocket ss
+participant ServerProtocol sp
+participant ServerProtocolList sps
+participant FileHashController fh
+participant ServerFactory sf
+
+note left of ss : Files Added event received
+ss -> sp :
+sp -> sf : File Added event received
+sf -> sps : send modification message
+sps -> ss : send file modification message
+sf -> sf : Deserialise file modification list
+sf -> fh : send modification list

@@ -1,0 +1,3 @@
+Does not currently view repeat files as separate files
+	- Should be able to query all file owners of same files to return data in case of drop out
+	- Should be able to hash files to detirmine uniqueness

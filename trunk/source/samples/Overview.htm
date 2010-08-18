@@ -1,0 +1,216 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Untitled Page</title>
+    <style type="text/css">
+        .style1
+        {
+            font-family: Verdana;
+            font-weight: bold;
+        }
+        .style2
+        {
+            font-size: small;
+        }
+        .style3
+        {
+            font-size: medium;
+        }
+        .style4
+        {
+            font-size: small;
+            font-weight: normal;
+        }
+        .style5
+        {
+            font-size: large;
+            font-weight: bold;
+        }
+        .style6
+        {
+            font-size: small;
+            margin-left: 40px;
+        }
+    </style>
+</head>
+<body style="font-family: Verdana">
+    <ul>
+        <li>ReMio&lt;FileDU<span class="style1"><b>Adding File</b></span> </li>
+            
+            <ul>
+                <li><span class="style2">Application Notifies Client of New File</li></span>
+                    <ul>
+                        <li><span class="style2">Client Sends New File Request
+                            </span>
+                            <ul>
+                                <li class="style2">Full File Property </li>
+                                <li class="style2">Object Server Name </li>
+                                <li class="style2">File Name and Path Id or Guid ? (smaller vs
+                            less spoofable) </li>
+                            </ul>
+                        </li>
+                        <li class="style2">Image Server Broadcasts New File Data To Clients </li>
+                        <li class="style2">Client notifies
+                            Application of New Data </li>
+                    </ul>
+            </ul>
+        </ul>
+    <p>
+        &nbsp;</p>
+    <ul>
+        <li><b>Removing File</b>
+            <ul>
+                <li><span class="style2">Application Notifies Client of Removed File
+                            </span>
+                    <ul>
+                        <li><span class="style2">Client Sends Deletion File Request </span>
+                            <ul>
+                                <li class="style2">Simple File Property Object Id (or Guid) </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+    <p>
+        &nbsp;</p>
+    <ul>
+        <li><b>Logging to Server </b>
+            <ul>
+                <li><span class="style2">Application requests Logon from Client </span>
+                    <ul>
+                        <li><span class="style2">Client sends Logon request to server
+                            <- Id'd in case of multiple servers? </span>
+                            <ul>
+                                <li><span class="style2">Logon request </span>
+                                    <ul>
+                                        <li class="style2">Server Name</li>
+                                        <li class="style2">Client (Guid / Id?)</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="style2">Client can&#39;t connect<ul>
+                            <li class="style2">respond as below</li>
+                            </ul>
+                        </li>
+                        <li class="style2">Server responds with fail<ul>
+                            <li class="style2">Enum reason (shared library)</li>
+                            <li class="style2">Text Message if required</li>
+                            </ul>
+                        </li>
+                        <li class="style2">Server success (return server guid / id?)</li>
+                        <li class="style2">Server sends current file list</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+    <p>
+        &nbsp;</p>
+    <ul>
+        <li class="style3">File List<ul>
+            <li class="style4">Server responding to request or server accepts login<ul>
+                <li class="style4">Client receives list</li>
+                <li class="style4">Client notifies Application of File List</li>
+                </ul>
+            </li>
+            </ul>
+        </li>
+    </ul>
+    <p class="style5">
+        Responsibilities:</p>
+    <p>
+        <b>Application</b></p>
+    <p class="style2" style="margin-left: 40px">
+        Application functionality:
+    </p>
+    <p class="style2" style="margin-left: 80px">
+        Needs to accept files from user</p>
+    <p class="style2" style="margin-left: 80px">
+        Needs to accept removed files from user</p>
+    <p class="style2" style="margin-left: 80px">
+        Needs to update in response to new file descriptors received from server</p>
+    <p class="style2" style="margin-left: 80px">
+        Needs to update in response to removed file descriptors received from server</p>
+    <p class="style2" style="margin-left: 80px">
+        Visually show own (removable) files as separate to server files (which should 
+        include own files)</p>
+    <p class="style2" style="margin-left: 40px">
+        App to Client:</p>
+    <p class="style2" style="margin-left: 80px">
+        Needs to notify Client of added files</p>
+    <p class="style2" style="margin-left: 80px">
+        Needs to notify Client of removed files</p>
+    <p class="style2" style="margin-left: 40px">
+        Client to App:</p>
+    <p class="style2" style="margin-left: 80px">
+        Needs to receive server added files</p>
+    <p class="style2" style="margin-left: 80px">
+        Needs to receive server removed files</p>
+    <p>
+        Server</p>
+    <p>
+        Client</p>
+    <p class="style5">
+        Classes:</p>
+    <p class="style3">
+        Library?
+    </p>
+    <p class="style6">
+        enum FileDescriptorNotificationMode { FullList, AddedFiles, RemovedFiles}</p>
+    <p class="style6">
+        enum FileModificationKey { FileList, FilesAdded, FilesRemoved }</p>
+<p class="style6">
+        enum MessageKey { FileModifications, LoginRequest</p>
+    <p class="style3">
+        CClient Application:</p>
+    <p class="style6">
+        (Callback) delegate void FileModifications(params FileDescriptor[] addedFiles)</p>
+    <p class="style6">
+        (AcceptFilesFromUser ...)</p>
+    <p class="style6">
+        (AcceptFileRemovalFromUser ...)</p>
+    <p class="style6">
+        UpdateFileUI();</p>
+    <p class="style3">
+        ClientService:</p>
+    <p class="style6">
+        Ctor(delegate void FileModifications(params FileModificationDescriptor[] 
+        addedFiles))</p>
+    <p class="style6">
+        NotifyOnFileChanges(params FileModificationDescriptor[] )</p>
+    <p class="style6">
+        RequestLogin(ClientDescriptor)/p>
+    <p class="style3">
+        ClientProtocol : FrameProtocol</p>
+    <p class="style3">
+        ClientProtocolFactoryp>
+    <p class="style3">
+        Server Application</p>
+    <p class="style3">
+        ServerService</p>
+    <p class="style3">
+        Server Console</p>
+    <p class="style3">
+        ServerProtocol</p>
+    <p class="style3">
+        ServerProtocolFactory</p>
+    <p class="style3">
+        ClientDescriptor</p>
+    <p class="style3">
+        FileModification</p>
+<p class="style3">
+        FileModificationDescriptor</p>
+    <p class="style6">
+        FileDescriptionNotificationMode mode,
+    </p>
+    <p class="style6">
+        FileFileDescriptor</p>
+<p class="style3">
+        MessMessage</p>
+<p class="style6" align="left">
+        Key: MessageType</p>
+</body>
+</html>
