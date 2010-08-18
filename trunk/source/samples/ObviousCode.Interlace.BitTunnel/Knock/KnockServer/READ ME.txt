@@ -1,0 +1,5 @@
+Start Knock Server with command line arguments
+
+-a127.0.0.1 -p1234
+
+where -a[local ipaddress] -p[port]
