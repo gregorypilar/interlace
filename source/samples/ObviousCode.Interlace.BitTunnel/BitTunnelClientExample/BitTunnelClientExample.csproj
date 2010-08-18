@@ -143,6 +143,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ObviousCode.Interlace.NestedFrames\ObviousCode.Interlace.NestedFrames\ObviousCode.Interlace.NestedFrames.csproj">
+      <Project>{029954EB-560B-40C2-B0B4-5DB0470DB019}</Project>
+      <Name>ObviousCode.Interlace.NestedFrames</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ExampleLibrary\BitTunnelExampleLibrary.csproj">
       <Project>{38A4EE1F-4493-4CD3-A030-A6DE40533ADA}</Project>
       <Name>BitTunnelExampleLibrary</Name>
