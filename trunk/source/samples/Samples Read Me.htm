@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>Untitled Page</title>
+</head>
+<body style="font-family: Arial, Helvetica, sans-serif">
+    <p><h1>Samples</h1>
+<p>As it stands, documentation for Interlace is fairly light on the ground, 
+    bordering on non-existent. </p>
+<p>This will be corrected in the short term, however, until such time, I have 
+    provided the following sample applications to help assist new users. As samples, 
+    they have been written as (far from comprehensive) examples of the Interlace 
+    libraries and we offer no guarentees or warranty on their functionality.&nbsp;
+</p>
+    <ul>
+        <li><a href="#HelloWorld">Hello World</a></li>
+        <li><a href="#ChatRoom">Interlace Chat</a></li>
+        <li><a href="#BitTunnel">Bit Tunnel File Sharing</a></li>
+    </ul>
+    <a name="HelloWorld" />
+    <h2>Hello World</h2>
+    <p>I think it&#39;s probably bad luck not to have one of these, so Hello World.</p>
+    <p>This is a simple client-server, application. The server responds with &quot;Hello 
+        World&quot; whenever it receives a message from the client.</p>
+    <p>It was written, largely to demonstrate the networking capabilities of the 
+        Interlace framework</p>
+        <p>To run Hello World from Visual Studio, set both available projects as Start Up projects, otherwise simply run HelloWorldServer.exe and HelloWorldClient.exe</p>
+    <a name="ChatRoom" />
+    <h2>Interlace Chat</h2>
+    <p>And, in keeping with convention, I felt it was only proper to supply a Chat Room 
+        application.</p>
+        <p>The Start Up projects are ObviousCode.Interlace.ClientApplication and ObviousCode.Interlace.ChatRoomServerConsole, and the runnable executables are executable files of the same names</p>
+        <a name="BitTunnel" />
+    <h2>Bit Tunnel</h2>
+    <p>With the onus of tradition now aside, we move to Bit Tunnel, a set of libraries 
+        that can be used to build File Sharing applications (in the Napster sense, where 
+        a centralised server is required to keep track of client files and feed requests 
+        around the network). </p>
+    <p>The solution can be viewed in 3 parts</p>
+    <ol>
+        <li><b>Bit Tunnel.</b> These are the libraries that the other projects in the solution reference. 
+            <p>Had I had my wits about me, I should have called it Bit Dribble or something, but I was keen to start, and Bit Tunnel was the first thing that came to mind.</p>
+<p>There is some design documentation and UML around the Bit Tunnel libraries, however, as is ever the case, post-development, they are only about 95% accurate. </p>
+<p>There are also some test projects as well, with a few tests not yet implemented (I doffed my hat to TDD, but naughtily looked the other way when development got too interesting). Those that are implemented all pass when run individually, but 2 or 3 fail when run as a batch. I am still working on this.</p></li>
+            
+        <li>(The even less creatively named) "<b>Example</b>" applications. These demonstrate the use of the Bit Tunnel, with a Forms based File Sharing application.</li>
+            <br />
+        <li><b>Knock</b>. I've no real excuse for calling it that. Again, I just wanted something to call the Visual Studio project so I could get started.
+        <p>This application uses a console based application that can 'mount' files and directories that can be accessed by a Bit Tunnel Client, such as the example client. </p>
+        <p>I am building a Knock Web client front end using the Vici MVC project.</p></li>
+    </ol>
+</body>
+</html>
