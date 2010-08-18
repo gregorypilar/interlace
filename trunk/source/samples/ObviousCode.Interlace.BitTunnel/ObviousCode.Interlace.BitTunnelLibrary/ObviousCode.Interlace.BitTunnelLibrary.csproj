@@ -33,7 +33,7 @@
   <ItemGroup>
     <Reference Include="Interlace, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Interlace\source\library\Interlace\bin\Debug\Interlace.dll</HintPath>
+      <HintPath>..\..\..\library\Interlace\bin\Debug\Interlace.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -100,7 +100,7 @@
     <Compile Include="AppSettings.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\NestedFrames\ObviousCode.Interlace.NestedFrames\ObviousCode.Interlace.NestedFrames\ObviousCode.Interlace.NestedFrames.csproj">
+    <ProjectReference Include="..\..\ObviousCode.Interlace.NestedFrames\ObviousCode.Interlace.NestedFrames\ObviousCode.Interlace.NestedFrames.csproj">
       <Project>{029954EB-560B-40C2-B0B4-5DB0470DB019}</Project>
       <Name>ObviousCode.Interlace.NestedFrames</Name>
     </ProjectReference>
