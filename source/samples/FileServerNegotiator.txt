@@ -1,0 +1,64 @@
+participant ServerProtocolFactory as sf
+participant ServerService as ss
+participant ServerInstance as si
+participant FileServerNegotiator as n
+participant ServerProtocolInstance as spi
+participant ClientProtocolInstance as cpi
+
+note left of sf: File Requested
+sf -> ss : Fire (Initiate) FileRequested
+
+alt Instance has subscribed to File Requested from Service
+
+	sv -> si : Fire File Requested if available	
+	ss --> ss : Handles event
+	
+	alt File Request Allowed, continue		
+	else return File Request Response Not Available
+	end
+		
+else assume file request is allowed by server
+end
+
+ss -> n : Construct (List<Protocols>, FileDescriptor, Callbacks)
+ss -> n : Attach events
+ss -> n : Negotiate (Tell negotiator to start)
+
+loop through protocols
+
+	alt Has protocol	
+
+		n -> spi : Request File
+		spi -> cpi : Request File
+				
+		alt Client responds to request
+		
+			cpi --> spi : Respond to request
+
+			opt File Request Approved 
+			
+				n -> sf : ResponseCallback(available)		
+	
+				Start File Negotiation
+										
+			end
+			opt File Request Refused
+			
+				n -> n: Continue loop
+			
+			end
+
+		else no response before timeout
+		
+				n -> n: Continue loop
+			
+		end
+		
+	else No more protocols, file request not accepted
+		
+		Fire Request Failed event
+		
+	end
+end
+
+-------------------------

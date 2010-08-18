@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="ObviousCode.Interlace.BitTunnelServer.BitTunnelServerProtocol">
+    <Position X="10.25" Y="1.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAgQAAAEAQAAAAAAAQAAAAAAAAAAAAAAAAAgA=</HashCode>
+      <FileName>BitTunnelServerProtocol.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="_parent" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="ObviousCode.Interlace.BitTunnelServer.BitTunnelServerService">
+    <Position X="4" Y="1.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>gAAIAAAACAAAAAQAAEAAAAAAAAAAAAAAQAAAQACAAgA=</HashCode>
+      <FileName>BitTunnelServerService.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Instance" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="ObviousCode.Interlace.BitTunnelServer.BitTunnelServerProtocolFactory">
+    <Position X="6.75" Y="1.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAwAAAACUAAAEAAAAAAAAAAAAAAQAQAAAAgA=</HashCode>
+      <FileName>BitTunnelServerProtocolFactory.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="ObviousCode.Interlace.BitTunnelLibrary.Interfaces.IInstance">
+    <Position X="1.25" Y="1.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

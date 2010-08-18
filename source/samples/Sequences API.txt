@@ -1,0 +1,182 @@
+
+
+participant Application as a
+participant API as c
+participant InterlaceClient as ic
+
+note left of a: Application Issues Disconnect
+a-> c: Disconnect
+c-> ic : Stops Service
+
+---------------------------------------
+
+participant Application as a
+participant API as c
+participant InterlaceClient as ic
+
+note left of a: Files are added
+a-> c: Fire File List Updates event
+c-> ic : Send File List Modification Message
+ic-->c : Receive Global File List Modification Message
+c-->a:Fire FileListModified event
+c->c:Update Internal Hash
+
+---------------------------------------
+
+participant Application as a
+participant API as c
+participant InterlaceClient as ic
+
+note left of a: Files are removed
+a-> c: Fire File List Updates event
+c-> ic : Send File List Modification Message
+ic-->c : Receive Global File List Modification Message
+c-->a:Fire FileListModified event
+c->c:Update Internal Hash
+
+---------------------------------------
+
+participant Application as a
+participant API as c
+participant InterlaceClient as ic
+
+note left of a: Files are removed
+a-> c: Send removed Files enumerable of File Descriptors
+c-> ic : Send File List Modification Message
+ic-->c : Receive Global File List Modification Message
+c-->a:Fire FileListModified event
+c->c:Update Internal Hash
+
+----------------------------------------
+
+participant Application as a
+participant API as c
+participant InterlaceClient as ic
+
+note left of a : Application requests file
+a->c:Request File
+c->ic:Request File Message
+alt Request Not accepted
+    ic -->c:FileRequestFailed Message
+    c-->a:Fire FileRequestFailed event
+else File Request Accepted
+    
+    ic -->c:FilePending Message
+    loop while file bytes continue
+        ic -->c:FileChunk
+        c->c: Build byte array
+        c-->a:Fire Progress Event
+        opt error
+            ic --> c:FileSendFailedMessage
+            c-->a:Fire Received Failed event
+            c->c: clear byte array
+       end
+       opt file completed
+            c->c: Complete File Build
+            c->a: Fire File Request Completed event
+       end
+    end
+end
+
+
+
+
+==========================================
+TO BE GENERATED:
+
+participant Application as a
+participant API as ap
+participant InterlaceServer as is
+
+note left of a : Application Issues Connect
+a -> ap: Connect
+ap-> is : Starts Server
+
+-------------------------------------
+
+participant Application as a
+participant API as ap
+participant InterlaceServer as ic
+
+note left of a: Application Issues Disconnect
+a-> ap: Disconnect
+ap-> is : Stops Service
+
+-------------------------------------
+
+participant ServerProtocol as sp
+participant ServerFactory as sf
+
+note left of sp : ConnectionLost message received
+
+sp -> sf : Fire Lost Connection event
+sf -> sf : remove protocol from pool
+
+---------------------------------------
+
+participant Application as a
+participant API as ap
+participant InterlaceClient as ic
+
+note left of a: Files are removed
+a -> ap: Send removed Files enumerable of File Descriptors
+c-> ic : Send File List Modification Message
+ic-->ap : Receive Global File List Modification Message
+ap-->a:Fire FileListModified event
+ap -> ap:Update Internal Hash
+
+-----------------------------------------
+participant Connection as c
+participant ServerService as ssv
+participant ClientService as csv
+participant ClientFactory as cf
+
+c -> c : Connect
+c -> c : Lock for timeout length or completed
+opt timeout
+	c -> c: throw exception
+end
+opt Server Completes Connection 
+	c -> ssv: Connect
+	ssv -> ssv: Listen to Reactor
+	ssv -> c : Fire Connection Completed Event
+end
+opt Client Completes Connection
+	c -> csv: Connect
+	csv -> cf 
+end
+
+-------------------------------------
+participant Application as a
+participant API as ap
+participant Connection as c
+participant InterlaceClient as ic
+participant ClientService as csv
+participant ClientFactory as cf
+participant ClientProtocol as cp
+participant ClientSocket as cs
+participant ServerSocket as ss
+participant ServerProtocol as sp
+participant ServerFactory as sf
+
+
+note left of a : Application Issues Connect
+a -> ap: Connect (optional string server name)
+ap -> ic : (Starts Services)
+ic -> ss : ... To Network ...
+ss -> sp : ... ConnectionMade
+sp -> sp : Generates new ConnectedClient and adds new Server Instance Id
+sp --> ss : Return Connected Client message
+ss --> cs : Connected Client Response
+cs --> cp : ... From Network, Receive ConnectedClient 
+cf --> cf : Update ConnectedClient with public name
+cf --> cf : Stores ConnectedClient 
+cf -> csv : Fires ProtocolMadeConnection
+csv -> c : Fires Connection Completed to allow Connect method in Connection to return true 
+cf --> cp : Sends ConnectedClient back as response
+cp --> cs : ... To Network
+ss --> sp : ... From Network, Receives and updates ConnectedClient
+
+-------------------------
+
+Client disposed -> Connection Disposed -> Service Host stopped -> (if Client) in Service.Stop call factory to call protocol to LoseConnection

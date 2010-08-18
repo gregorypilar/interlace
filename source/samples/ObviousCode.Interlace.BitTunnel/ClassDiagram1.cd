@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="ObviousCode.Interlace.BitTunnel.Connectivity.Connection">
+    <Position X="0.5" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAIAACAAAABQAAAAgIAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>Connectivity\Connection.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="ObviousCode.Interlace.BitTunnel.Connectivity.ClientInstance">
+    <Position X="4" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>IASAAAAAAAAAAAECAAAABIAAAAAAAAAAQAAAAAAABAA=</HashCode>
+      <FileName>Connectivity\ClientInstance.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Connection" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="ObviousCode.Interlace.BitTunnel.File.FileModificationDescriptor">
+    <Position X="9.25" Y="0.5" Width="2.5" />
+    <AssociationLine Name="Mode" Type="ObviousCode.Interlace.BitTunnel.FileModificationMode">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.76" Y="0.081" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>File\FileModificationDescriptor.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Mode" />
+      <Property Name="File" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="ObviousCode.Interlace.BitTunnel.File.FileDescriptor">
+    <Position X="8.75" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAEQAAAAAAAAEAAAAAAAAIAAAA=</HashCode>
+      <FileName>File\FileDescriptor.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="ObviousCode.Interlace.BitTunnel.FileModificationMode">
+    <Position X="10.75" Y="2" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAACAAAAAABAAAAAAAAAAAAAAAAAAAABA=</HashCode>
+      <FileName>FileModificationMode.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
