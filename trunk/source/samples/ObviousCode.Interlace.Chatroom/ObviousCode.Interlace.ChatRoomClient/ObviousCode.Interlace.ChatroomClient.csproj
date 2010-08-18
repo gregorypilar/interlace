@@ -33,7 +33,7 @@
   <ItemGroup>
     <Reference Include="Interlace, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Interlace\source\library\Interlace\bin\Debug\Interlace.dll</HintPath>
+      <HintPath>..\..\..\library\Interlace\bin\Debug\Interlace.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
