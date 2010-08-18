@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObviousCode.Interlace.NestedFrames", "ObviousCode.Interlace.NestedFrames\ObviousCode.Interlace.NestedFrames.csproj", "{029954EB-560B-40C2-B0B4-5DB0470DB019}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObviousCode.Interlace.TestNestedFramesServer", "ObviousCode.Interlace.TestNestedFrames\ObviousCode.Interlace.TestNestedFramesServer.csproj", "{78195CBC-6699-4DE5-8696-B58A503912CF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{029954EB-560B-40C2-B0B4-5DB0470DB019}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{029954EB-560B-40C2-B0B4-5DB0470DB019}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{029954EB-560B-40C2-B0B4-5DB0470DB019}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{029954EB-560B-40C2-B0B4-5DB0470DB019}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78195CBC-6699-4DE5-8696-B58A503912CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78195CBC-6699-4DE5-8696-B58A503912CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78195CBC-6699-4DE5-8696-B58A503912CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78195CBC-6699-4DE5-8696-B58A503912CF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
