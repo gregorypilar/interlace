@@ -4,7 +4,7 @@
     <title>Untitled Page</title>
 </head>
 <body style="font-family: Arial, Helvetica, sans-serif">
-    <p><h1>Samples</h1>
+    <p><h1>Samples</h1></p>
 <p>As it stands, documentation for Interlace is fairly light on the ground, 
     bordering on non-existent. </p>
 <p>This will be corrected in the short term, however, until such time, I have 
@@ -17,12 +17,17 @@
         <li><a href="#ChatRoom">Interlace Chat</a></li>
         <li><a href="#BitTunnel">Bit Tunnel File Sharing</a></li>
     </ul>
+    <p>
+    Those that are familiar with the Deferred functionality of Python Twisted, the libraries that Interlace is heavily based on, may notice that this feature is not demonstrated in the sample apps.
+    </p>
+<p>This is simply as I &lt;insert excuse here&gt;. Deferred returns are, in fact, implemented in Interlace and are being used reliably in real world commercial applications. </p>
+<p> I shall document / use them in samples in the very near future. </p>
     <a name="HelloWorld" />
     <h2>Hello World</h2>
     <p>I think it&#39;s probably bad luck not to have one of these, so Hello World.</p>
     <p>This is a simple client-server, application. The server responds with &quot;Hello 
         World&quot; whenever it receives a message from the client.</p>
-    <p>It was written, largely to demonstrate the networking capabilities of the 
+    <p>It was written, largely, to demonstrate the networking capabilities of the 
         Interlace framework</p>
         <p>To run Hello World from Visual Studio, set both available projects as Start Up projects, otherwise simply run HelloWorldServer.exe and HelloWorldClient.exe</p>
     <a name="ChatRoom" />
@@ -39,8 +44,9 @@
     <p>The solution can be viewed in 3 parts</p>
     <ol>
         <li><b>Bit Tunnel.</b> These are the libraries that the other projects in the solution reference. 
-            <p>Had I had my wits about me, I should have called it Bit Dribble or something, but I was keen to start, and Bit Tunnel was the first thing that came to mind.</p>
-<p>There is some design documentation and UML around the Bit Tunnel libraries, however, as is ever the case, post-development, they are only about 95% accurate. </p>
+            <p>Had I had my wits about me, I would have named it Bit Dribble or the like, but I was keen to start, and Bit Tunnel was the first thing that came to mind.</p>
+<p>There is some design documentation and UML in various pieces around the Bit Tunnel libraries, however, as is ever the case, post-development, they are only about 95% accurate.</p>
+<p>The BitTunnelUML.simp file is opened by the free application "Software Ideas Modeler", however, as nice as this tool is, I was getting some stability problems with it, so most of the sequence diagrams are in the Sequences folder, and are in pdf format.</p>
 <p>There are also some test projects as well, with a few tests not yet implemented (I doffed my hat to TDD, but naughtily looked the other way when development got too interesting). Those that are implemented all pass when run individually, but 2 or 3 fail when run as a batch. I am still working on this.</p></li>
             
         <li>(The even less creatively named) "<b>Example</b>" applications. These demonstrate the use of the Bit Tunnel, with a Forms based File Sharing application.</li>
