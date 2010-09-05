@@ -31,27 +31,40 @@ using System;
 #endregion
 
 namespace Interlace.DatabaseManagement
-{
-	public abstract class DatabaseConnectionString
+{ 
+	public class DatabaseVersion
 	{
-		protected string _databaseName;
+		string _product;
+		string _version;
 
-		public DatabaseConnectionString()
+		public DatabaseVersion(string product, string version)
 		{
-			_databaseName = "master";
+			_product = product;
+			_version = version;
 		}
 
-		public string DatabaseName
+		public string Product
 		{
-			get { return _databaseName; }
-			set { _databaseName = value; }
+			get { return _product; }
 		}
 
-        public abstract string GetStringRepresentation();
-
-		public override string ToString()
+		public string Version
 		{
-            return GetStringRepresentation();
+			get { return _version; }
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (!(obj is DatabaseVersion)) return false;
+
+			DatabaseVersion rhs = obj as DatabaseVersion;
+			
+			return _product == rhs._product && _version == rhs._version;
+		}
+
+		public override int GetHashCode()
+		{
+			return _product.GetHashCode() ^ _version.GetHashCode();
 		}
 	}
 }

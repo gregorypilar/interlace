@@ -59,7 +59,8 @@ namespace Interlace.Utilities
         Full,
 
         /// <summary>Specifies that abbreviations should be used.</summary>
-        Compact
+        Compact,
+        CompactWithSeconds
     }
 
     /// <summary>
@@ -153,7 +154,7 @@ namespace Interlace.Utilities
             string positiveDescription;
             TimeSpan positiveTime = time > TimeSpan.Zero ? time : time.Negate();
 
-            if (format == FormatTimeFormat.Compact)
+            if (format == FormatTimeFormat.Compact || format == FormatTimeFormat.CompactWithSeconds)
             {
                 if (positiveTime.Days > 0)
                 {
@@ -167,12 +168,24 @@ namespace Interlace.Utilities
                 }
                 else if (positiveTime.Minutes > 0)
                 {
-                    positiveDescription = string.Format("{0} m",
-                        positiveTime.Minutes);
+                    positiveDescription = string.Format(
+                        format == FormatTimeFormat.CompactWithSeconds ? "{0} m, {1} s" : "{0} m",
+                        positiveTime.Minutes, positiveTime.Seconds);
+                }
+                else if (positiveTime.Seconds > 0)
+                {
+                    if (format == FormatTimeFormat.CompactWithSeconds)
+                    {
+                        positiveDescription = string.Format("{0} s", positiveTime.Seconds);
+                    }
+                    else
+                    {
+                        positiveDescription = "1 m";
+                    }
                 }
                 else
                 {
-                    positiveDescription = "1 m";
+                    positiveDescription = "";
                 }
             }
             else

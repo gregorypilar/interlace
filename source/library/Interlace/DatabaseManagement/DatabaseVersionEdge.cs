@@ -32,26 +32,47 @@ using System;
 
 namespace Interlace.DatabaseManagement
 {
-	public abstract class DatabaseConnectionString
+	public class DatabaseVersionEdge
 	{
-		protected string _databaseName;
+		DatabaseSchemaUpgrade _upgrade;
+		bool _unexplored;
+		DatabaseVersionEdge _previousEdge;
 
-		public DatabaseConnectionString()
+		public DatabaseVersionEdge(DatabaseSchemaUpgrade upgrade)
 		{
-			_databaseName = "master";
+			_upgrade = upgrade;
+			_unexplored = true;
+			_previousEdge = null;
 		}
 
-		public string DatabaseName
+		public override bool Equals(object obj)
 		{
-			get { return _databaseName; }
-			set { _databaseName = value; }
+			if (!(obj is DatabaseVersionEdge)) return false;
+
+			DatabaseVersionEdge rhs = obj as DatabaseVersionEdge;
+
+			return FromVersion == rhs.FromVersion && ToVersion == rhs.ToVersion;
 		}
 
-        public abstract string GetStringRepresentation();
-
-		public override string ToString()
+		public override int GetHashCode()
 		{
-            return GetStringRepresentation();
+			return FromVersion.GetHashCode() ^ ToVersion.GetHashCode();
+		}
+
+		public string FromVersion { get { return _upgrade.fromversion; } }
+		public string ToVersion { get { return _upgrade.toversion; } }
+		public string[] Commands { get { return _upgrade.command; } }
+
+		public DatabaseVersionEdge PreviousEdge
+		{
+			get { return _previousEdge; }
+			set { _previousEdge = value; }
+		}
+
+		public bool Unexplored
+		{
+			get { return _unexplored; }
+			set { _unexplored = value; }
 		}
 	}
 }

@@ -32,26 +32,21 @@ using System;
 
 namespace Interlace.DatabaseManagement
 {
-	public abstract class DatabaseConnectionString
+	public class DatabaseVersionTableMissingException : DatabaseManagerException
 	{
-		protected string _databaseName;
-
-		public DatabaseConnectionString()
+		public DatabaseVersionTableMissingException()
+			: base()
 		{
-			_databaseName = "master";
 		}
 
-		public string DatabaseName
+		public DatabaseVersionTableMissingException(string message)
+			: base(message)
 		{
-			get { return _databaseName; }
-			set { _databaseName = value; }
 		}
 
-        public abstract string GetStringRepresentation();
-
-		public override string ToString()
+		public DatabaseVersionTableMissingException(string message, Exception innerException)
+			: base(message, innerException)
 		{
-            return GetStringRepresentation();
 		}
 	}
 }

@@ -27,31 +27,27 @@
 // DAMAGE.
 
 using System;
+using System.Data;
+using System.Data.SqlClient;
 
 #endregion
 
 namespace Interlace.DatabaseManagement
 {
-	public abstract class DatabaseConnectionString
+	public class DatabaseSharedLock : DatabaseLock
 	{
-		protected string _databaseName;
-
-		public DatabaseConnectionString()
+		public DatabaseSharedLock(SqlConnection connection, string name)
+			: base(connection, name)
 		{
-			_databaseName = "master";
 		}
 
-		public string DatabaseName
+		protected override string LockMode
 		{
-			get { return _databaseName; }
-			set { _databaseName = value; }
+			get
+			{
+				return "Shared";
+			}
 		}
 
-        public abstract string GetStringRepresentation();
-
-		public override string ToString()
-		{
-            return GetStringRepresentation();
-		}
 	}
 }

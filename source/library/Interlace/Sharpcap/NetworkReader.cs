@@ -39,6 +39,8 @@ namespace Interlace.Sharpcap
         byte[] _data;
         int _offset;
 
+        byte[] _buffer = new byte[8];
+
         public NetworkReader(byte[] data)
         {
             _data = data;
@@ -51,6 +53,38 @@ namespace Interlace.Sharpcap
 
             if (_offset < 0) _offset = 0;
             if (_offset > _data.Length) _offset = _data.Length;
+        }
+
+        public bool AtEnd
+        {
+            get
+            {
+                return _offset >= _data.Length;
+            }
+        }
+
+        public int Position
+        {
+            get { return _offset; }
+        }
+
+        public int Length
+        {
+            get { return _data.Length; }
+        }
+
+        public byte[] ReadBytes(int count)
+        {
+            if (_data.Length - _offset < count) throw new NetworkReaderTruncationException();
+
+            byte value = _data[_offset];
+
+            byte[] bytes = new byte[count];
+            Array.Copy(_data, _offset, bytes, 0, count);
+
+            _offset += count;
+
+            return bytes;
         }
 
         public byte ReadUnsigned8()
@@ -117,6 +151,38 @@ namespace Interlace.Sharpcap
             _offset += 4;
 
             return value;
+        }
+
+        public float ReadFloat32()
+        {
+            if (_data.Length - _offset < 4) throw new NetworkReaderTruncationException();
+
+            _buffer[0] = _data[_offset + 3];
+            _buffer[1] = _data[_offset + 2];
+            _buffer[2] = _data[_offset + 1];
+            _buffer[3] = _data[_offset + 0];
+
+            _offset += 4;
+
+            return BitConverter.ToSingle(_buffer, 0);
+        }
+
+        public double ReadFloat64()
+        {
+            if (_data.Length - _offset < 8) throw new NetworkReaderTruncationException();
+
+            _buffer[0] = _data[_offset + 7];
+            _buffer[1] = _data[_offset + 6];
+            _buffer[2] = _data[_offset + 5];
+            _buffer[3] = _data[_offset + 4];
+            _buffer[4] = _data[_offset + 3];
+            _buffer[5] = _data[_offset + 2];
+            _buffer[6] = _data[_offset + 1];
+            _buffer[7] = _data[_offset + 0];
+
+            _offset += 8;
+
+            return BitConverter.ToDouble(_buffer, 0);
         }
     }
 }

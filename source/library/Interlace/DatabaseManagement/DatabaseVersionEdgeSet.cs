@@ -27,31 +27,42 @@
 // DAMAGE.
 
 using System;
+using System.Collections;
 
 #endregion
 
 namespace Interlace.DatabaseManagement
 {
-	public abstract class DatabaseConnectionString
+	public class DatabaseVersionEdgeSet
 	{
-		protected string _databaseName;
+		Hashtable _fromEdges = new Hashtable();
+		ArrayList _emptyArray = new ArrayList();
 
-		public DatabaseConnectionString()
+		public DatabaseVersionEdgeSet(DatabaseSchemaUpgrade[] upgrades)
 		{
-			_databaseName = "master";
+			foreach (DatabaseSchemaUpgrade upgrade in upgrades)
+			{
+				DatabaseVersionEdge edge = new DatabaseVersionEdge(upgrade);
+
+				if (!_fromEdges.Contains(edge.FromVersion))
+				{
+					_fromEdges[edge.FromVersion] = new ArrayList();
+				}
+
+				(_fromEdges[edge.FromVersion] as ArrayList).Add(edge);
+			}
 		}
 
-		public string DatabaseName
+		public ArrayList GetEdgesFrom(string fromVersion)
 		{
-			get { return _databaseName; }
-			set { _databaseName = value; }
-		}
-
-        public abstract string GetStringRepresentation();
-
-		public override string ToString()
-		{
-            return GetStringRepresentation();
+			if (_fromEdges.Contains(fromVersion))
+			{
+				return _fromEdges[fromVersion] as ArrayList;
+			}
+			else
+			{
+				return _emptyArray;
+			}
 		}
 	}
 }

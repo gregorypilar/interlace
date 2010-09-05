@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<xs:schema id="DatabaseSetup" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="schema" type="DatabaseSchema" />
+
+  <xs:complexType name="DatabaseSchema">
+	  <xs:sequence>
+	    <xs:element name="upgrade" type="DatabaseSchemaUpgrade" minOccurs="0" maxOccurs="unbounded" />
+	  </xs:sequence>
+	  <xs:attribute name="product" />
+	</xs:complexType>
+
+	<xs:complexType name="DatabaseSchemaUpgrade">
+	  <xs:sequence>
+	    <xs:element name="command" minOccurs="0" maxOccurs="unbounded" type="xs:string" />
+	  </xs:sequence>
+	  <xs:attribute name="fromversion" use="required" />
+	  <xs:attribute name="toversion" use="required" />
+	</xs:complexType>
+</xs:schema>
