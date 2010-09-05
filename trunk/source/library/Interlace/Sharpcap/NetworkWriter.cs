@@ -37,9 +37,10 @@ namespace Interlace.Sharpcap
 {
     public class NetworkWriter
     {
-        MemoryStream _stream;
+        Stream _stream;
+        byte[] _buffer = new byte[8];
 
-        public NetworkWriter(MemoryStream stream)
+        public NetworkWriter(Stream stream)
         {
             _stream = stream;
         }
@@ -72,6 +73,34 @@ namespace Interlace.Sharpcap
         public void WriteSigned32(int value)
         {
             _stream.Write(BitConverter.GetBytes(ByteOrder.HostToNetwork(value)), 0, 4);
+        }
+
+        public void WriteFloat32(float value)
+        {
+            byte[] intelOrder = BitConverter.GetBytes((float)value);
+
+            _buffer[0] = intelOrder[3];
+            _buffer[1] = intelOrder[2];
+            _buffer[2] = intelOrder[1];
+            _buffer[3] = intelOrder[0];
+
+            _stream.Write(_buffer, 0, 4);
+        }
+
+        public void WriteFloat64(double value)
+        {
+            byte[] intelOrder = BitConverter.GetBytes((double)value);
+
+            _buffer[0] = intelOrder[7];
+            _buffer[1] = intelOrder[6];
+            _buffer[2] = intelOrder[5];
+            _buffer[3] = intelOrder[4];
+            _buffer[4] = intelOrder[3];
+            _buffer[5] = intelOrder[2];
+            _buffer[6] = intelOrder[1];
+            _buffer[7] = intelOrder[0];
+
+            _stream.Write(_buffer, 0, 8);
         }
     }
 }

@@ -32,26 +32,74 @@ using System;
 
 namespace Interlace.DatabaseManagement
 {
-	public abstract class DatabaseConnectionString
+	public class SqlDatabaseConnectionString : DatabaseConnectionString
 	{
-		protected string _databaseName;
+		private string _serverName;
 
-		public DatabaseConnectionString()
+		private string _username;
+		private string _password;
+
+		private bool _useIntegratedAuthentication;
+
+		private int _connectionTimeout;
+
+		public SqlDatabaseConnectionString()
 		{
+			_serverName = ".";
 			_databaseName = "master";
+
+			_username = "";
+			_password = "";
+
+			_useIntegratedAuthentication = true;
+
+			_connectionTimeout = 10;
 		}
 
-		public string DatabaseName
+		public string ServerName
 		{
-			get { return _databaseName; }
-			set { _databaseName = value; }
+			get { return _serverName; }
+			set { _serverName = value; }
 		}
 
-        public abstract string GetStringRepresentation();
-
-		public override string ToString()
+		public string Username
 		{
-            return GetStringRepresentation();
+			get { return _username; }
+			set { _username = value; }
+		}
+
+		public string Password
+		{
+			get { return _password; }
+			set { _password = value; }
+		}
+
+		public bool UseIntegratedAuthentication
+		{
+			get { return _useIntegratedAuthentication; }
+			set { _useIntegratedAuthentication = value; }
+		}
+
+		public int ConnectionTimeout
+		{
+			get { return _connectionTimeout; }
+			set { _connectionTimeout = value; }
+		}
+
+		public override string GetStringRepresentation()
+		{
+			if (_useIntegratedAuthentication)
+			{
+				return String.Format("Server={0};Database={1};" + 
+					"Trusted_Connection=True;Connect Timeout={2}", _serverName, _databaseName,
+					_connectionTimeout);
+			}
+			else
+			{
+				return String.Format("Server={0};Database={1};User ID={2};Password={3};" + 
+					"Trusted_Connection=False;Connect Timeout={4}", _serverName, _databaseName,
+					_username, _password, _connectionTimeout);
+			}
 		}
 	}
 }

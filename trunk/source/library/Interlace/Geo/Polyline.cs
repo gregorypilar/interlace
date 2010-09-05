@@ -42,6 +42,11 @@ namespace Interlace.Geo
 		{
 		}
 
+		public Polyline(int capacity)
+		{
+            _points = new List<Position>(capacity);
+		}
+
 		public Polyline(int[][] points)
 		{
 			for (int i = 0; i < points.Length; i++) 

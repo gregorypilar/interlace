@@ -32,26 +32,21 @@ using System;
 
 namespace Interlace.DatabaseManagement
 {
-	public abstract class DatabaseConnectionString
+	public class DatabaseUpgradeUnsupportedException : DatabaseManagerException
 	{
-		protected string _databaseName;
+		string _fromVersion;
+		string _toVersion;
 
-		public DatabaseConnectionString()
+		public DatabaseUpgradeUnsupportedException(string fromVersion, string toVersion)
+			: base(String.Format("The database version could not be upgraded from {0} to {1} " +
+			  "because no automatic upgrade path is available between the two versions.", fromVersion,
+			  toVersion))
 		{
-			_databaseName = "master";
+			_fromVersion = fromVersion;
+			_toVersion = toVersion;
 		}
 
-		public string DatabaseName
-		{
-			get { return _databaseName; }
-			set { _databaseName = value; }
-		}
-
-        public abstract string GetStringRepresentation();
-
-		public override string ToString()
-		{
-            return GetStringRepresentation();
-		}
+		public string FromVersion { get { return _fromVersion; } }
+		public string ToVersion { get { return _toVersion; } }
 	}
 }

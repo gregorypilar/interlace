@@ -32,26 +32,23 @@ using System;
 
 namespace Interlace.DatabaseManagement
 {
-	public abstract class DatabaseConnectionString
+	public class DatabaseUpgradeFailedException : DatabaseManagerException
 	{
-		protected string _databaseName;
+		string _fromVersion;
+		string _toVersion;
+		string _error;
 
-		public DatabaseConnectionString()
+		public DatabaseUpgradeFailedException(string fromVersion, string toVersion, string error)
+			: base(String.Format("A previous attempt at upgrading this database from version {0} " +
+			  "to version {1} failed. The database may be corrupt.", fromVersion, toVersion))
 		{
-			_databaseName = "master";
+			_fromVersion = fromVersion;
+			_toVersion = toVersion;
+			_error = error;
 		}
 
-		public string DatabaseName
-		{
-			get { return _databaseName; }
-			set { _databaseName = value; }
-		}
-
-        public abstract string GetStringRepresentation();
-
-		public override string ToString()
-		{
-            return GetStringRepresentation();
-		}
+		public string FromVersion { get { return _fromVersion; } }
+		public string ToVersion { get { return _toVersion; } }
+		public string Error { get { return _error; } }
 	}
 }

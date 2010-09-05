@@ -347,6 +347,31 @@
     <Compile Include="Collections\TrackedCollectionEventArgs.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DatabaseManagement\AssemblyDatabaseSchemaFactory.cs" />
+    <Compile Include="DatabaseManagement\IDatabaseSchemaFactory.cs" />
+    <Compile Include="DatabaseManagement\NpgsqlDatabaseImplementation.cs" />
+    <Compile Include="DatabaseManagement\DatabaseUpgrader.cs" />
+    <Compile Include="DatabaseManagement\IDatabaseImplementation.cs" />
+    <Compile Include="DatabaseManagement\SqlDatabaseConnectionString.cs" />
+    <Compile Include="DatabaseManagement\DatabaseConnectionString.cs" />
+    <Compile Include="DatabaseManagement\DatabaseLock.cs" />
+    <Compile Include="DatabaseManagement\DatabaseManager.cs" />
+    <Compile Include="DatabaseManagement\DatabaseManagerException.cs" />
+    <Compile Include="DatabaseManagement\DatabaseSetup.cs">
+      <DependentUpon>DatabaseSetup.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="DatabaseManagement\DatabaseSharedLock.cs" />
+    <Compile Include="DatabaseManagement\DatabaseUpgradeFailedException.cs" />
+    <Compile Include="DatabaseManagement\WindowsDatabaseUpgrader.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DatabaseManagement\DatabaseUpgradeUnsupportedException.cs" />
+    <Compile Include="DatabaseManagement\DatabaseVersion.cs" />
+    <Compile Include="DatabaseManagement\DatabaseVersionEdge.cs" />
+    <Compile Include="DatabaseManagement\DatabaseVersionEdgeSet.cs" />
+    <Compile Include="DatabaseManagement\DatabaseVersionTableInvalidException.cs" />
+    <Compile Include="DatabaseManagement\DatabaseVersionTableMissingException.cs" />
+    <Compile Include="DatabaseManagement\SqlDatabaseImplementation.cs" />
     <Compile Include="Differencing\MatchingBlock.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -413,6 +438,7 @@
     <Compile Include="Geo\DouglasPeucker.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Geo\DouglasPeuckerBase.cs" />
     <Compile Include="Geo\Ellipsoid.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -929,6 +955,10 @@
     <EmbeddedResource Include="AdornedText\AdornedTextStrings.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseManagement\WindowsDatabaseUpgrader.resx">
+      <DependentUpon>WindowsDatabaseUpgrader.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Utilities\Resources.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -941,6 +971,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="AdornedText\adorned-text.atd" />
+    <None Include="DatabaseManagement\DatabaseSetup.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="DatabaseManagement\DatabaseSetup.xsx">
+      <DependentUpon>DatabaseSetup.xsd</DependentUpon>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
