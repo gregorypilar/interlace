@@ -781,6 +781,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Sharpcap\ByteOrder.cs" />
+    <Compile Include="Sharpcap\MachineNetworkWriter.cs" />
     <Compile Include="Sharpcap\ICaptureListener.cs" />
     <Compile Include="Sharpcap\NetworkReader.cs" />
     <Compile Include="Sharpcap\NetworkReaderTruncationException.cs" />
@@ -830,6 +831,7 @@
     <Compile Include="Utilities\ControlThreadInvoker.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Utilities\DataSetPopulator.cs" />
     <Compile Include="Utilities\DelayedEvent.cs">
       <SubType>Code</SubType>
     </Compile>

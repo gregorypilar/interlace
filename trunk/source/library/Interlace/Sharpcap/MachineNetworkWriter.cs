@@ -35,12 +35,12 @@ using System.Text;
 
 namespace Interlace.Sharpcap
 {
-    public class NetworkWriter
+    public class MachineNetworkWriter
     {
         Stream _stream;
         byte[] _buffer = new byte[8];
 
-        public NetworkWriter(Stream stream)
+        public MachineNetworkWriter(Stream stream)
         {
             _stream = stream;
         }
@@ -57,50 +57,36 @@ namespace Interlace.Sharpcap
 
         public void WriteUnsigned16(ushort value)
         {
-            _stream.Write(BitConverter.GetBytes(ByteOrder.HostToNetwork(value)), 0, 2);
+            _stream.Write(BitConverter.GetBytes(value), 0, 2);
         }
 
         public void WriteSigned16(short value)
         {
-            _stream.Write(BitConverter.GetBytes(ByteOrder.HostToNetwork(value)), 0, 2);
+            _stream.Write(BitConverter.GetBytes(value), 0, 2);
         }
 
         public void WriteUnsigned32(uint value)
         {
-            _stream.Write(BitConverter.GetBytes(ByteOrder.HostToNetwork(value)), 0, 4);
+            _stream.Write(BitConverter.GetBytes(value), 0, 4);
         }
 
         public void WriteSigned32(int value)
         {
-            _stream.Write(BitConverter.GetBytes(ByteOrder.HostToNetwork(value)), 0, 4);
+            _stream.Write(BitConverter.GetBytes(value), 0, 4);
         }
 
         public void WriteFloat32(float value)
         {
-            byte[] intelOrder = BitConverter.GetBytes((float)value);
+            byte[] machineOrder = BitConverter.GetBytes((float)value);
 
-            _buffer[0] = intelOrder[3];
-            _buffer[1] = intelOrder[2];
-            _buffer[2] = intelOrder[1];
-            _buffer[3] = intelOrder[0];
-
-            _stream.Write(_buffer, 0, 4);
+            _stream.Write(machineOrder, 0, 4);
         }
 
         public void WriteFloat64(double value)
         {
-            byte[] intelOrder = BitConverter.GetBytes((double)value);
+            byte[] machineOrder = BitConverter.GetBytes((double)value);
 
-            _buffer[0] = intelOrder[7];
-            _buffer[1] = intelOrder[6];
-            _buffer[2] = intelOrder[5];
-            _buffer[3] = intelOrder[4];
-            _buffer[4] = intelOrder[3];
-            _buffer[5] = intelOrder[2];
-            _buffer[6] = intelOrder[1];
-            _buffer[7] = intelOrder[0];
-
-            _stream.Write(_buffer, 0, 8);
+            _stream.Write(machineOrder, 0, 8);
         }
 
         public void WriteBytes(byte[] bytes)

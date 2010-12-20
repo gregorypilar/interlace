@@ -73,11 +73,22 @@ namespace Interlace.ReactorCore
 
             IPHostEntry entry;
 
-            entry = Dns.EndGetHostEntry(result);
+            try
+            {
+                entry = Dns.EndGetHostEntry(result);
+            }
+            catch (SocketException e)
+            {
+                factory.ConnectionFailed(new ApplicationException(string.Format(
+                    "Address resolution for the address \"{0}\" failed.",
+                    pair.First), e));
+
+                return;
+            }
 
             if (entry.AddressList.Length == 0)
             {
-                _factory.ConnectionFailed(new ApplicationException(string.Format(
+                factory.ConnectionFailed(new ApplicationException(string.Format(
                     "Address resolution for the address \"{0}\" failed.",
                     pair.First)));
             }
