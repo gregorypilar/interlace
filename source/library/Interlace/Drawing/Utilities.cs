@@ -57,19 +57,19 @@ namespace Interlace.Drawing
             if (radius > rect.Height / 2) radius = rect.Width / 2;
 
             // Top left arc and top edge:
-            path.AddArc(new RectangleF(x1, y1, radius * 2, radius * 2), 180, 90);
+            if (radius > 0.0) path.AddArc(new RectangleF(x1, y1, radius * 2, radius * 2), 180, 90);
             path.AddLine(x1 + radius, y1, x2 - radius, y1);
 
             // Top right arc and right edge:
-            path.AddArc(new RectangleF(x2 - radius * 2, y1, radius * 2, radius * 2), 270, 90);
+            if (radius > 0.0) path.AddArc(new RectangleF(x2 - radius * 2, y1, radius * 2, radius * 2), 270, 90);
             path.AddLine(x2, y1 + radius, x2, y2 - radius);
 
             // Bottom right arc and bottom edge:
-            path.AddArc(new RectangleF(x2 - radius * 2, y2 - radius * 2, radius * 2, radius * 2), 0, 90);
+            if (radius > 0.0) path.AddArc(new RectangleF(x2 - radius * 2, y2 - radius * 2, radius * 2, radius * 2), 0, 90);
             path.AddLine(x2 - radius, y2, x1 + radius, y2);
 
             // Bottom left arc and left edge:
-            path.AddArc(new RectangleF(x1, y2 - radius * 2, radius * 2, radius * 2), 90, 90);
+            if (radius > 0.0) path.AddArc(new RectangleF(x1, y2 - radius * 2, radius * 2, radius * 2), 90, 90);
             path.AddLine(x1, y2 - radius, x1, y1 + radius);
 
             return path;
