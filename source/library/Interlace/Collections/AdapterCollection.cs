@@ -44,6 +44,16 @@ namespace Interlace.Collections
 
         public void Merge(IList<TValue> source) 
         {
+            Merge(source, true);
+        }
+
+        public void Update(IList<TValue> partialSource) 
+        {
+            Merge(partialSource, false);
+        }
+
+        void Merge(IList<TValue> source, bool removeMissingEntities) 
+        {
             // Build a dictionary of existing items (that we later mutate in a gross way):
             Dictionary<TKey, int> existingIndicies = new Dictionary<TKey, int>();
 
@@ -78,17 +88,20 @@ namespace Interlace.Collections
             }
 
         	// Remove missing entities:
-    		List<int> indiciesToRemove = new List<int>(existingIndicies.Values);
-
-            indiciesToRemove.Sort();
-
-            int indiciesRemoved = 0;
-
-            foreach (int index in indiciesToRemove)
+            if (removeMissingEntities)
             {
-                RemoveAt(index - indiciesRemoved);
+        		List<int> indiciesToRemove = new List<int>(existingIndicies.Values);
 
-                indiciesRemoved++;
+                indiciesToRemove.Sort();
+
+                int indiciesRemoved = 0;
+
+                foreach (int index in indiciesToRemove)
+                {
+                    RemoveAt(index - indiciesRemoved);
+
+                    indiciesRemoved++;
+                }
             }
         }
     }
