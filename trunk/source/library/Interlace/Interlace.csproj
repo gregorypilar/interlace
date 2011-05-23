@@ -597,6 +597,7 @@
     <Compile Include="ReactorCore\DatagramSocketConnector.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ReactorCore\DnsResolutionException.cs" />
     <Compile Include="ReactorCore\IConnection.cs">
       <SubType>Code</SubType>
     </Compile>

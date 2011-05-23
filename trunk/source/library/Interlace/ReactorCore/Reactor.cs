@@ -42,6 +42,7 @@ namespace Interlace.ReactorCore
     {
         TimerQueue _queue = new TimerQueue();
         List<ReactorSlot> _slots = new List<ReactorSlot>();
+        bool _slotsInUse = false;
 
         public event EventHandler<ServiceExceptionEventArgs> ReactorException;
 
@@ -150,6 +151,8 @@ namespace Interlace.ReactorCore
 
             slot.Handle = slot.Result.AsyncWaitHandle;
 
+            if (_slotsInUse) throw new InvalidOperationException("Cross-thread use of a reactor detected.");
+
             _slots.Add(slot);
         }
 
@@ -172,6 +175,8 @@ namespace Interlace.ReactorCore
             slot.IsPermanent = false;
 
             slot.Handle = handle;
+
+            if (_slotsInUse) throw new InvalidOperationException("Cross-thread use of a reactor detected.");
 
             _slots.Add(slot);
         }
@@ -196,6 +201,8 @@ namespace Interlace.ReactorCore
 
             slot.Handle = handle;
 
+            if (_slotsInUse) throw new InvalidOperationException("Cross-thread use of a reactor detected.");
+
             _slots.Add(slot);
         }
 
@@ -219,6 +226,8 @@ namespace Interlace.ReactorCore
                 // Check the native handle for equality:
                 if (_slots[i].Handle.Handle.Equals(handle.Handle))
                 {
+                    if (_slotsInUse) throw new InvalidOperationException("Cross-thread use of a reactor detected.");
+
                     _slots.RemoveAt(i);
                 }
                 else
@@ -250,43 +259,54 @@ namespace Interlace.ReactorCore
 
         public void RunLoopIteration()
         {
-            // Build a list of handles in slot order; assume that the slots won't change index
-            // during the run loop:
-            WaitHandle[] handles = new WaitHandle[_slots.Count];
+            _slotsInUse = true;
 
-            for (int i = 0; i < _slots.Count; i++)
+            try
             {
-                handles[i] = _slots[i].Handle;
+                // Build a list of handles in slot order; assume that the slots won't change index
+                // during the run loop:
+                WaitHandle[] handles = new WaitHandle[_slots.Count];
+
+                for (int i = 0; i < _slots.Count; i++)
+                {
+                    handles[i] = _slots[i].Handle;
+                }
+
+                // Wait on all of the slots until the next timer is ready to be fired:
+                TimeSpan timeout = _queue.IsEmpty ? 
+                    _forever : _queue.GetTimeUntilNextFireable(DateTime.Now);
+
+                int signalledSlotIndex = WaitHandle.WaitAny(handles, timeout, false);
+
+                if (signalledSlotIndex != WaitHandle.WaitTimeout)
+                {
+                    // Fire off the signalled slot:
+                    ReactorSlot signalledSlot = _slots[signalledSlotIndex];
+
+                    if (!signalledSlot.IsPermanent) _slots.RemoveAt(signalledSlotIndex);
+
+                    // (The "handles" array no longer matches the slots list.)
+
+                    try
+                    {
+                        _slotsInUse = false;
+
+                        signalledSlot.Callback(signalledSlot.Result, signalledSlot.State);
+                    }
+                    catch (Exception ex)
+                    {
+                        ServiceExceptionEventArgs args = 
+                            new ServiceExceptionEventArgs(ServiceExceptionKind.DuringHandler, ex);
+
+                        if (ReactorException != null) ReactorException(this, args);
+
+                        if (!args.Handled) throw;
+                    }
+                }
             }
-
-            // Wait on all of the slots until the next timer is ready to be fired:
-            TimeSpan timeout = _queue.IsEmpty ? 
-                _forever : _queue.GetTimeUntilNextFireable(DateTime.Now);
-
-            int signalledSlotIndex = WaitHandle.WaitAny(handles, timeout, false);
-
-            if (signalledSlotIndex != WaitHandle.WaitTimeout)
+            finally
             {
-                // Fire off the signalled slot:
-                ReactorSlot signalledSlot = _slots[signalledSlotIndex];
-
-                if (!signalledSlot.IsPermanent) _slots.RemoveAt(signalledSlotIndex);
-
-                // (The "handles" array no longer matches the slots list.)
-
-                try
-                {
-                    signalledSlot.Callback(signalledSlot.Result, signalledSlot.State);
-                }
-                catch (Exception ex)
-                {
-                    ServiceExceptionEventArgs args = 
-                        new ServiceExceptionEventArgs(ServiceExceptionKind.DuringHandler, ex);
-
-                    if (ReactorException != null) ReactorException(this, args);
-
-                    if (!args.Handled) throw;
-                }
+                _slotsInUse = false;
             }
 
             // Fire any timers:
