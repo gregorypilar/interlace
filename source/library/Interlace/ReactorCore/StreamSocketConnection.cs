@@ -45,7 +45,40 @@ namespace Interlace.ReactorCore
 
         public IPEndPoint RemoteEndPoint
         {
-            get { return _socket.RemoteEndPoint as IPEndPoint; }
+            get 
+            { 
+                try
+                {
+                    return _socket.RemoteEndPoint as IPEndPoint; 
+                }
+                catch (SocketException)
+                {
+                    return null;
+                }
+                catch (ObjectDisposedException)
+                {
+                    return null;
+                }
+            }
+        }
+
+        public IPEndPoint LocalEndPoint
+        {
+            get 
+            { 
+                try
+                {
+                    return _socket.LocalEndPoint as IPEndPoint; 
+                }
+                catch (SocketException)
+                {
+                    return null;
+                }
+                catch (ObjectDisposedException)
+                {
+                    return null;
+                }
+            }
         }
 
         protected override void ContinueReceive()

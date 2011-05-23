@@ -79,7 +79,7 @@ namespace Interlace.ReactorCore
             }
             catch (SocketException e)
             {
-                factory.ConnectionFailed(new ApplicationException(string.Format(
+                factory.ConnectionFailed(new DnsResolutionException(string.Format(
                     "Address resolution for the address \"{0}\" failed.",
                     pair.First), e));
 
@@ -88,7 +88,7 @@ namespace Interlace.ReactorCore
 
             if (entry.AddressList.Length == 0)
             {
-                factory.ConnectionFailed(new ApplicationException(string.Format(
+                factory.ConnectionFailed(new DnsResolutionException(string.Format(
                     "Address resolution for the address \"{0}\" failed.",
                     pair.First)));
             }

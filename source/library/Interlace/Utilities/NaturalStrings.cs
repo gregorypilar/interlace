@@ -185,7 +185,7 @@ namespace Interlace.Utilities
                 }
                 else
                 {
-                    positiveDescription = "";
+                    positiveDescription = "now";
                 }
             }
             else

@@ -84,6 +84,18 @@ namespace Interlace.ReactorService
             _reactor.AddRepeatingTimer(new TimeSpan(0, 0, 10), ExceptionWaitTimer, null);
         }
 
+        public TimeSpan StartingExceptionWaitTimeout
+        {
+            get { return _startingExceptionWaitTimeout; }
+            set { _startingExceptionWaitTimeout = value; }
+        }
+
+        public TimeSpan UpExceptionWaitTimeout 
+        {
+            get { return _upExceptionWaitTimeout; }
+            set { _upExceptionWaitTimeout = value; }
+        }
+
         void _reactor_ReactorException(object sender, ServiceExceptionEventArgs e)
         {
             if (UnhandledException != null) UnhandledException(this, 
