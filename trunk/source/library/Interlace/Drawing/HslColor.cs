@@ -91,7 +91,7 @@ namespace Interlace.Drawing
         static void HslToRgbInternal(double hue, double saturation, double luminosity, 
             out double red, out double green, out double blue)
         {
-            double chroma = saturation * (luminosity <= 0.5 ? 2.0 * luminosity : 2.0 - 2.0 * luminosity);
+            double chroma = (1.0 - Math.Abs(2.0 * luminosity - 1.0)) * saturation;
 
             double scaledHue = hue / 60.0;
 
@@ -135,6 +135,12 @@ namespace Interlace.Drawing
                     blue = x;
                     break;
             }
+
+            double lightnessMatching = luminosity - 0.5 * chroma;
+
+            red += lightnessMatching;
+            green += lightnessMatching;
+            blue += lightnessMatching;
         }
     }
 }
