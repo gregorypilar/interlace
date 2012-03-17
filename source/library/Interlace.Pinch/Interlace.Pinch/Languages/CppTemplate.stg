@@ -3,19 +3,30 @@ group CppTemplate;
 h(Document) ::= <<
 #pragma once
 
-#include "Pinch/Pinch.h"
-
 <Document.Protocols:protocol_h()>
 >>
 
 protocol_h(Protocol) ::= <<
+<if(Protocol.Implementation.UsesNamespace)>
+namespace <Protocol.Implementation.Namespace>
+{
+<endif>
+
 <Protocol.Declarations:{ d | <d:(d.KindTag + "_forward_h")()> }; separator="\r\n">
 
-<Protocol.Declarations:{ d | <d:(d.KindTag + "_h")()> }>
+<Protocol.Declarations:{ d | <d:(d.KindTag + "_h")()> }; separator="\r\n">
+
+<if(Protocol.Implementation.UsesNamespace)>
+}
+<endif>
 
 >>
 
 structure_forward_h(Structure) ::= <<
+class <Structure.Implementation.ClassName>;
+>>
+
+choice_forward_h(Structure) ::= <<
 class <Structure.Implementation.ClassName>;
 >>
 
@@ -39,27 +50,44 @@ public:
 class <Structure.Implementation.ClassName> : public CPinchable
 {
 private:
-    <Structure.Members:{ m | <m.Implementation.OuterValueTypeName> <m.Implementation.FieldIdentifier>; }; separator="\r\n">
-
+    <Structure.NonRemovedMembers:{ m | <m.Implementation.OuterValueTypeName> <m.Implementation.FieldIdentifier>; }; separator="\r\n">
+    
 protected:
     <Structure.Members:{ m | static CPinchFieldProperties <m.Implementation.FieldIdentifier>Properties; }; separator="\r\n">
     
 public:
     <Structure.Implementation.ClassName>()
     {
+        <Structure.NonRemovedMembers:structure_field_constructor(); separator="\r\n">
     }
 
     <Structure.Implementation.ClassName>(CPinchDecodingContext &context)
     {
     }
     
-    <Structure.Members:structure_properties(); separator="\r\n\r\n">
-
+    <Structure.NonRemovedMembers:structure_properties(); separator="\r\n\r\n">
+    
     virtual int GetProtocolVersion() const { return <Structure.Parent.Version>; }
     virtual void Encode(CPinchEncoder &encoder) const;
     virtual void Decode(CPinchDecoder &decoder);
+    
+    <if(Structure.Implementation.IsSurrogate)>
+    static boost::shared_ptr\<<Structure.Implementation.ClassName>\> ValueToSurrogateRequired(<Structure.Implementation.SurrogateReferenceType> value);
+    static <Structure.Implementation.SurrogateValueType> SurrogateToValueRequired(boost::shared_ptr\<<Structure.Implementation.ClassName>\> surrogate);
+    static boost::shared_ptr\<<Structure.Implementation.ClassName>\> ValueToSurrogateOptional(<Structure.Implementation.SurrogateNullableReferenceType> value);
+    static <Structure.Implementation.SurrogateNullableValueType> SurrogateToValueOptional(boost::shared_ptr\<<Structure.Implementation.ClassName>\> surrogate);
+    <endif>
+
+protected:
+    virtual void OnAdditionalFutureFields(CPinchDecoder &decoder);
 };
 
+>>
+
+structure_field_constructor(Member) ::= <<
+<if(Member.Implementation.HasInitialiser)>
+<Member.Implementation.FieldIdentifier> = <Member.Implementation.Initialiser>;
+<endif>
 >>
 
 structure_properties(Member) ::= <<
@@ -85,16 +113,106 @@ enumeration_member(Member) ::= <<
     <Member.Identifier> = <Member.Number>
 >>
 
-cpp(Document) ::= <<
-#include "EnvoyLibraryStandard.h"
-#include "Pinch/Pinch.h"
-#include "<Document.BaseName>.h"
+choice_h(Structure) ::= <<
+class <Structure.Implementation.FactoryClassName> : public CPinchableFactory
+{
+private:
+    static <Structure.Implementation.FactoryClassName> m_Instance;
+    
+protected:
+    <Structure.Members:{ m | static CPinchFieldProperties <m.Implementation.FieldIdentifier>Properties; }; separator="\r\n">
+    
+public:
+    static const <Structure.Implementation.FactoryClassName> &GetInstance()
+    {
+        return m_Instance;
+    }
+        
+    virtual CPinchable *Create(CPinchDecodingContext &context) const;
+};
 
+class <Structure.Implementation.ClassName> : public CPinchable
+{
+public:
+    enum Kind
+    {
+        None = 0,
+        
+        <Structure.Members:{ m | <m.Identifier> = <m.Number>, }; separator="\r\n">
+    };
+
+private:
+	boost::shared_ptr\<CPinchable\> m_Value;
+	Kind m_ValueKind;
+
+protected:
+    <Structure.Members:{ m | static CPinchFieldProperties <m.Implementation.FieldIdentifier>Properties; }; separator="\r\n">
+    
+public:
+    <Structure.Implementation.ClassName>()
+    {
+        m_ValueKind = <Structure.Implementation.ClassName>::None;
+    }
+
+    <Structure.Implementation.ClassName>(CPinchDecodingContext &context)
+    {
+    }
+    
+    <Structure.Members:{ m | <Structure.Implementation.ClassName>(<m.Implementation.ReferenceTypeName> value)
+\{
+    m_Value = value;
+    m_ValueKind = <Structure.Implementation.ClassName>::<m.Identifier>;
+\}
+}; separator="\r\n">
+
+    <Structure.Members:choice_structure_properties(); separator="\r\n\r\n">
+    
+    Kind GetValueKind() const { return m_ValueKind; }
+
+    virtual int GetProtocolVersion() const { return <Structure.Parent.Version>; }
+    virtual void Encode(CPinchEncoder &encoder) const;
+    virtual void Decode(CPinchDecoder &decoder);
+};
+
+>>
+
+choice_structure_properties(Member) ::= <<
+<Member.Implementation.ReferenceTypeName> Get<Member.Identifier>()
+{
+    if (m_ValueKind == <Member.Parent.Implementation.ClassName>::<Member.Identifier>)
+    {
+        return boost::static_pointer_cast\<<Member.Implementation.ClassName>\>(m_Value);
+    }
+    else
+    {
+        return boost::shared_ptr\<<Member.Implementation.ClassName>\>();
+    }
+}
+    
+void Set<Member.Identifier>(<Member.Implementation.ReferenceTypeName> value)
+{
+    m_Value = boost::static_pointer_cast\<CPinchable\>(value);
+    m_ValueKind = <Member.Parent.Implementation.ClassName>::<Member.Identifier>;
+}
+>>
+
+cpp(Document) ::= <<
 <Document.Protocols:protocol_cpp()>
 >>
 
 protocol_cpp(Protocol) ::= <<
+<Protocol.Implementation.Includes:{ m | #include "<m>" }; separator="\r\n">
+
+<if(Protocol.Implementation.UsesNamespace)>
+namespace <Protocol.Implementation.Namespace>
+{
+<endif>
+
 <Protocol.Declarations:declaration_cpp()>
+
+<if(Protocol.Implementation.UsesNamespace)>
+}
+<endif>
 
 >>
 
@@ -115,30 +233,75 @@ CPinchable *<Structure.Implementation.FactoryClassName>::Create(CPinchDecodingCo
 
 void <Structure.Implementation.ClassName>::Encode(CPinchEncoder &encoder) const
 {
-    encoder.OpenUncountedContainer();
+    encoder.OpenSequence(<Structure.CodingOrderMembers.Count>);
+    <Structure.VersionGroupedMembers:structure_member_group_encode(); separator="\r\n">
             
-    <Structure.CodingOrderMembers:structure_member_prepare_encode(); separator="\r\n">
-            
-    encoder.PrepareContainer();
-            
-    <Structure.CodingOrderMembers:structure_member_encode(); separator="\r\n">
-            
-    encoder.CloseContainer();
+    encoder.CloseSequence();
 }
 
 void <Structure.Implementation.ClassName>::Decode(CPinchDecoder &decoder)
 {
-    decoder.OpenUncountedContainer();
+    int remainingFields = decoder.OpenSequence();
+    int decodedUpToVersion = 0;
     
-    <Structure.CodingOrderMembers:structure_member_prepare_decode(); separator="\r\n">
+    <Structure.VersionGroupedMembers:structure_member_group_decode(); separator="\r\n">
     
-    decoder.PrepareContainer();
+    if (remainingFields > 0)
+    {
+        OnAdditionalFutureFields(decoder);
+        
+        decoder.SkipFields(remainingFields);
+    }
     
-    <Structure.CodingOrderMembers:structure_member_decode(); separator="\r\n">
-    
-    decoder.CloseContainer();
+    decoder.CloseSequence();
 }
 
+void <Structure.Implementation.ClassName>::OnAdditionalFutureFields(CPinchDecoder &decoder)
+{
+}
+
+>>
+
+choice_cpp(Structure) ::= <<
+<Structure.Implementation.FactoryClassName> <Structure.Implementation.FactoryClassName>::m_Instance;
+
+CPinchable *<Structure.Implementation.FactoryClassName>::Create(CPinchDecodingContext &context) const
+{
+    return new <Structure.Implementation.ClassName>(context);
+}
+
+<Structure.Members:{ m | CPinchFieldProperties <Structure.Implementation.ClassName>::<m.Implementation.FieldIdentifier>Properties(<m.Number>, <m.Implementation.AddedInVersion>, <m.Implementation.RemovedInVersion>); }; separator="\r\n">
+
+void <Structure.Implementation.ClassName>::Encode(CPinchEncoder &encoder) const
+{
+    encoder.EncodeChoiceMarker((int)m_ValueKind);
+    
+    switch (m_ValueKind)
+    {
+        case <Structure.Implementation.ClassName>::None:
+            throw CPinchNullRequiredFieldException();
+            
+        <Structure.Members:{ m | case <Structure.Implementation.ClassName>::<m.Identifier>:
+encoder.EncodeRequiredStructure(m_Value, <m:structure_member_action_arguments()>);
+break; 
+}; separator="\r\n">
+    }
+}
+
+void <Structure.Implementation.ClassName>::Decode(CPinchDecoder &decoder)
+{
+    m_ValueKind = (<Structure.Implementation.ClassName>::Kind)decoder.DecodeChoiceMarker();
+    
+    switch (m_ValueKind)
+    {
+        <Structure.Members:{ m | case <Structure.Implementation.ClassName>::<m.Identifier>:
+m_Value = decoder.DecodeRequiredStructure(<m.Implementation.FactoryClassName>::GetInstance(), <m:structure_member_action_arguments()>);
+break; 
+}; separator="\r\n">
+        default:
+            throw CPinchInvalidCodingException();
+    }
+}
 >>
 
 enumeration_cpp(Structure) ::= <<
@@ -150,13 +313,17 @@ structure_member_action_arguments(Member) ::= <<
 
 cast_for_encode(Identifier) ::= <<
 <if(it.Implementation.IsStructure)>
+<if(it.Implementation.IsSurrogate)>
+<it.Implementation.ClassName>::ValueToSurrogate<it.Implementation.RequiredOptionalModifier>(<Identifier>)
+<else>
 boost::static_pointer_cast\<CPinchable\>(<Identifier>)
+<endif>
 <endif>
 <if(it.Implementation.IsEnumeration)>
 <if(it.Implementation.IsRequired)>
 (int)<Identifier>
 <else>
-CNullable\<int\>(<Identifier>)
+CNullable\<int\>::Cast(<Identifier>)
 <endif>
 <endif>
 <if(it.Implementation.IsIntrinsic)>
@@ -164,27 +331,17 @@ CNullable\<int\>(<Identifier>)
 <endif>
 >>
 
-structure_member_prepare_encode(Member) ::= <<
-<if(Member.Implementation.ContainerIsScalar)>
-encoder.PrepareEncode<Member.Implementation.CodecMethodSuffix>(<Member:cast_for_encode(Member.Implementation.FieldIdentifier)>, <Member:structure_member_action_arguments()>);
-<endif>
+structure_member_group_encode(MemberGroup) ::= <<
+
+// Encode fields for version <MemberGroup.Version>:
+<MemberGroup.Members:structure_member_encode(); separator="\r\n">
 >>
 
 structure_member_encode_list(Member) ::= <<
 
-encoder.OpenCountedContainer((int)<Member.Implementation.FieldIdentifier>.GetCount());
+encoder.OpenSequence((int)<Member.Implementation.FieldIdentifier>.GetCount());
 
 POSITION <Member.Implementation.PositionVariableName> = <Member.Implementation.FieldIdentifier>.GetHeadPosition();
-
-while (<Member.Implementation.PositionVariableName> != NULL)
-{
-    <Member.Implementation.ReferenceTypeName> value(<Member.Implementation.FieldIdentifier>.GetNext(<Member.Implementation.PositionVariableName>));
-    encoder.PrepareEncode<Member.Implementation.CodecMethodSuffix>(<Member:cast_for_encode("value")>, <Member:structure_member_action_arguments()>);
-}
-
-encoder.PrepareContainer();
-
-<Member.Implementation.PositionVariableName> = <Member.Implementation.FieldIdentifier>.GetHeadPosition();
 
 while (<Member.Implementation.PositionVariableName> != NULL)
 {
@@ -192,27 +349,24 @@ while (<Member.Implementation.PositionVariableName> != NULL)
     encoder.Encode<Member.Implementation.CodecMethodSuffix>(<Member:cast_for_encode("value")>, <Member:structure_member_action_arguments()>);
 }
 
-encoder.CloseContainer();
+encoder.CloseSequence();
 
 >>
 
 structure_member_encode(Member) ::= <<
+<if(Member.IsRemoved)>
+encoder.EncodeRemoved();
+<else>
 <if(Member.Implementation.ContainerIsScalar)>
 encoder.Encode<Member.Implementation.CodecMethodSuffix>(<Member:cast_for_encode(Member.Implementation.FieldIdentifier)>, <Member:structure_member_action_arguments()>);
 <else>
 <Member:("structure_member_encode_" + Member.Implementation.ContainerTag)()>
 <endif>
+<endif>
 >>
 
 structure_member_decode_list(Member) ::= <<
-int <Member.Implementation.CountVariableName> = decoder.OpenCountedContainer();
-
-for (int i = 0; i \< <Member.Implementation.CountVariableName>; i++)
-{
-    decoder.PrepareDecode<Member.Implementation.CodecMethodSuffix>(<Member:structure_member_action_arguments()>);
-}
-
-decoder.PrepareContainer();
+int <Member.Implementation.CountVariableName> = decoder.OpenSequence();
 
 <Member.Implementation.FieldIdentifier>.RemoveAll();
 
@@ -221,13 +375,7 @@ for (int i = 0; i \< <Member.Implementation.CountVariableName>; i++)
     <Member.Implementation.FieldIdentifier>.AddTail(<Member:structure_member_decode_expression()>);
 }
 
-decoder.CloseContainer();
->>
-
-structure_member_prepare_decode(Member) ::= <<
-<if(Member.Implementation.ContainerIsScalar)>
-decoder.PrepareDecode<Member.Implementation.CodecMethodSuffix>(<Member:structure_member_action_arguments()>);
-<endif>
+decoder.CloseSequence();
 >>
 
 structure_member_decode_expression_inner(Member) ::= <<
@@ -236,20 +384,51 @@ decoder.Decode<Member.Implementation.CodecMethodSuffix>(<if(Member.Implementatio
 
 structure_member_decode_expression(Member) ::= <<
 <if(Member.Implementation.IsStructure)>
+<if(Member.Implementation.IsSurrogate)>
+<Member.Implementation.ClassName>::SurrogateToValue<Member.Implementation.RequiredOptionalModifier>(boost::static_pointer_cast\<<Member.Implementation.ClassName>\>(<Member:structure_member_decode_expression_inner()>))
+<else>
 boost::static_pointer_cast\<<Member.Implementation.ClassName>\>(<Member:structure_member_decode_expression_inner()>)
 <endif>
+<endif>
 <if(Member.Implementation.IsEnumeration)>
-(<Member.Implementation.ValueTypeName>)<Member:structure_member_decode_expression_inner()>
+<if(Member.Implementation.IsRequired)>
+(<Member.Implementation.ValueTypeName>)(<Member:structure_member_decode_expression_inner()>)
+<else>
+<Member.Implementation.ValueTypeName>::Cast(<Member:structure_member_decode_expression_inner()>)
+<endif>
 <endif>
 <if(Member.Implementation.IsIntrinsic)>
 <Member:structure_member_decode_expression_inner()>
 <endif>
 >>
 
+structure_member_group_decode(MemberGroup) ::= <<
+
+// Decode members for version <MemberGroup.Version>:
+if (remainingFields >= <MemberGroup.Members.Count>)
+{
+    <MemberGroup.Members:structure_member_decode(); separator="\r\n">
+
+    remainingFields -= <MemberGroup.Members.Count>;
+    decodedUpToVersion = <MemberGroup.Version>;
+}
+else
+{
+    if (remainingFields != 0) throw CPinchInvalidCodingException();
+    
+    // TODO: OnMissingNewFields(decodedUpToVersion, <MemberGroup.Version>);
+}
+>>
+
 structure_member_decode(Member) ::= <<
+<if(Member.IsRemoved)>
+decoder.SkipRemoved();
+<else>
 <if(Member.Implementation.ContainerIsScalar)>
 <Member.Implementation.FieldIdentifier> = <Member:structure_member_decode_expression()>;
 <else>
 <Member:("structure_member_decode_" + Member.Implementation.ContainerTag)()>
 <endif>
+<endif>
 >>
+

@@ -43,8 +43,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Test.java.instance" />
     <None Include="Test.pinch" />
-    <None Include="Test.instance" />
+    <None Include="Test.cs.instance" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

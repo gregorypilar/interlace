@@ -87,9 +87,7 @@ namespace Interlace.Pinch.BuildTasks
 
                     language.CreateDomImplementationHelpers(document, PropertyDictionary.EmptyDictionary());
 
-                    Generator generator = new Generator(language);
-
-                    generator.Generate(document, destinationPath, Path.GetDirectoryName(destinationPath));
+                    Generator.Generate(language, destinationPath, Path.GetDirectoryName(destinationPath));
 
                     Log.LogMessage(MessageImportance.Low, "Pinch compiled {0}", sourcePath);
                 }

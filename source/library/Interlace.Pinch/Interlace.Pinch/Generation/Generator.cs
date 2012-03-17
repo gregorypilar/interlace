@@ -37,6 +37,7 @@ using Antlr.StringTemplate.Language;
 using Interlace.Pinch.Analysis;
 using Interlace.Pinch.Dom;
 using Interlace.PropertyLists;
+using System.Text.RegularExpressions;
 
 #endregion
 
@@ -45,10 +46,18 @@ namespace Interlace.Pinch.Generation
     public class Generator
     {
         Language _language;
+        Document _document;
+        string _documentPath;
+        string _destinationPath;
 
-        public Generator(Language language)
+        static Regex _suffixRegex = new Regex(@"(\.(java|cs|cpp))?\.instance$", RegexOptions.IgnoreCase);
+
+        protected Generator(Language language, Document document, string documentPath, string destinationPath)
         {
             _language = language;
+            _document = document;
+            _documentPath = documentPath;
+            _destinationPath = destinationPath;
         }
 
         public static void Generate(Language language, string documentPath, string destinationPath)
@@ -62,10 +71,10 @@ namespace Interlace.Pinch.Generation
             PropertyDictionary documentOptions;
             string actualDocumentPath;
 
-            if (string.Compare(Path.GetExtension(documentPath), ".instance", true) == 0)
+            if (_suffixRegex.IsMatch(documentPath))
             {
                 documentOptions = PropertyDictionary.FromFile(documentPath);
-                actualDocumentPath = Path.ChangeExtension(documentPath, ".pinch");
+                actualDocumentPath = _suffixRegex.Replace(documentPath, ".pinch");
 
                 if (!File.Exists(actualDocumentPath))
                 {
@@ -77,14 +86,6 @@ namespace Interlace.Pinch.Generation
             else
             {
                 actualDocumentPath = documentPath;
-
-                if (File.Exists(Path.ChangeExtension(actualDocumentPath, ".instance")))
-                {
-                    throw new ApplicationException(string.Format(
-                        "An instance configuration for \"{0}\" exists but is not being used. Either remove or rename the " +
-                        "instance configuration file or specify it rather than the specification file.",
-                        documentPath));
-                }
 
                 documentOptions = PropertyDictionary.EmptyDictionary();
                 actualDocumentPath = documentPath;
@@ -99,38 +100,41 @@ namespace Interlace.Pinch.Generation
 
             language.CreateDomImplementationHelpers(document, documentOptions);
 
-            Generator generator = new Generator(language);
+            Generator generator = new Generator(language, document, actualDocumentPath, destinationPath);
 
-            generator.Generate(document, documentPath, destinationPath);
+            language.GenerateFiles(generator, document);
         }
 
-        public void Generate(Document document, string documentPath, string destinationPath)
+        public string BaseName
         {
-            foreach (LanguageOutput output in _language.GetLanguageOutputs(Path.GetFileNameWithoutExtension(documentPath), destinationPath))
+            get 
             {
-                switch (output.TemplateKind)
-                {
-                    case LanguageOutputTemplateKind.StringTemplate:
-                        GenerateFromStringTemplate(document, output);
-                        break;
-                }
+                return Path.GetFileNameWithoutExtension(_documentPath);
             }
         }
 
-        private void GenerateFromStringTemplate(Document document, LanguageOutput output)
+        public string DestinationPath
+        {
+            get 
+            {
+                return _destinationPath;
+            }
+        }
+
+        public void GenerateFile(string outputFilePath, string templateString, string templateName, string rootName, object root)
         {
             StringTemplateGroup group;
 
-            using (StringReader reader = new StringReader(output.Template))
+            using (StringReader reader = new StringReader(templateString))
             {
                 group = new StringTemplateGroup(reader, typeof(AngleBracketTemplateLexer));
             }
 
-            StringTemplate template = group.GetInstanceOf(output.TemplateName);
+            StringTemplate template = group.GetInstanceOf(templateName);
 
-            template.SetAttribute("Document", document);
+            template.SetAttribute(rootName, root);
 
-            using (StreamWriter writer = new StreamWriter(output.OutputFilePath, false))
+            using (StreamWriter writer = new StreamWriter(outputFilePath, false))
             {
                 template.Write(new AutoIndentWriter(writer));
             }

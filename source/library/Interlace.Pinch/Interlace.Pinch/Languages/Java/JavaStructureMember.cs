@@ -36,14 +36,21 @@ using Interlace.Pinch.Dom;
 
 namespace Interlace.Pinch.Languages
 {
-    public class CppStructureMember : BaseStructureMember
+    public class JavaStructureMember : BaseStructureMember
     {
-        CppType _type;
+        JavaType _type;
+        JavaStructure _structure;
 
-        public CppStructureMember(StructureMember member, CppType type)
+        JavaStructure _containedInStructure;
+
+        public JavaStructureMember(StructureMember member, JavaType type, JavaStructure structure)
             : base(member)
         {
+            _member = member;
             _type = type;
+            _structure = structure;
+
+            _containedInStructure = member.Parent.Implementation as JavaStructure;
         }
 
         public StructureMember Member
@@ -55,101 +62,83 @@ namespace Interlace.Pinch.Languages
         {
             get
             {
-                return string.Format("m_{0}", _member.Identifier);
-            }
-        }
-
-        public string AddedInVersion
-        {
-            get { return _member.Versioning.AddedInVersion.ToString(); }
-        }
-
-        public string RemovedInVersion
-        {
-            get 
-            { 
-                if (_member.Versioning.RemovedInVersion.HasValue)
-                {
-                    return _member.Versioning.RemovedInVersion.ToString();
-                }
-                else
-                {
-                    return "0";
-                }
-            }
-        }
-
-        public string ReferenceTypeName
-        {
-            get { return _type.ReferenceTypeName; }
-        }
-
-        public string ValueTypeName
-        {
-            get { return _type.ValueTypeName; }
-        }
-
-        public string ClassName
-        {
-            get { return _type.ClassName; }
-        }
-
-        public string OuterValueTypeName
-        {
-            get
-            {
-                switch (_member.FieldContainerReference)
-                {
-                    case ContainerType.None:
-                        return string.Format("{0}", ValueTypeName);
-
-                    case ContainerType.List:
-                        return string.Format("CList<{0}>", ValueTypeName);
-
-                    case ContainerType.Set:
-                        return string.Format("CList<{0}>", ValueTypeName);
-
-                    case ContainerType.Map:
-                        throw new InvalidOperationException();
-
-                    default:
-                        throw new InvalidOperationException();
-                }
-            }
-        }
-
-        public string OuterReferenceTypeName
-        {
-            get
-            {
-                switch (_member.FieldContainerReference)
-                {
-                    case ContainerType.None:
-                        return string.Format("{0}", ValueTypeName);
-
-                    case ContainerType.List:
-                        return string.Format("CList<{0}> &", ValueTypeName);
-
-                    case ContainerType.Set:
-                        return string.Format("CList<{0}> &", ValueTypeName);
-
-                    case ContainerType.Map:
-                        throw new InvalidOperationException();
-
-                    default:
-                        throw new InvalidOperationException();
-                }
+                return string.Format("_{0}{1}", _member.Identifier.Substring(0, 1).ToLower(), _member.Identifier.Substring(1));
             }
         }
 
         public string CountVariableName
         {
-            get { return string.Format("{0}{1}Count", _member.Identifier.Substring(0, 1).ToLower(), _member.Identifier.Substring(1)); }
+            get
+            {
+                return string.Format("{0}{1}Count", _member.Identifier.Substring(0, 1).ToLower(), _member.Identifier.Substring(1));
+            }
         }
 
-        public string PositionVariableName
+        public bool IsSurrogate
         {
-            get { return string.Format("{0}{1}Position", _member.Identifier.Substring(0, 1).ToLower(), _member.Identifier.Substring(1)); }
+            get
+            {
+                if (_structure == null) return false;
+
+                return _structure.IsSurrogate;
+            }
+        }
+
+        public string InnerTypeFactoryName
+        {
+            get
+            {
+                return _structure.Identifier + "Factory";
+            }
+        }
+
+        public string InnerTypeCodecName
+        {
+            get
+            {
+                return _structure.Identifier;
+            }
+        }
+
+        public string InnerTypeName
+        {
+            get
+            {
+                string postFix;
+
+                if (_member.Modifier == FieldModifier.Optional && !_type.IsReferenceType)
+                {
+                    return _type.ReferenceTypeNameOrNull;
+                }
+                else
+                {
+                    return _type.NativeTypeName;
+                }
+            }
+        }
+
+        public string TypeName
+        {
+            get
+            {
+                switch (_member.FieldContainerReference)
+                {
+                    case ContainerType.None:
+                        return string.Format("{0}", InnerTypeName);
+
+                    case ContainerType.List:
+                        return string.Format("{0}<{1}>", _containedInStructure.ListTypeName, InnerTypeName);
+
+                    case ContainerType.Set:
+                        return string.Format("{0}<{1}>", _containedInStructure.SetTypeName, InnerTypeName);
+
+                    case ContainerType.Map:
+                        throw new InvalidOperationException();
+
+                    default:
+                        throw new InvalidOperationException();
+                }
+            }
         }
     }
 }

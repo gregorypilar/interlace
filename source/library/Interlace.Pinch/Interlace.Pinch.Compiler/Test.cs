@@ -139,9 +139,8 @@ namespace Interlace.Pinch.Test
     {
         None = 0,
         
-        Fixes = 3, 
+        Fixes = 2, 
         Exception = 1, 
-        Exception2 = 2, 
     }
     
     public partial class Content : IPinchable, INotifyPropertyChanged
@@ -149,9 +148,8 @@ namespace Interlace.Pinch.Test
         object _value;
         ContentKind _valueKind;
         
-        static PinchFieldProperties _fixesProperties = new PinchFieldProperties(3, 1, null); 
+        static PinchFieldProperties _fixesProperties = new PinchFieldProperties(2, 1, null); 
         static PinchFieldProperties _exceptionProperties = new PinchFieldProperties(1, 1, null); 
-        static PinchFieldProperties _exception2Properties = new PinchFieldProperties(2, 1, null); 
         
         public Content(Fixes value)
         {
@@ -169,18 +167,6 @@ namespace Interlace.Pinch.Test
         {
             _value = value;
             _valueKind = ContentKind.Exception;
-        }
-        
-        public static implicit operator Content(Exception value)
-        {
-            return new Content(value);
-        }
-        
-        
-        public Content(Exception value)
-        {
-            _value = value;
-            _valueKind = ContentKind.Exception2;
         }
         
         public static implicit operator Content(Exception value)
@@ -240,21 +226,6 @@ namespace Interlace.Pinch.Test
             }
         }
         
-        public Exception Exception2
-        {
-            get { return _valueKind == ContentKind.Exception2 ? (Exception)_value : null; }
-            set 
-            { 
-                ContentKind existingKind = _valueKind;
-                
-                _value = value; 
-                _valueKind = ContentKind.Exception2;
-                
-                if (existingKind != _valueKind) FirePropertyChanged(existingKind);
-                FirePropertyChanged(_valueKind);
-            }
-        }
-        
         int IPinchable.ProtocolVersion
         {
             get 
@@ -276,10 +247,6 @@ namespace Interlace.Pinch.Test
                     
                 case ContentKind.Exception:
                     FirePropertyChanged("Exception");
-                    break; 
-                    
-                case ContentKind.Exception2:
-                    FirePropertyChanged("Exception2");
                     break; 
                     
                 default:
@@ -304,10 +271,6 @@ namespace Interlace.Pinch.Test
                     encoder.EncodeRequiredStructure((IPinchable)_value, _exceptionProperties);
                     break; 
                     
-                case ContentKind.Exception2:
-                    encoder.EncodeRequiredStructure((IPinchable)_value, _exception2Properties);
-                    break; 
-                    
             }
         }
         
@@ -323,10 +286,6 @@ namespace Interlace.Pinch.Test
                     
                 case ContentKind.Exception:
                     _value = decoder.DecodeRequiredStructure(ExceptionFactory.Instance, _exceptionProperties);
-                    break; 
-                    
-                case ContentKind.Exception2:
-                    _value = decoder.DecodeRequiredStructure(ExceptionFactory.Instance, _exception2Properties);
                     break; 
                     
                 default:

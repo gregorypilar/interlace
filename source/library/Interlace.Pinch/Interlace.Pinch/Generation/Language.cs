@@ -33,6 +33,7 @@ using System.Text;
 using Interlace.Pinch.Dom;
 using Interlace.Pinch.Languages;
 using Interlace.PropertyLists;
+using Interlace.Pinch.Languages.Cs;
 
 #endregion
 
@@ -52,6 +53,16 @@ namespace Interlace.Pinch.Generation
         public static Language Cs
         {
             get { return new CsLanguage(); }
+        }
+
+        public static Language Java
+        {
+            get { return new JavaLanguage(); }
+        }
+
+        public static Language Cpp
+        {
+            get { return new CppLanguage(); }
         }
 
         public string Name
@@ -123,6 +134,6 @@ namespace Interlace.Pinch.Generation
         public virtual object CreateStructureImplementationHelper(Structure structure, PropertyDictionary options) { return null; }
         public virtual object CreateStructureMemberImplementationHelper(StructureMember member) { return null; }
 
-        public abstract IEnumerable<LanguageOutput> GetLanguageOutputs(string baseName, string destinationPath);
+        public abstract void GenerateFiles(Generator generator, Document document);
     }
 }

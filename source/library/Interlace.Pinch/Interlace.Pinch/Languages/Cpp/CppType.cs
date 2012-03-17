@@ -36,25 +36,67 @@ using Interlace.Pinch.Dom;
 
 namespace Interlace.Pinch.Languages
 {
-    public class CsType
+    public class CppType
     {
-        readonly string _nativeTypeName;
-        readonly bool _isReferenceType;
+        readonly string _valueTypeName;
+        readonly string _referenceTypeName;
+        readonly string _initialiser;
+        readonly string _className;
+        readonly CppStructure _structure;
 
-        public CsType(string nativeTypeName, bool isReferenceType)
+        public CppType(string valueTypeName, string referenceTypeName)
         {
-            _nativeTypeName = nativeTypeName;
-            _isReferenceType = isReferenceType;
+            _valueTypeName = valueTypeName;
+            _referenceTypeName = referenceTypeName;
         }
 
-        public string NativeTypeName
-        { 	 
-            get { return _nativeTypeName; }
+        public CppType(string valueTypeName, string referenceTypeName, string initialiser)
+        {
+            _valueTypeName = valueTypeName;
+            _referenceTypeName = referenceTypeName;
+            _initialiser = initialiser;
         }
 
-        public bool IsReferenceType
+        public CppType(string valueTypeName, string referenceTypeName, string initialiser, string className)
+        {
+            _valueTypeName = valueTypeName;
+            _referenceTypeName = referenceTypeName;
+            _initialiser = initialiser;
+            _className = className;
+        }
+
+        public CppType(string valueTypeName, string referenceTypeName, string initialiser, string className, CppStructure structure)
+        {
+            _valueTypeName = valueTypeName;
+            _referenceTypeName = referenceTypeName;
+            _initialiser = initialiser;
+            _className = className;
+            _structure = structure;
+        }
+
+        public string ValueTypeName
         { 	 
-            get { return _isReferenceType; }
+            get { return _valueTypeName; }
+        }
+
+        public string ReferenceTypeName
+        { 	 
+            get { return _referenceTypeName; }
+        }
+
+        public string Initialiser
+        {
+            get { return _initialiser; }
+        }
+
+        public string ClassName
+        {
+            get { return _className; }
+        }
+
+        public CppStructure Structure
+        {
+            get { return _structure; }
         }
     }
 }

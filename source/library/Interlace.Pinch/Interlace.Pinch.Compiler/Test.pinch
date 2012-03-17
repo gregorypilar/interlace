@@ -1,49 +1,83 @@
-protocol Interlace.Pinch.Test (1.1.1) [2]
+protocol Interlace.Pinch.Tests (1.1.1) [2]
 {
-	enumeration FixQuality [1]
+	enumeration Enumeration [1]
 	{
-		None [1];
-		Bad [1];
-		Good [1];
-		Excellent [2];
+		A [1];
+		B [2];
+		C [1, removed 2]; 
+	}
+	 
+	message ChoiceMessage [1]
+	{
+	    required int32 Test [1];
+	    required ChoiceStructure Choice [1];
+	} 
+	
+	choice ChoiceStructure [1]
+	{
+	    SmallStructure Small [1];
+	    VersioningStructure Versioning [1];
 	}
 	
-	message Message [1]
+	structure SmallStructure [1]
 	{
-	    required Content Content [1];
-	}
-
-	choice Content [1]
-	{
-	    Fixes Fixes [1];
-	    Exception Exception [1];
-	    Exception Exception2 [1];
+	    required int8 Test [1];
 	}
 	
-	structure Exception [1]
+	message VersioningStructure [1]
 	{
-	    required string Message [1];
+	    required int8 ReqScalar [1];
+	    required string ReqPointer [1];
+	    required SmallStructure ReqStructure [1];
+	    optional int8 OptScalar [1];
+	    optional string OptPointer [1];
+	    optional SmallStructure OptStructure [1];
+	    
+	    optional int8 RemovedOptScalar [1, removed 2];
+	    optional string RemovedOptPointer [1, removed 2];
+	    optional SmallStructure RemovedOptStructure [1, removed 2];
+	    
+	    required int8 AddedReqScalar [2];
+	    required string AddedReqPointer [2];
+	    required SmallStructure AddedReqStructure [2];
+	    optional int8 AddedOptScalar [2];
+	    optional string AddedOptPointer [2];
+	    optional SmallStructure AddedOptStructure [2];
 	}
 	
-	structure Fixes [1]
+	enumeration TypesEnumeration [1]
 	{
-	    list<required Fix> Fix [1];
+	    A [1];
+	    B [1];
+	    C [2];
 	}
 	
-	structure Timestamp [1]
+	message TypesStructure [1]
 	{
-	    required int64 Ticks [1];
-	}
-
-	structure Fix [1]
-	{
-	    required Timestamp When [1];
-	    optional Timestamp Received [1];
-	    list<optional Timestamp> ReceivedTimes [1];
-	    required float32 Latitude [2];
-	    required float32 Longitude [2];
-	    optional float32 X [1, removed 2];
-	    optional float32 Y [1, removed 2];
-		optional float32 HDOP [1, removed 2];
+	    required float32 ReqFloat32 [1];
+	    required float64 ReqFloat64 [1];
+        required int8 ReqInt8 [1];
+        required int16 ReqInt16 [1];
+        required int32 ReqInt32 [1];
+        required int64 ReqInt64 [1];
+        required bool ReqBool [1];
+        required string ReqString [1];
+        required bytes ReqBytes [1];
+        required TypesEnumeration ReqEnumeration [1];
+        required SmallStructure ReqStructure [1];
+        list<required TypesEnumeration> ReqListOfEnum [1];
+        
+	    optional float32 OptFloat32 [1];
+	    optional float64 OptFloat64 [1];
+        optional int8 OptInt8 [1];
+        optional int16 OptInt16 [1];
+        optional int32 OptInt32 [1];
+        optional int64 OptInt64 [1];
+        optional bool OptBool [1];
+        optional string OptString [1];
+        optional bytes OptBytes [1];
+        optional TypesEnumeration OptEnumeration [1];
+        optional SmallStructure OptStructure [1];
+        list<optional TypesEnumeration> OptListOfEnum [1];
 	}
 }
