@@ -36,7 +36,7 @@
 %type <protocolIdentifier> protocol_identifier 
 %type <enumeration> enumeration_member_list 
 %type <enumerationMember> enumeration_member 
-%type <structure> structure_member_list 
+%type <structure> structure_member_list structure_member_block
 %type <structureMember> structure_member 
 
 %using Interlace.Pinch.Dom
@@ -93,8 +93,12 @@ enumeration_member_list : enumeration_member_list enumeration_member           {
 enumeration_member             : identifier version_attributes SEMICOLON       { $$ = new EnumerationMember($1, $2); }
                         ;
                         
-structure               : structure_kind identifier version_attributes LBRACE structure_member_list RBRACE
-                                                                        { $$ = $5; $5.Identifier = $2; $5.Versioning = $3; $5.StructureKind = (StructureKind)$1; }
+structure               : structure_kind identifier version_attributes structure_member_block
+                                                                        { $$ = $4; $4.Identifier = $2; $4.Versioning = $3; $4.StructureKind = (StructureKind)$1; }
+                        ;
+                        
+structure_member_block  : LBRACE structure_member_list RBRACE           { $$ = $2; }
+                        | LBRACE RBRACE                                 { $$ = new Structure(); }
                         ;
                         
 structure_kind          : MESSAGE                                       { $$ = (int)StructureKind.Message; }

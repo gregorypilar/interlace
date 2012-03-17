@@ -45,12 +45,69 @@ namespace Interlace.Pinch.Compiler
         {
             try
             {
-                string documentPath = Path.GetFullPath(args[0]);
-                string destinationPath = args.Length >= 2 ? Path.GetFullPath(args[1]) : Path.GetDirectoryName(documentPath);
+                Language language = Language.Cs;
 
-                Generator.Generate(Language.Cs, documentPath, destinationPath);
+                string documentPath = null;
+                string destinationPath = null;
+
+                int nonOptions = 0;
+
+                for (int argumentIndex = 0; argumentIndex < args.Length; argumentIndex++)
+                {
+                    string argument = args[argumentIndex];
+
+                    if (argument.ToLower() == "--cs")
+                    {
+                        language = Language.Cs;
+                    }
+                    else if (argument.ToLower() == "--java")
+                    {
+                        language = Language.Java;
+                    }
+                    else if (argument.ToLower() == "--cpp")
+                    {
+                        language = Language.Cpp;
+                    }
+                    else if (argument.StartsWith("-"))
+                    {
+                        throw new ApplicationException(
+                            string.Format("The option \"{0}\" is not supported.", argument));
+                    }
+                    else
+                    {
+                        if (nonOptions == 0)
+                        {
+                            documentPath = Path.GetFullPath(argument);
+
+                            nonOptions++;
+                        }
+                        else if (nonOptions == 1)
+                        {
+                            destinationPath = Path.GetFullPath(argument);
+
+                            nonOptions++;
+                        }
+                        else
+                        {
+                            throw new ApplicationException(
+                                string.Format("An unexpected argument was specified."));
+                        }
+                    }
+                }
+
+                if (documentPath == null)
+                {
+                    throw new ApplicationException("A file to process must be specified.");
+                }
+
+                if (destinationPath == null)
+                {
+                    destinationPath = Path.GetDirectoryName(documentPath);
+                }
+
+                Generator.Generate(language, documentPath, destinationPath);
             }
-            catch (ApplicationException e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
 

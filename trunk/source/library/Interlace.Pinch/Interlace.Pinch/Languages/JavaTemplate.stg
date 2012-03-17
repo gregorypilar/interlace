@@ -1,0 +1,389 @@
+group JavaTemplate;
+
+file(Declaration) ::= <<
+package <Declaration.Parent.Implementation.PackageName>;
+
+import com.interlacelibrary.pinch.*;
+
+<Declaration:(Declaration.KindTag)()>
+
+>>
+
+structure(Structure) ::= <<
+public class <Structure.Implementation.Identifier> implements IPinchable
+{
+    public static class Factory implements IPinchableFactory
+    {
+        public Object create(IPinchDecodingContext context)
+        {
+            return new <Structure.Implementation.Identifier>(context);
+        }
+    }
+        
+    static Factory _pinch_factoryInstance;
+    
+    public static IPinchableFactory getFactoryInstance()
+    {
+        if (_pinch_factoryInstance == null)
+        {
+            _pinch_factoryInstance = new Factory();
+        }
+        
+        return _pinch_factoryInstance;
+    }
+    
+    <Structure.NonRemovedMembers:{ m | <m.Implementation.TypeName> <m.Implementation.FieldIdentifier>; }; separator="\r\n">
+
+    <Structure.Members:{ m | static PinchFieldProperties <m.Implementation.FieldIdentifier>Properties = new PinchFieldProperties(<m.Number>, <m.Implementation.AddedInVersion><if(m.Implementation.IsRemoved)>, <m.Implementation.RemovedInVersion><endif>); }; separator="\r\n">
+    
+    public <Structure.Implementation.Identifier>()
+    {
+        <Structure.NonRemovedMembers:structure_field_constructor(); separator="\r\n">
+    }
+
+    public <Structure.Implementation.Identifier>(IPinchDecodingContext context)
+    {
+    }
+    
+    <Structure.NonRemovedMembers:structure_properties(); separator="\r\n\r\n">
+    
+    public int getProtocolVersion()
+    {
+        return <Structure.Parent.Version>;
+    }
+    
+    protected void onAdditionalFutureFields(IPinchDecoder decoder)
+    {
+    }
+
+    public void encode(IPinchEncoder encoder) throws java.io.IOException
+    {
+        encoder.openSequence(<Structure.CodingOrderMembers.Count>);
+        <Structure.VersionGroupedMembers:structure_member_group_encode(); separator="\r\n">
+        
+        encoder.closeSequence();
+    }
+    
+    public void decode(IPinchDecoder decoder) throws java.io.IOException
+    {
+        int remainingFields = decoder.openSequence();
+        <if(Structure.Implementation.GenerateOnMissingNewFields)>
+        int decodedUpToVersion = 0;
+        <endif>
+        <Structure.VersionGroupedMembers:structure_member_group_decode(); separator="\r\n">
+        
+        if (remainingFields > 0) 
+        {
+            onAdditionalFutureFields(decoder);
+            
+            decoder.skipFields(remainingFields);
+        }
+        
+        decoder.closeSequence();
+    }
+    
+	<if(Structure.Implementation.IsSurrogate)>
+	// Surrogate Methods
+	
+	public static <Structure.Implementation.Identifier> valueToSurrogateOptional(<Structure.Implementation.OptionalSurrogateFor> value)
+	{
+		if (value != null)
+		{
+			<Structure.Implementation.Identifier> surrogate = <Structure.Implementation.Identifier>Conversions.convertValueToSurrogate((<Structure.Implementation.SurrogateFor>)value);
+
+			if (surrogate == null) throw new PinchNullRequiredFieldException();
+
+			return surrogate;
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	public static <Structure.Implementation.Identifier> valueToSurrogateRequired(<Structure.Implementation.SurrogateFor> value)
+	{
+		<Structure.Implementation.Identifier> surrogate = <Structure.Implementation.Identifier>Conversions.convertValueToSurrogate(value);
+
+		if (surrogate == null) throw new PinchNullRequiredFieldException();
+
+		return surrogate;
+	}
+	
+	public static <Structure.Implementation.OptionalSurrogateFor> surrogateToValueOptional(<Structure.Implementation.Identifier> surrogate)
+	{
+		if (surrogate != null)
+		{
+			return <Structure.Implementation.Identifier>Conversions.convertSurrogateToValue(surrogate);
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	public static <Structure.Implementation.SurrogateFor> surrogateToValueRequired(<Structure.Implementation.Identifier> surrogate)
+	{
+		if (surrogate != null)
+		{
+			return <Structure.Implementation.Identifier>Conversions.convertSurrogateToValue(surrogate);
+		}
+		else
+		{
+			throw new PinchNullRequiredFieldException();
+		}
+	}
+	<endif>
+}
+
+>>
+
+structure_member_action_arguments(Member) ::= <<
+<Member.Implementation.FieldIdentifier>Properties
+>>
+
+structure_field_constructor(Member) ::= <<
+<if(!Member.Implementation.ContainerIsScalar)>
+<Member.Implementation.FieldIdentifier> = new <Member.Implementation.TypeName>();
+<endif>
+>>
+
+structure_member_encode_scalar(Member) ::= <<
+<if(Member.Implementation.IsSurrogate)>
+encoder.encode<Member.Implementation.CodecMethodSuffix>(<Member.Implementation.InnerTypeCodecName>.valueToSurrogate<Member.Implementation.RequiredOptionalModifier>(<if(Member.Implementation.ContainerIsScalar)><Member.Implementation.FieldIdentifier><else>value<endif>), <Member:structure_member_action_arguments()>);
+<else>
+encoder.encode<Member.Implementation.CodecMethodSuffix>(<if(Member.Implementation.ContainerIsScalar)><Member.Implementation.FieldIdentifier><else>value<endif>, <Member:structure_member_action_arguments()>);
+<endif>
+>>
+
+structure_member_encode_list(Member) ::= <<
+
+encoder.openSequence(<Member.Implementation.FieldIdentifier>.size());
+
+for (<Member.Implementation.InnerTypeName> value : <Member.Implementation.FieldIdentifier>)
+{
+	<Member:structure_member_encode_scalar()>
+}
+
+encoder.closeSequence();
+
+>>
+
+structure_member_group_encode(MemberGroup) ::= <<
+
+// Encode fields for version <MemberGroup.Version>:
+<MemberGroup.Members:structure_member_encode(); separator="\r\n">
+>>
+
+structure_member_encode(Member) ::= <<
+<if(Member.IsRemoved)>
+encoder.encodeRemoved();
+<else>
+<Member:("structure_member_encode_" + Member.Implementation.ContainerTag)()>
+<endif>
+>>
+
+structure_member_decode_list(Member) ::= <<
+int <Member.Implementation.CountVariableName> = decoder.openSequence();
+
+<Member.Implementation.FieldIdentifier> = new <Member.Implementation.TypeName>();
+
+for (int i = 0; i \< <Member.Implementation.CountVariableName>; i++)
+{
+    <Member.Implementation.FieldIdentifier>.add(<Member:structure_member_decode_expression()>);
+}
+
+decoder.closeSequence();
+>>
+
+structure_member_decode_expression(Member) ::= <<
+<if(Member.Implementation.IsSurrogate)>
+<Member.Implementation.InnerTypeCodecName>.surrogateToValue<Member.Implementation.RequiredOptionalModifier>((<Member.Implementation.InnerTypeCodecName>)decoder.decode<Member.Implementation.CodecMethodSuffix>(<Member.Implementation.InnerTypeCodecName>.getFactoryInstance(), <Member:structure_member_action_arguments()>))
+<else>
+<if(Member.Implementation.IsInnerTypeEnumeration)>
+<Member.Implementation.InnerTypeName>.toEnumeration(decoder.decode<Member.Implementation.CodecMethodSuffix>(<Member:structure_member_action_arguments()>))
+<else>
+(<Member.Implementation.InnerTypeName>)decoder.decode<Member.Implementation.CodecMethodSuffix>(<if(Member.Implementation.IsInnerTypeStructure)><Member.Implementation.InnerTypeName>.getFactoryInstance(), <endif><Member:structure_member_action_arguments()>)<endif><endif>
+>>
+
+structure_member_group_decode(MemberGroup) ::= <<
+
+// Decode members for version <MemberGroup.Version>:
+if (remainingFields >= <MemberGroup.Members.Count>)
+{
+    <MemberGroup.Members:structure_member_decode(); separator="\r\n">
+
+    remainingFields -= <MemberGroup.Members.Count>;
+    <if(MemberGroup.Structure.Implementation.GenerateOnMissingNewFields)>
+    decodedUpToVersion = <MemberGroup.Version>;
+    <endif>
+}
+else
+{
+    if (remainingFields != 0) throw new PinchInvalidCodingException();
+    <if(MemberGroup.Structure.Implementation.GenerateOnMissingNewFields)>
+    
+    onMissingNewFields(decodedUpToVersion, <MemberGroup.Version>);
+    <endif>
+}
+>>
+
+structure_member_decode(Member) ::= <<
+<if(Member.IsRemoved)>
+decoder.skipRemoved();
+<else>
+<if(Member.Implementation.ContainerIsScalar)>
+<Member.Implementation.FieldIdentifier> = <Member:structure_member_decode_expression()>;
+<else>
+<Member:("structure_member_decode_" + Member.Implementation.ContainerTag)()>
+<endif>
+<endif>
+>>
+
+structure_properties(Member) ::= <<
+public <Member.Implementation.TypeName> get<Member.Implementation.PropertyIdentifier>()
+{
+    return <Member.Implementation.FieldIdentifier>;
+}
+
+public void set<Member.Implementation.PropertyIdentifier>(<Member.Implementation.TypeName> value)
+{
+    <Member.Implementation.FieldIdentifier> = value; 
+}
+>>
+
+choice_structure_properties(Member) ::= <<
+public <Member.Implementation.TypeName> get<Member.Implementation.PropertyIdentifier>()
+{
+    return _valueKind == <Member.Parent.Identifier>Kind.<Member.Identifier> ? (<Member.Implementation.TypeName>)_value : null; 
+}
+    
+public void set<Member.Implementation.PropertyIdentifier>(<Member.Implementation.TypeName> value)
+{
+    _value = value; 
+    _valueKind = <Member.Parent.Identifier>Kind.<Member.Identifier>;
+}
+>>
+
+enumeration(Enumeration) ::= <<
+@SuppressWarnings("unused")
+public enum <Enumeration.Identifier>
+{
+<Enumeration.Implementation.OrderedIdentifiers; separator=",\r\n">;
+
+    public static <Enumeration.Identifier> toEnumeration(Integer value)
+    {
+        if (value == null) return null;
+        
+        return <Enumeration.Identifier>.values()[value];
+    }
+    
+    public static <Enumeration.Identifier> toEnumeration(int value)
+    {
+        return <Enumeration.Identifier>.values()[value];
+    }
+}
+    
+>>
+
+choice(Structure) ::= <<
+public class <Structure.Implementation.Identifier> implements IPinchable
+{
+    public static class Factory implements IPinchableFactory
+    {
+        public Object create(IPinchDecodingContext context)
+        {
+            return new <Structure.Implementation.Identifier>(context);
+        }
+    }
+        
+    static Factory _pinch_factoryInstance;
+    
+    public static IPinchableFactory getFactoryInstance()
+    {
+        if (_pinch_factoryInstance == null)
+        {
+            _pinch_factoryInstance = new Factory();
+        }
+        
+        return _pinch_factoryInstance;
+    }
+    
+    public enum <Structure.Implementation.Identifier>Kind
+    {
+        <Structure.Implementation.OrderedIdentifiers; separator=",\r\n">;
+    }
+    
+    Object _value;
+    <Structure.Implementation.Identifier>Kind _valueKind;
+    
+    <Structure.Members:{ m | static PinchFieldProperties <m.Implementation.FieldIdentifier>Properties = new PinchFieldProperties(<m.Number>, <m.Implementation.AddedInVersion><if(m.Implementation.IsRemoved)>, <m.Implementation.RemovedInVersion><endif>); }; separator="\r\n">
+    
+    <Structure.Members:{ m | public <Structure.Implementation.Identifier>(<m.Implementation.TypeName> value)
+\{
+    _value = value;
+    _valueKind = <Structure.Implementation.Identifier>Kind.<m.Identifier>;
+\}
+
+}; separator="\r\n">
+    
+        public <Structure.Implementation.Identifier>()
+        {
+            _value = null;
+            _valueKind = <Structure.Implementation.Identifier>Kind.<Structure.Implementation.EnumerationNoneIdentifier>;
+        }
+    
+        public <Structure.Implementation.Identifier>(IPinchDecodingContext context)
+        {
+        }
+        
+        public Object getValue()
+        {
+            return _value; 
+        }
+        
+        public <Structure.Implementation.Identifier>Kind getValueKind()
+        {
+            return _valueKind; 
+        }
+        
+        <Structure.Members:choice_structure_properties(); separator="\r\n\r\n">
+        
+        public int getProtocolVersion()
+        {
+            return <Structure.Parent.Version>;
+        }
+        
+        public void encode(IPinchEncoder encoder) throws java.io.IOException
+        {
+            encoder.encodeChoiceMarker(_valueKind.ordinal());
+            
+            switch (_valueKind)
+            {
+                case <Structure.Implementation.EnumerationNoneIdentifier>:
+                    throw new PinchNullRequiredFieldException();
+                    
+                <Structure.Members:{ m | case <m.Identifier>:
+    encoder.encodeRequiredStructure((IPinchable)_value, <m:structure_member_action_arguments()>);
+    break; 
+    }; separator="\r\n">
+            }
+        }
+        
+        public void decode(IPinchDecoder decoder) throws java.io.IOException
+        {
+            _valueKind = <Structure.Implementation.Identifier>Kind.values()[decoder.decodeChoiceMarker()];
+            
+            switch (_valueKind)
+            {
+                <Structure.Members:{ m | case <m.Identifier>:
+    _value = decoder.decodeRequiredStructure(<m.Implementation.InnerTypeName>.getFactoryInstance(), <m:structure_member_action_arguments()>);
+    break; 
+    }; separator="\r\n">
+                default:
+                    throw new PinchInvalidCodingException();
+            }
+        }
+    }
+
+>>

@@ -36,23 +36,30 @@ using Interlace.Pinch.Dom;
 
 namespace Interlace.Pinch.Languages
 {
-    public class CppStructure
+    public class JavaType
     {
-        Structure _structure;
+        readonly string _nativeTypeName;
+        readonly string _referenceTypeNameOrNull;
 
-        public CppStructure(Structure structure)
+        public JavaType(string nativeTypeName, string referenceTypeNameOrNull)
         {
-            _structure = structure;
+            _nativeTypeName = nativeTypeName;
+            _referenceTypeNameOrNull = referenceTypeNameOrNull;
         }
 
-        public string ClassName
-        {
-            get { return CppLanguage.IdentifierToClassName(_structure.Identifier); }
+        public string NativeTypeName
+        { 	 
+            get { return _nativeTypeName; }
         }
 
-        public string FactoryClassName
+        public string ReferenceTypeNameOrNull
+        { 	 
+            get { return _referenceTypeNameOrNull; }
+        }
+
+        public bool IsReferenceType
         {
-            get { return CppLanguage.IdentifierToClassName(string.Format("{0}Factory", _structure.Identifier)); }
+            get { return _referenceTypeNameOrNull == null; }
         }
     }
 }

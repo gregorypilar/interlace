@@ -124,4 +124,7 @@
   <data name="CsTemplate" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>CsTemplate.stg;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
+  <data name="JavaTemplate" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>JavaTemplate.stg;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
 </root>

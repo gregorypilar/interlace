@@ -34,6 +34,8 @@ using System.Text;
 using Interlace.Pinch.Dom;
 using Interlace.Pinch.Generation;
 using Interlace.Utilities;
+using Interlace.PropertyLists;
+using Interlace.Pinch.Languages.Cpp;
 
 #endregion
 
@@ -47,13 +49,13 @@ namespace Interlace.Pinch.Languages
         {
             _intrinsics = new Dictionary<Pair<IntrinsicType, FieldModifier>, CppType>();
 
-            _intrinsics.Add(new Pair<IntrinsicType, FieldModifier>(IntrinsicType.Float32, FieldModifier.Required), new CppType("float", "float"));
-            _intrinsics.Add(new Pair<IntrinsicType, FieldModifier>(IntrinsicType.Float64, FieldModifier.Required), new CppType("double", "double"));
-            _intrinsics.Add(new Pair<IntrinsicType, FieldModifier>(IntrinsicType.Int8, FieldModifier.Required), new CppType("unsigned char", "unsigned char"));
-            _intrinsics.Add(new Pair<IntrinsicType, FieldModifier>(IntrinsicType.Int16, FieldModifier.Required), new CppType("short", "short"));
-            _intrinsics.Add(new Pair<IntrinsicType, FieldModifier>(IntrinsicType.Int32, FieldModifier.Required), new CppType("int", "int"));
-            _intrinsics.Add(new Pair<IntrinsicType, FieldModifier>(IntrinsicType.Int64, FieldModifier.Required), new CppType("long long", "long long"));
-            _intrinsics.Add(new Pair<IntrinsicType, FieldModifier>(IntrinsicType.Bool, FieldModifier.Required), new CppType("bool", "bool"));
+            _intrinsics.Add(new Pair<IntrinsicType, FieldModifier>(IntrinsicType.Float32, FieldModifier.Required), new CppType("float", "float", "0.0f"));
+            _intrinsics.Add(new Pair<IntrinsicType, FieldModifier>(IntrinsicType.Float64, FieldModifier.Required), new CppType("double", "double", "0.0"));
+            _intrinsics.Add(new Pair<IntrinsicType, FieldModifier>(IntrinsicType.Int8, FieldModifier.Required), new CppType("unsigned char", "unsigned char", "0"));
+            _intrinsics.Add(new Pair<IntrinsicType, FieldModifier>(IntrinsicType.Int16, FieldModifier.Required), new CppType("short", "short", "0"));
+            _intrinsics.Add(new Pair<IntrinsicType, FieldModifier>(IntrinsicType.Int32, FieldModifier.Required), new CppType("int", "int", "0"));
+            _intrinsics.Add(new Pair<IntrinsicType, FieldModifier>(IntrinsicType.Int64, FieldModifier.Required), new CppType("long long", "long long", "0"));
+            _intrinsics.Add(new Pair<IntrinsicType, FieldModifier>(IntrinsicType.Bool, FieldModifier.Required), new CppType("bool", "bool", "false"));
             _intrinsics.Add(new Pair<IntrinsicType, FieldModifier>(IntrinsicType.String, FieldModifier.Required), new CppType("CString", "const CString &"));
             _intrinsics.Add(new Pair<IntrinsicType, FieldModifier>(IntrinsicType.Bytes, FieldModifier.Required), new CppType("CBlob", "const CBlob &"));
 
@@ -76,6 +78,11 @@ namespace Interlace.Pinch.Languages
         public static string IdentifierToClassName(string identifier)
         {
             return string.Format("C{0}", identifier);
+        }
+
+        public override object CreateProtocolImplementationHelper(Protocol protocol, PropertyDictionary options)
+        {
+            return new CppProtocol(options);
         }
 
         public override object CreateStructureMemberImplementationHelper(StructureMember member)
@@ -112,38 +119,48 @@ namespace Interlace.Pinch.Languages
                         type = new CppType(typeName, typeName);
                     }
                 }
-                else
+                else if (reference.Declaration.Implementation is CppStructure)
                 {
-                    string valueTypeName = string.Format("boost::shared_ptr<{0}>", referenceClassName);
-                    string referenceTypeName = string.Format("const boost::shared_ptr<{0}> &", referenceClassName);
+                    CppStructure structure = (CppStructure)reference.Declaration.Implementation;
 
-                    if (isInProtocolNamespace)
+                    if (!structure.IsSurrogate)
                     {
-                        type = new CppType(valueTypeName, referenceTypeName, referenceClassName);
+                        type = new CppType(
+                            string.Format("boost::shared_ptr<{0}>", referenceClassName),
+                            string.Format("const boost::shared_ptr<{0}>", referenceClassName),
+                            null, referenceClassName, structure);
                     }
                     else
                     {
-                        type = new CppType(valueTypeName, referenceTypeName, referenceClassName);
+                        type = new CppType(
+                            member.Modifier == FieldModifier.Required ? structure.SurrogateValueType : structure.SurrogateNullableValueType,
+                            member.Modifier == FieldModifier.Required ? structure.SurrogateReferenceType : structure.SurrogateNullableReferenceType,
+                            null, referenceClassName, structure);
                     }
+                }
+                else
+                {
+                    throw new InvalidOperationException();
                 }
 
                 return new CppStructureMember(member, type);
             }
         }
 
-        public override object CreateStructureImplementationHelper(Structure structure)
+        public override object CreateStructureImplementationHelper(Structure structure, PropertyDictionary options)
         {
-            return new CppStructure(structure);
+            return new CppStructure(structure, options);
         }
 
-        public override IEnumerable<LanguageOutput> GetLanguageOutputs(string baseName, string destinationPath)
+        public override void GenerateFiles(Generator generator, Document document)
         {
-            string baseFileName = baseName.Replace(".", "");
+            generator.GenerateFile(
+                Path.Combine(generator.DestinationPath, generator.BaseName + ".h"),
+                Templates.CppTemplate, "h", "Document", document);
 
-            yield return new LanguageOutput(Path.Combine(destinationPath, baseName + ".h"), 
-                LanguageOutputTemplateKind.StringTemplate, Templates.CppTemplate, "h");
-            yield return new LanguageOutput(Path.Combine(destinationPath, baseName + ".cpp"), 
-                LanguageOutputTemplateKind.StringTemplate, Templates.CppTemplate, "cpp");
+            generator.GenerateFile(
+                Path.Combine(generator.DestinationPath, generator.BaseName + ".cpp"),
+                Templates.CppTemplate, "cpp", "Document", document);
         }
     }
 }

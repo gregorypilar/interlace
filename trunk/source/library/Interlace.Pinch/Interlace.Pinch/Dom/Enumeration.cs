@@ -40,6 +40,7 @@ namespace Interlace.Pinch.Dom
     public class Enumeration : Declaration
     {
         TrackedBindingList<EnumerationMember> _members;
+        List<EnumerationMember> _codingOrderMembers;
 
         public Enumeration()
         {
@@ -82,6 +83,25 @@ namespace Interlace.Pinch.Dom
         public override string KindTag 
         {
             get { return "enumeration"; } 
+        }
+
+        public IList<EnumerationMember> CodingOrderMembers
+        {
+            get
+            {
+                if (_codingOrderMembers == null)
+                {
+                    List<EnumerationMember> members = new List<EnumerationMember>(_members);
+                    members.Sort(delegate(EnumerationMember lhs, EnumerationMember rhs)
+                    {
+                        return lhs.Number.CompareTo(rhs.Number);
+                    });
+
+                    _codingOrderMembers = members;
+                }
+
+                return _codingOrderMembers;
+            }
         }
     }
 }

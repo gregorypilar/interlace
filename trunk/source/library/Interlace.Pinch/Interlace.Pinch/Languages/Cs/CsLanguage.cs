@@ -37,7 +37,7 @@ using Interlace.PropertyLists;
 
 #endregion
 
-namespace Interlace.Pinch.Languages
+namespace Interlace.Pinch.Languages.Cs
 {
     public class CsLanguage : Language
     {
@@ -111,9 +111,10 @@ namespace Interlace.Pinch.Languages
             }
         }
 
-        public override IEnumerable<LanguageOutput> GetLanguageOutputs(string baseName, string destinationPath)
+        public override void GenerateFiles(Generator generator, Document document)
         {
-            yield return new LanguageOutput(Path.Combine(destinationPath, baseName + ".cs"), LanguageOutputTemplateKind.StringTemplate, Templates.CsTemplate, "file");
+            generator.GenerateFile(
+                Path.Combine(generator.DestinationPath, generator.BaseName + ".cs"), Templates.CsTemplate, "file", "Document", document);
         }
     }
 }

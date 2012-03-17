@@ -141,6 +141,23 @@ namespace Interlace.Pinch.Languages
             }
         }
 
+        public bool IsInnerTypeEnumeration
+        {
+            get
+            {
+                if (_member.FieldTypeReference is DeclarationTypeReference)
+                {
+                    DeclarationTypeReference declaration = _member.FieldTypeReference as DeclarationTypeReference;
+
+                    return declaration.Declaration is Enumeration;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
         public bool ContainerIsScalar
         {
             get
@@ -211,19 +228,29 @@ namespace Interlace.Pinch.Languages
             get { return _member.Versioning.AddedInVersion.ToString(); }
         }
 
+        public bool IsRemoved
+        {
+            get { return _member.Versioning.RemovedInVersion.HasValue; }
+        }
+
         public string RemovedInVersion
         {
             get 
-            { 
+            {
                 if (_member.Versioning.RemovedInVersion.HasValue)
                 {
                     return _member.Versioning.RemovedInVersion.ToString();
                 }
                 else
                 {
-                    return "null";
+                    return NullVersionLiteral;
                 }
             }
+        }
+
+        public virtual string NullVersionLiteral
+        {
+            get { return "null"; }
         }
     }
 }

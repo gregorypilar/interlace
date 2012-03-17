@@ -30,44 +30,52 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+using Interlace.PropertyLists;
 using Interlace.Pinch.Dom;
 
 #endregion
 
 namespace Interlace.Pinch.Languages
 {
-    public class CppType
+    public class JavaEnumeration 
     {
-        readonly string _valueTypeName;
-        readonly string _referenceTypeName;
-        readonly string _className;
+        Enumeration _enumeration;
+        PropertyDictionary _options;
 
-        public CppType(string valueTypeName, string referenceTypeName)
+        public JavaEnumeration(Enumeration enumeration, PropertyDictionary options)
         {
-            _valueTypeName = valueTypeName;
-            _referenceTypeName = referenceTypeName;
+            _enumeration = enumeration;
+            _options = options;
         }
 
-        public CppType(string valueTypeName, string referenceTypeName, string className)
+        public string EnumerationNoneIdentifier
         {
-            _valueTypeName = valueTypeName;
-            _referenceTypeName = referenceTypeName;
-            _className = className;
+            get
+            {
+                foreach (EnumerationMember member in _enumeration.Members)
+                {
+                    if (member.Identifier == "None") return "PinchQualifiedNone";
+                }
+
+                return "None";
+            }
         }
 
-        public string ValueTypeName
-        { 	 
-            get { return _valueTypeName; }
-        }
-
-        public string ReferenceTypeName
-        { 	 
-            get { return _referenceTypeName; }
-        }
-
-        public string ClassName
+        public List<string> OrderedIdentifiers
         {
-            get { return _className; }
+            get 
+            {
+                List<string> identifiers = new List<string>();
+
+                identifiers.Add(EnumerationNoneIdentifier);
+
+                foreach (EnumerationMember member in _enumeration.CodingOrderMembers)
+                {
+                    identifiers.Add(member.Identifier);
+                }
+
+                return identifiers;
+            }
         }
     }
 }

@@ -77,18 +77,35 @@
     <Compile Include="Generation\LanguageOutput.cs" />
     <Compile Include="Generation\NullableIntegerRenderer.cs" />
     <Compile Include="Languages\BaseStructureMember.cs" />
-    <Compile Include="Languages\CsLanguage.cs" />
-    <Compile Include="Languages\CsStructure.cs" />
-    <Compile Include="Languages\CsStructureMember.cs" />
-    <Compile Include="Languages\CsType.cs" />
+    <Compile Include="Languages\Cpp\CppLanguage.cs" />
+    <Compile Include="Languages\Cpp\CppProtocol.cs" />
+    <Compile Include="Languages\Cpp\CppStructure.cs" />
+    <Compile Include="Languages\Cpp\CppStructureMember.cs" />
+    <Compile Include="Languages\Cpp\CppType.cs" />
+    <Compile Include="Languages\Cs\CsLanguage.cs" />
+    <Compile Include="Languages\Cs\CsStructure.cs" />
+    <Compile Include="Languages\Cs\CsStructureMember.cs" />
+    <Compile Include="Languages\Cs\CsType.cs" />
+    <Compile Include="Languages\Java\JavaEnumeration.cs" />
+    <Compile Include="Languages\Java\JavaProtocol.cs" />
+    <Compile Include="Languages\Java\JavaStructureMember.cs" />
+    <Compile Include="Languages\Java\JavaStructure.cs" />
+    <Compile Include="Languages\Java\JavaType.cs" />
+    <Compile Include="Languages\Java\JavaLanguage.cs" />
     <Compile Include="Languages\LanguageException.cs" />
-    <Compile Include="Languages\Templates.Designer.cs" />
+    <Compile Include="Languages\Templates.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Templates.resx</DependentUpon>
+    </Compile>
     <Compile Include="Parsing\ParsingException.cs" />
     <Compile Include="Parsing\PinchLexer.cs" />
     <Compile Include="Parsing\PinchParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Languages\CppTemplate.stg" />
+    <None Include="Languages\JavaTemplate.stg" />
     <None Include="Languages\CsTemplate.stg" />
     <None Include="Parsing\build.bat" />
     <None Include="Parsing\PinchLexer.l" />
@@ -97,6 +114,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Languages\Templates.resx">
       <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Templates.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

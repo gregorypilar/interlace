@@ -37,20 +37,15 @@ using Interlace.Pinch.Dom;
 
 namespace Interlace.Pinch.Languages
 {
-    public class CsStructure 
+    public class JavaStructure 
     {
         Structure _structure;
         PropertyDictionary _options;
 
-        public CsStructure(Structure structure, PropertyDictionary options)
+        public JavaStructure(Structure structure, PropertyDictionary options)
         {
             _structure = structure;
             _options = options;
-
-            if (_options.HasStringFor("surrogate-for") && !_options.HasValueFor("surrogate-for-is-reference-type"))
-            {
-                throw new LanguageException("Any use of \"surrogate-for\" must be accompanied with \"surrogate-for-is-reference-type\".");
-            }
         }
 
         public bool IsSurrogate
@@ -62,14 +57,23 @@ namespace Interlace.Pinch.Languages
         {
             get 
             {
-                if (IsSurrogate)
-                {
-                    return _options.BooleanFor("surrogate-for-is-reference-type").Value;
-                }
-                else
-                {
-                    return true;
-                }
+                return true;
+            }
+        }
+
+        public string ListTypeName
+        {
+            get
+            {
+                return _options.StringFor("list-type-name", "java.util.ArrayList");
+            }
+        }
+
+        public string SetTypeName
+        {
+            get
+            {
+                return _options.StringFor("set-type-name", "java.util.HashSet");
             }
         }
 
@@ -129,6 +133,36 @@ namespace Interlace.Pinch.Languages
         public bool GenerateOnMissingNewFields 
         {
             get { return _options.BooleanFor("generate-on-missing-new-fields", false); }
+        }
+
+        public string EnumerationNoneIdentifier
+        {
+            get
+            {
+                foreach (StructureMember member in _structure.CodingOrderMembers)
+                {
+                    if (member.Identifier == "None") return "PinchQualifiedNone";
+                }
+
+                return "None";
+            }
+        }
+
+        public List<string> OrderedIdentifiers
+        {
+            get 
+            {
+                List<string> identifiers = new List<string>();
+
+                identifiers.Add(EnumerationNoneIdentifier);
+
+                foreach (StructureMember member in _structure.CodingOrderMembers)
+                {
+                    identifiers.Add(member.Identifier);
+                }
+
+                return identifiers;
+            }
         }
     }
 }
