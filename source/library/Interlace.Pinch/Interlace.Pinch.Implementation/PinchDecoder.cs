@@ -428,9 +428,31 @@ namespace Interlace.Pinch.Implementation
             return _readTokenArgument;
         }
 
+        public int? OpenOptionalSequence()
+        {
+            TokenKind token = ReadToken();
+
+            if (token == TokenKind.Null) return null;
+
+            if (token != TokenKind.Sequence) throw new PinchInvalidCodingException();
+
+            return _readTokenArgument;
+        }
+
         public int DecodeChoiceMarker()
         {
             TokenKind token = ReadToken();
+
+            if (token != TokenKind.Choice) throw new PinchInvalidCodingException();
+
+            return _readTokenArgument;
+        }
+
+        public int? DecodeOptionalChoiceMarker()
+        {
+            TokenKind token = ReadToken();
+
+            if (token == TokenKind.Null) return null;
 
             if (token != TokenKind.Choice) throw new PinchInvalidCodingException();
 

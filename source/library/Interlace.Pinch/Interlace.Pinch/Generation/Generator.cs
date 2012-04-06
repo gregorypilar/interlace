@@ -49,15 +49,17 @@ namespace Interlace.Pinch.Generation
         Document _document;
         string _documentPath;
         string _destinationPath;
+        DateTime _mostRecentSourceFile;
 
         static Regex _suffixRegex = new Regex(@"(\.(java|cs|cpp))?\.instance$", RegexOptions.IgnoreCase);
 
-        protected Generator(Language language, Document document, string documentPath, string destinationPath)
+        protected Generator(Language language, Document document, string documentPath, string destinationPath, DateTime mostRecentSourceFile)
         {
             _language = language;
             _document = document;
             _documentPath = documentPath;
             _destinationPath = destinationPath;
+            _mostRecentSourceFile = mostRecentSourceFile;
         }
 
         public static void Generate(Language language, string documentPath, string destinationPath)
@@ -91,6 +93,11 @@ namespace Interlace.Pinch.Generation
                 actualDocumentPath = documentPath;
             }
 
+            DateTime documentModified = File.GetLastWriteTimeUtc(documentPath);
+            DateTime actualDocumentModified = File.GetLastWriteTimeUtc(actualDocumentPath);
+
+            DateTime mostRecent = documentModified > actualDocumentModified ? documentModified : actualDocumentModified;
+
             Document document = Document.Parse(actualDocumentPath);
 
             Compilation compilation = new Compilation();
@@ -100,7 +107,7 @@ namespace Interlace.Pinch.Generation
 
             language.CreateDomImplementationHelpers(document, documentOptions);
 
-            Generator generator = new Generator(language, document, actualDocumentPath, destinationPath);
+            Generator generator = new Generator(language, document, actualDocumentPath, destinationPath, mostRecent);
 
             language.GenerateFiles(generator, document);
         }
@@ -123,6 +130,8 @@ namespace Interlace.Pinch.Generation
 
         public void GenerateFile(string outputFilePath, string templateString, string templateName, string rootName, object root)
         {
+            if (_mostRecentSourceFile < File.GetLastWriteTimeUtc(outputFilePath)) return;
+
             StringTemplateGroup group;
 
             using (StringReader reader = new StringReader(templateString))
