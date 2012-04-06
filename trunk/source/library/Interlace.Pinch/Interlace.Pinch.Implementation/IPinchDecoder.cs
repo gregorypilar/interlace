@@ -37,8 +37,10 @@ namespace Interlace.Pinch.Implementation
     public interface IPinchDecoder
     {
         int OpenSequence();
+        int? OpenOptionalSequence();
 
         int DecodeChoiceMarker();
+        int? DecodeOptionalChoiceMarker();
 
         void SkipFields(int remainingFields);
         void SkipRemoved();
