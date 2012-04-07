@@ -12,12 +12,47 @@ namespace Interlace.Pinch.Tests.Dynamic
     public class DynamicTests
     {
         [Test]
+        public void TestDynamicDecodingWithTypes()
+        {
+            DynamicPincher pincher = new DynamicPincher(@"..\..\TestVersion3.pinch");
+
+            TypesStructure sample = new TypesStructure();
+
+            sample.ReqFloat32 = 1.2f;
+            sample.ReqFloat64 = 3.4;
+            sample.ReqInt8 = 5;
+            sample.ReqInt16 = 6;
+            sample.ReqInt32 = 7;
+            sample.ReqInt64 = 8;
+            sample.ReqDecimal = 9.10M;
+            sample.ReqBool = true;
+            sample.ReqString = "Eleven";
+            sample.ReqBytes = new byte[] { 1, 2 };
+            sample.ReqEnumeration = TypesEnumeration.B;
+            sample.ReqStructure = new SmallStructure();
+            sample.ReqStructure.Test = 13;
+
+            SmallStructure firstSmall = new SmallStructure();
+            firstSmall.Test = 14;
+
+            SmallStructure secondSmall = new SmallStructure();
+            secondSmall.Test = 15;
+
+            sample.ReqListOfEnum.Add(firstSmall);
+            sample.ReqListOfEnum.Add(secondSmall);
+
+            byte[] data = Pincher.Encode(sample);
+
+            DynamicStructure structure = 
+                pincher.Decode("Interlace.Pinch.TestsVersion3.TypesStructure", data);
+        }
+
+        [Test]
         public void TestDynamicDecoding()
         {
             DynamicPincher pincher = new DynamicPincher(@"..\..\TestVersion3.pinch");
 
             VersioningStructure sample = new VersioningStructure();
-
             sample.ReqScalar = 1;
             sample.ReqPointer = "Two";
             sample.ReqStructure = new SmallStructure();
