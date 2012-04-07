@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interlace.Pinch.Tests", "In
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interlace.Pinch.Utility", "Interlace.Pinch.Utility\Interlace.Pinch.Utility.csproj", "{1EBED803-58D9-46C2-83DC-E35A6AA2637D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interlace.Pinch.Dynamic", "Interlace.Pinch.Dynamic\Interlace.Pinch.Dynamic.csproj", "{7C2ECFF7-12B8-48FF-9060-E66DB3AD2863}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -107,6 +109,16 @@ Global
 		{1EBED803-58D9-46C2-83DC-E35A6AA2637D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{1EBED803-58D9-46C2-83DC-E35A6AA2637D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{1EBED803-58D9-46C2-83DC-E35A6AA2637D}.Release|Win32.ActiveCfg = Release|Any CPU
+		{7C2ECFF7-12B8-48FF-9060-E66DB3AD2863}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C2ECFF7-12B8-48FF-9060-E66DB3AD2863}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C2ECFF7-12B8-48FF-9060-E66DB3AD2863}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{7C2ECFF7-12B8-48FF-9060-E66DB3AD2863}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{7C2ECFF7-12B8-48FF-9060-E66DB3AD2863}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{7C2ECFF7-12B8-48FF-9060-E66DB3AD2863}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C2ECFF7-12B8-48FF-9060-E66DB3AD2863}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C2ECFF7-12B8-48FF-9060-E66DB3AD2863}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{7C2ECFF7-12B8-48FF-9060-E66DB3AD2863}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{7C2ECFF7-12B8-48FF-9060-E66DB3AD2863}.Release|Win32.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

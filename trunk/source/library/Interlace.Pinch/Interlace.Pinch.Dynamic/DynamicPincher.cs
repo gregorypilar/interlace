@@ -191,7 +191,12 @@ namespace Interlace.Pinch.Dynamic
             if (structure.StructureKind == StructureKind.Message || structure.StructureKind == StructureKind.Structure)
             {
                 // Decode a structure:
-                DynamicStructure dynamicStructure = new DynamicStructure(structure.QualifiedName.ToString());
+                DynamicStructure dynamicStructure = new DynamicStructure(structure.QualifiedName.ToString(), structure.Identifier);
+
+                foreach (StructureMember member in structure.Members)
+                {
+                    dynamicStructure.OrderedMemberNames.Add(member.Identifier);
+                }
 
                 int? remainingFieldsNullable = decoder.OpenOptionalSequence();
 
