@@ -31,5 +31,10 @@ namespace Interlace.Pinch.Dynamic
         {
             get { return _value; }
         }
+
+        public override string ToString()
+        {
+            return string.Format("({0}) {1}, {2}", _enumerationName, _valueName, _value);
+        }
     }
 }
