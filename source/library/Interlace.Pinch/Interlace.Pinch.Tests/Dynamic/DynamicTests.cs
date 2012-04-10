@@ -45,6 +45,8 @@ namespace Interlace.Pinch.Tests.Dynamic
 
             DynamicStructure structure = 
                 pincher.Decode("Interlace.Pinch.TestsVersion3.TypesStructure", data);
+
+            string structureText = structure.Dumped;
         }
 
         [Test]

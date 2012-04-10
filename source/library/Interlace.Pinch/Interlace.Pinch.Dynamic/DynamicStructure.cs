@@ -61,7 +61,8 @@ namespace Interlace.Pinch.Dynamic
         {
             string indentString = "".PadLeft(indent * 2);
 
-            builder.AppendFormat("{0}({1})\n", indentString, _identifier);
+            builder.AppendFormat("{0}({1})", indentString, _identifier);
+            builder.AppendLine();
 
             foreach (string name in _orderedMemberNames)
             {
@@ -91,13 +92,19 @@ namespace Interlace.Pinch.Dynamic
         {
             if (value is DynamicStructure)
             {
-                builder.AppendFormat("\n");
+                builder.AppendLine();
 
                 ((DynamicStructure)value).Dump(builder, indent + 1);
             }
-            else 
+            else if (value is byte[])
             {
-                builder.AppendFormat("{0}\n", value);
+                builder.AppendFormat("({0} bytes)", ((byte[])value).Length);
+                builder.AppendLine();
+            }
+            else
+            {
+                builder.AppendFormat("{0}", value);
+                builder.AppendLine();
             }
         }
     }

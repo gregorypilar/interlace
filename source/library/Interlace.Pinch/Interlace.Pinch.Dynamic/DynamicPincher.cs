@@ -163,13 +163,13 @@ namespace Interlace.Pinch.Dynamic
 
                     foreach (EnumerationMember enumerationMember in enumeration.Members)
                     {
-                        if (member.Number == value.Value) 
+                        if (enumerationMember.Number == value.Value) 
                         {
-                            enumerationValueName = member.Identifier;
+                            enumerationValueName = enumerationMember.Identifier;
                         }
                     }
 
-                    return new DynamicEnumerationValue(enumeration.QualifiedName.ToString(), enumerationValueName, value.Value);
+                    return new DynamicEnumerationValue(enumeration.Identifier, enumerationValueName, value.Value);
                 }
                 else if (declaration is Structure)
                 {
