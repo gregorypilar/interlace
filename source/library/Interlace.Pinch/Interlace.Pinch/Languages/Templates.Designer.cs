@@ -66,26 +66,27 @@ namespace Interlace.Pinch.Languages {
         ///h(Document) ::= &lt;&lt;
         ///#pragma once
         ///
-        ///#include &quot;Pinch/Pinch.h&quot;
-        ///
         ///&lt;Document.Protocols:protocol_h()&gt;
         ///&gt;&gt;
         ///
         ///protocol_h(Protocol) ::= &lt;&lt;
+        ///&lt;if(Protocol.Implementation.UsesNamespace)&gt;
+        ///namespace &lt;Protocol.Implementation.Namespace&gt;
+        ///{
+        ///&lt;endif&gt;
+        ///
         ///&lt;Protocol.Declarations:{ d | &lt;d:(d.KindTag + &quot;_forward_h&quot;)()&gt; }; separator=&quot;\r\n&quot;&gt;
         ///
-        ///&lt;Protocol.Declarations:{ d | &lt;d:(d.KindTag + &quot;_h&quot;)()&gt; }&gt;
+        ///&lt;Protocol.Declarations:{ d | &lt;d:(d.KindTag + &quot;_h&quot;)()&gt; }; separator=&quot;\r\n&quot;&gt;
+        ///
+        ///&lt;if(Protocol.Implementation.UsesNamespace)&gt;
+        ///}
+        ///&lt;endif&gt;
         ///
         ///&gt;&gt;
         ///
         ///structure_forward_h(Structure) ::= &lt;&lt;
-        ///class &lt;Structure.Implementation.ClassName&gt;;
-        ///&gt;&gt;
-        ///
-        ///enumeration_forward_h(Structure) ::= &quot;&quot;
-        ///
-        ///structure_h(Structure) ::= &lt;&lt;
-        ///class &lt;Structure.Implementation.FactoryC [rest of string was truncated]&quot;;.
+        ///class &lt;Str [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CppTemplate {
             get {
@@ -153,6 +154,42 @@ namespace Interlace.Pinch.Languages {
         internal static string JavaTemplate {
             get {
                 return ResourceManager.GetString("JavaTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to group CsTemplate;
+        ///
+        ///file(Document) ::= &lt;&lt;
+        ///using System.Collections.Generic;
+        ///using System.ComponentModel;
+        ///
+        ///using Interlace.Pinch.Implementation;
+        ///
+        ///&lt;Document.Protocols:protocol()&gt;
+        ///&gt;&gt;
+        ///
+        ///protocol(Protocol) ::= &lt;&lt;
+        ///namespace &lt;Protocol.Name&gt;
+        ///{
+        ///&lt;Protocol.Declarations:declaration()&gt;
+        ///}
+        ///
+        ///&gt;&gt;
+        ///
+        ///declaration(Declaration) ::= &lt;&lt;
+        ///&lt;Declaration:(Declaration.KindTag)()&gt;
+        ///
+        ///&gt;&gt;
+        ///
+        ///structure(Structure) ::= &lt;&lt;
+        ///    public class &lt;Structure.Implementation.Identifier&gt;Factory : IPinchableFactory
+        ///    {
+        ///        static  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string PythonTemplate {
+            get {
+                return ResourceManager.GetString("PythonTemplate", resourceCulture);
             }
         }
     }

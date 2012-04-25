@@ -1,0 +1,260 @@
+group PythonTemplate;
+
+file(Document) ::= <<
+import pinch
+
+<Document.Protocols:protocol()>
+>>
+
+protocol(Protocol) ::= <<
+namespace <Protocol.Name>
+{
+<Protocol.Declarations:declaration()>
+}
+
+>>
+
+declaration(Declaration) ::= <<
+<Declaration:(Declaration.KindTag)()>
+
+>>
+
+structure(Structure) ::= <<
+def <Structure.Implementation.Identifier>Factory(context):
+    return <Structure.Implementation.Identifier>()
+
+class <Structure.Implementation.Identifier>(object):
+    def __init__(self):
+        <Structure.NonRemovedMembers:structure_field_constructor(); separator="\r\n">
+    
+        protocol_version = <Structure.Parent.Version>
+        
+        def on_additional_future_fields(self):
+            pass
+    
+        def encode(self, encoder):
+            encoder.open_sequence(<Structure.CodingOrderMembers.Count>)
+            <Structure.VersionGroupedMembers:structure_member_group_encode(); separator="\r\n">
+            
+            encoder.close_sequence()
+        
+        void decode(self, decoder):
+            remaining_fields = decoder.open_sequence()
+            <if(Structure.Implementation.GenerateOnMissingNewFields)>
+            decoded_up_to_version = 0
+            <endif>
+            <Structure.VersionGroupedMembers:structure_member_group_decode(); separator="\r\n">
+            
+            if remainingFields > 0:
+                on_additional_future_fields(decoder)
+                
+                decoder.skip_fields(remaining_fields)
+            
+            decoder.close_sequence()
+        
+		<if(Structure.Implementation.IsSurrogate)>
+		def value_to_surrogate(self, value):
+		    raise NotImplementedError()
+		    
+		def surrogate_to_value(self, surrogate):
+		    raise NotImplementedError()
+		
+		def _value_to_surrogate_optional(self, value):
+			if value != None:
+				surrogate = self.value_to_surrogate(value)
+
+				if surrogate is None: raise pinch.PinchNullRequiredFieldException()
+
+				return surrogate
+			else:
+			    return None
+
+		def _value_to_surrogate_required(self, value):
+			surrogate = self.value_to_surrogate(value)
+
+			if surrogate is None: raise pinch.PinchNullRequiredFieldException()
+
+			return surrogate
+		
+		def _surrogate_to_value_optional(self, surrogate):
+			if surrogate is not None:
+				return self.surrogate_to_value(surrogate)
+			else:
+				return None
+
+		def _surrogate_to_value_required(self, surrogate):
+			if surrogate is not None:
+				return self.surrogate_to_value(surrogate)
+			else:
+				raise pinch.PinchNullRequiredFieldException()
+		<endif>
+
+>>
+
+structure_field_constructor(Member) ::= <<
+<Member.Implementation.FieldIdentifier> = <Member.Implementation.DefaultValue>
+>>
+
+structure_member_action_arguments(Member) ::= <<
+(<Member.Number>, <Member.Implementation.AddedInVersion>, <Member.Implementation.RemovedInVersion>)
+>>
+
+structure_member_encode_scalar(Member) ::= <<
+<if(Member.Implementation.IsSurrogate)>
+encoder.encode_<Member.Implementation.CodecMethodSuffix>(self.value_to_surrogate_<Member.Implementation.RequiredOptionalModifier>(<if(Member.Implementation.ContainerIsScalar)><Member.Implementation.FieldIdentifier><else>value<endif>), <Member:structure_member_action_arguments()>);
+<else>
+encoder.encode_<Member.Implementation.CodecMethodSuffix>(<if(Member.Implementation.ContainerIsScalar)><Member.Implementation.FieldIdentifier><else>value<endif>, <Member:structure_member_action_arguments()>);
+<endif>
+>>
+
+structure_member_encode_list(Member) ::= <<
+
+encoder.open_sequence(len(<Member.Implementation.FieldIdentifier>))
+
+for value in <Member.Implementation.FieldIdentifier>:
+	<Member:structure_member_encode_scalar()>
+
+encoder.close_sequence()
+
+>>
+
+structure_member_group_encode(MemberGroup) ::= <<
+
+# Encode fields for version <MemberGroup.Version>:
+<MemberGroup.Members:structure_member_encode(); separator="\r\n">
+>>
+
+structure_member_encode(Member) ::= <<
+<if(Member.IsRemoved)>
+encoder.encode_removed()
+<else>
+<Member:("structure_member_encode_" + Member.Implementation.ContainerTag)()>
+<endif>
+>>
+
+structure_member_decode_list(Member) ::= <<
+<Member.Implementation.CountVariableName> = decoder.open_sequence()
+
+<Member.Implementation.FieldIdentifier> = []
+
+for i in range(<Member.Implementation.CountVariableName>):
+    <Member.Implementation.FieldIdentifier>.append(<Member:structure_member_decode_expression()>)
+
+decoder.close_sequence()
+>>
+
+structure_member_decode_expression(Member) ::= <<
+<if(Member.Implementation.IsSurrogate)>
+self.surrogate_to_value_<Member.Implementation.RequiredOptionalModifier>(decoder.decode_<Member.Implementation.CodecMethodSuffix>(<Member.Implementation.InnerTypeFactoryName>, <Member:structure_member_action_arguments()>))
+<else>
+decoder.decode_<Member.Implementation.CodecMethodSuffix>(<if(Member.Implementation.IsInnerTypeStructure)><Member.Implementation.InnerTypeFactoryName>, <endif><Member:structure_member_action_arguments()>)<endif>
+>>
+
+structure_member_group_decode(MemberGroup) ::= <<
+
+# Decode members for version <MemberGroup.Version>:
+if remaining_fields >= <MemberGroup.Members.Count>:
+    <MemberGroup.Members:structure_member_decode(); separator="\r\n">
+
+    remaining_fields -= <MemberGroup.Members.Count>;
+    <if(MemberGroup.Structure.Implementation.GenerateOnMissingNewFields)>
+    decoded_up_to_version = <MemberGroup.Version>;
+    <endif>
+else:
+    if remaining_fields != 0: raise pinch.PinchInvalidCodingException()
+    <if(MemberGroup.Structure.Implementation.GenerateOnMissingNewFields)>
+    
+    self.on_missing_new_fields(decoded_up_to_version, <MemberGroup.Version>)
+    <endif>
+>>
+
+structure_member_decode(Member) ::= <<
+<if(Member.IsRemoved)>
+decoder.skip_removed()
+<else>
+<if(Member.Implementation.ContainerIsScalar)>
+<Member.Implementation.FieldIdentifier> = <Member:structure_member_decode_expression()>
+<else>
+<Member:("structure_member_decode_" + Member.Implementation.ContainerTag)()>
+<endif>
+<endif>
+>>
+
+choice_structure_properties(Member) ::= <<
+
+def get_<Member.Implementation.PropertyIdentifier>(self):
+    if self._value_kind == <Member.Parent.Identifier>.<Member.Implementation.ConstantName>:
+        return self._value
+    else:
+        return None
+            
+def set_<Member.Implementation.PropertyIdentifier>(self, value):
+    self._value = value;
+    self._value_kind = <Member.Parent.Identifier>.<Member.Implementation.ConstantName>
+
+<Member.Implementation.PropertyIdentifier> = property(_get_<Member.Implementation.PropertyIdentifier>, set_<Member.Implementation.PropertyIdentifier>)
+
+>>
+
+enumeration(Enumeration) ::= <<
+class <Enumeration.Identifier>(object):
+    <Enumeration.Members:enumeration_member(); separator=",\r\n">
+    
+>>
+
+enumeration_member(Member) ::= <<
+    <Member.Implementation.ConstantName> = <Member.Number>
+>>
+
+choice(Structure) ::= <<
+def <Structure.Implementation.Identifier>Factory(context):
+    return <Structure.Implementation.Identifier>()
+
+    
+class <Structure.Implementation.Identifier>(object):
+    NONE = 0
+    
+    <Structure.Members:{ m | <m.Implementation.ConstantName> = <m.Number>, }; separator="\r\n">
+    
+    _kind_by_type = \{
+        type(None) : 0, \\
+        <Structure.Members:{ m | <m.Implementation.InnerTypeCodecName> : <m.Number>, \\ }; separator="\r\n">
+    \}
+    
+    _arguments_by_kind = \{
+        <Structure.Members:{ m | <m.Number> : <m:structure_member_action_arguments()>, \\ }; separator="\r\n">
+    \}
+    
+    _factory_by_kind = \{
+        <Structure.Members:{ m | <m.Number> : <m.Implementation.InnerTypeFactoryName>, \\ }; separator="\r\n">
+    \}
+    
+    def __init__(self, value = None):
+        self._value = value
+        self._value_kind = <Structure.Implementation.Identifier>._kind_by_type[type(value)]
+        
+        <Structure.Members:choice_structure_properties(); separator="\r\n\r\n">
+        
+        protocol_version = <Structure.Parent.Version>
+        
+        def encode(self, encoder):
+            encoder.encode_choice_marker(self._value_kind)
+            
+            if self._value_kind == <Structure.Implementation.Identifier>.NONE:
+                raise pinch.PinchNullRequiredFieldException()
+            else:
+                if self._value_kind not in <Structure.Implementation.Identifier>._arguments_by_kind:
+                    raise pinch.PinchInvalidCodingException()
+                    
+                    encoder.encode_required_structure(self._value, <Structure.Implementation.Identifier>._arguments_by_kind[self._value_kind])
+    }; separator="\r\n">
+        
+        def decode(self, decoder):
+            self._value_kind = decoder.decode_choice_marker()
+            
+            if self._value_kind not in <Structure.Implementation.Identifier>._arguments_by_kind:
+                raise pinch.PinchInvalidCodingException()
+            
+            self._value = decoder.decode_required_structure(, <Structure.Implementation.Identifier>._arguments_by_kind[self._value_kind])
+        
+>>

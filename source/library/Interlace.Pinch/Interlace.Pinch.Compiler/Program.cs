@@ -68,6 +68,10 @@ namespace Interlace.Pinch.Compiler
                     {
                         language = Language.Cpp;
                     }
+                    else if (argument.ToLower() == "--python")
+                    {
+                        language = Language.Python;
+                    }
                     else if (argument.StartsWith("-"))
                     {
                         throw new ApplicationException(

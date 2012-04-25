@@ -82,6 +82,10 @@
     <Compile Include="Languages\Cpp\CppStructure.cs" />
     <Compile Include="Languages\Cpp\CppStructureMember.cs" />
     <Compile Include="Languages\Cpp\CppType.cs" />
+    <Compile Include="Languages\Python\PythonStructure.cs" />
+    <Compile Include="Languages\Python\PythonStructureMember.cs" />
+    <Compile Include="Languages\Python\PythonType.cs" />
+    <Compile Include="Languages\Python\PythonLanguage.cs" />
     <Compile Include="Languages\Cs\CsLanguage.cs" />
     <Compile Include="Languages\Cs\CsStructure.cs" />
     <Compile Include="Languages\Cs\CsStructureMember.cs" />
@@ -104,6 +108,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Languages\PythonTemplate.stg" />
     <None Include="Languages\CppTemplate.stg" />
     <None Include="Languages\JavaTemplate.stg" />
     <None Include="Languages\CsTemplate.stg" />
