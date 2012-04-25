@@ -34,6 +34,7 @@ using Interlace.Pinch.Dom;
 using Interlace.Pinch.Languages;
 using Interlace.PropertyLists;
 using Interlace.Pinch.Languages.Cs;
+using Interlace.Pinch.Languages.Python;
 
 #endregion
 
@@ -63,6 +64,11 @@ namespace Interlace.Pinch.Generation
         public static Language Cpp
         {
             get { return new CppLanguage(); }
+        }
+
+        public static Language Python
+        {
+            get { return new PythonLanguage(); }
         }
 
         public string Name

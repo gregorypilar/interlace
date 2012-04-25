@@ -53,12 +53,12 @@ namespace Interlace.Pinch.Languages
             }
         }
 
-        public string RequiredOptionalModifier
+        public virtual string RequiredOptionalModifier
         {
             get { return _member.Modifier == FieldModifier.Required ? "Required" : "Optional"; }
         }
 
-        public string CodecMethodSuffix
+        public virtual string CodecMethodSuffix
         {
             get
             {
