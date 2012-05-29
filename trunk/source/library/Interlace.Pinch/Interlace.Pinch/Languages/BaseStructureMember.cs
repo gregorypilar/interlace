@@ -45,7 +45,7 @@ namespace Interlace.Pinch.Languages
             _member = member;
         }
 
-        public string PropertyIdentifier
+        public virtual string PropertyIdentifier
         {
             get 
             {

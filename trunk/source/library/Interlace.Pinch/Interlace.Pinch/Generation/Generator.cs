@@ -51,7 +51,7 @@ namespace Interlace.Pinch.Generation
         string _destinationPath;
         DateTime _mostRecentSourceFile;
 
-        static Regex _suffixRegex = new Regex(@"(\.(java|cs|cpp))?\.instance$", RegexOptions.IgnoreCase);
+        static Regex _suffixRegex = new Regex(@"(\.(java|cs|cpp|python))?\.instance$", RegexOptions.IgnoreCase);
 
         protected Generator(Language language, Document document, string documentPath, string destinationPath, DateTime mostRecentSourceFile)
         {

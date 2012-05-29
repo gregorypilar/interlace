@@ -82,6 +82,8 @@
     <Compile Include="Languages\Cpp\CppStructure.cs" />
     <Compile Include="Languages\Cpp\CppStructureMember.cs" />
     <Compile Include="Languages\Cpp\CppType.cs" />
+    <Compile Include="Languages\Python\PythonProtocol.cs" />
+    <Compile Include="Languages\Python\PythonEnumerationMember.cs" />
     <Compile Include="Languages\Python\PythonStructure.cs" />
     <Compile Include="Languages\Python\PythonStructureMember.cs" />
     <Compile Include="Languages\Python\PythonType.cs" />
