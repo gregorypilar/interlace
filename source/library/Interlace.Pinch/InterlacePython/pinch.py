@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 # DAMAGE.
 
-import struct, os
+import struct, os, cStringIO
 
 PACKED_BYTE_KIND_MASK = 0xc0
 PACKED_BYTE_VALUE_MASK = 0x3f
@@ -48,10 +48,19 @@ TOKEN_PRIMITIVE_TAGGED_ORDINAL = 4 # No argument; the ordinal value must be read
 TOKEN_CHOICE = 5 # The value kind is the argument; the structure follows.
 TOKEN_NULL = 6 # No argument and nothing to read after.
 
-class PinchEndOfStreamException(Exception):
+class PinchException(Exception):
 	pass
 
-class PinchInvalidCodingException(Exception):
+class PinchEndOfStreamException(PinchException):
+	pass
+
+class PinchInvalidCodingException(PinchException):
+	pass
+
+class PinchNullRequiredFieldException(PinchException):
+	pass
+
+class PinchInvalidFieldTypeException(PinchException):
 	pass
 
 class PinchDecodingContext(object):
@@ -62,6 +71,14 @@ class PinchDecimal(object):
 		self.sign = sign
 		self.digits = digits
 		self.exponent = exponent
+
+	def __eq__(self, rhs):
+		if not isinstance(rhs, PinchDecimal): return False
+
+		return \
+			self.sign == rhs.sign and \
+			self.digits == rhs.digits and \
+			self.exponent == rhs.exponent
 
 class PinchDecoder(object):
 	def __init__(self, file):
@@ -169,11 +186,11 @@ class PinchDecoder(object):
 				if read_byte & 0x08: tag = long(tag)
 			elif shift > 28: raise PinchInvalidCodingException()
 
-			tag |= (readByte & 0x7f) << shift
+			tag |= (read_byte & 0x7f) << shift
 
 			shift += 7
 
-			if (readByte & 0x80) == 0: break
+			if (read_byte & 0x80) == 0: break
 
 		return tag
 
@@ -193,11 +210,11 @@ class PinchDecoder(object):
 				if read_byte & 0x08: tag = long(tag)
 			elif shift > 28: raise PinchInvalidCodingException()
 
-			tag |= (readByte & 0x7f) << shift
+			tag |= (read_byte & 0x7f) << shift
 
 			shift += 7
 
-			if (readByte & 0x80) == 0: break
+			if (read_byte & 0x80) == 0: break
 
 		if tag & 1:
 			return int(-(tag >> 1) - 1)
@@ -219,11 +236,11 @@ class PinchDecoder(object):
 				if read_byte & 0x7e: raise PinchInvalidCodingException()
 			elif shift > 63: raise PinchInvalidCodingException()
 
-			tag |= (readByte & 0x7f) << shift
+			tag |= (read_byte & 0x7f) << shift
 
 			shift += 7
 
-			if (readByte & 0x80) == 0: break
+			if (read_byte & 0x80) == 0: break
 
 		if tag & 1:
 			return -(tag >> 1) - 1
@@ -247,7 +264,7 @@ class PinchDecoder(object):
 
 		bytes = self._read_bytes(self._read_token_argument)
 
-		scale = ord(bytes[0])
+		exponent = ord(bytes[0])
 		is_negative = (ord(bytes[1]) & 0x80) != 0
 
 		buffer_length = self._read_token_argument
@@ -256,7 +273,7 @@ class PinchDecoder(object):
 		shift = 0
 		value = 0L
 
-		while bufferUsed != bufferLength:
+		while buffer_used != buffer_length:
 			read_byte = ord(bytes[buffer_used])
 			buffer_used += 1
 
@@ -264,7 +281,7 @@ class PinchDecoder(object):
 
 			shift += 8
 
-		return PinchDecimal(is_negative, value, scale)
+		return PinchDecimal(is_negative, value, exponent)
 
 	# Decoding Assistants:
 
@@ -272,6 +289,16 @@ class PinchDecoder(object):
 		token = self._read_token()
 
 		if token != TOKEN_PRIMITIVE_BUFFER: raise PinchInvalidCodingException()
+
+		return self._read_bytes(self._read_token_argument)
+
+	def _read_primitive_buffer_with_expect(self, expected):
+		token = self._read_token()
+
+		if token != TOKEN_PRIMITIVE_BUFFER: raise PinchInvalidCodingException()
+
+		if expected != self._read_token_argument:
+			raise PinchInvalidCodingException()
 
 		return self._read_bytes(self._read_token_argument)
 
@@ -322,10 +349,10 @@ class PinchDecoder(object):
 		return self._read_token_argument
 
 	def decode_required_float32(self, properties):
-		return struct.unpack("!f", self._read_primitive_buffer_with_expect(4))
+		return struct.unpack("!f", self._read_primitive_buffer_with_expect(4))[0]
 
 	def decode_required_float64(self, properties):
-		return struct.unpack("!d", self._read_primitive_buffer_with_expect(8))
+		return struct.unpack("!d", self._read_primitive_buffer_with_expect(8))[0]
 
 	def decode_required_int8(self, properties):
 		return self._read_primitive_unsigned_ordinal()
@@ -357,7 +384,7 @@ class PinchDecoder(object):
 		return self._read_primitive_unsigned_ordinal()
 
 	def decode_required_structure(self, factory, properties):
-		value = factory.create(PinchDecodingContext())
+		value = factory(PinchDecodingContext())
 
 		value.decode(self)
 
@@ -373,13 +400,13 @@ class PinchDecoder(object):
 
 	def decode_optional_float32(self, properties):
 		if self._start_optional():
-			return struct.unpack("!f", self._read_primitive_buffer_with_expect(4))
+			return struct.unpack("!f", self._read_primitive_buffer_with_expect(4))[0]
 		else:
 			return None
 
 	def decode_optional_float64(self, properties):
 		if self._start_optional():
-			return struct.unpack("!d", self._read_primitive_buffer_with_expect(8))
+			return struct.unpack("!d", self._read_primitive_buffer_with_expect(8))[0]
 		else:
 			return None
 
@@ -439,9 +466,9 @@ class PinchDecoder(object):
 		else:
 			return None
 
-	def decode_optional_structure(self, properties):
+	def decode_optional_structure(self, factory, properties):
 		if self._start_optional():
-			value = factory.create(PinchDecodingContext())
+			value = factory(PinchDecodingContext())
 
 			value.decode(self)
 
@@ -497,7 +524,7 @@ class PinchEncoder(object):
 		self._file.write(chr(remaining))
 
 	def _write_signed_tag(self, tag):
-		if tag < 2147483648 or 2147483647 < tag:
+		if tag < -2147483648 or 2147483647 < tag:
 			raise PinchInvalidCodingException()
 
 		if tag < 0:
@@ -587,7 +614,37 @@ class PinchEncoder(object):
 		self._file.write(chr(NULL))
 
 	def _write_decimal(self, value):
-		raise NotImplementedError()
+		# Validate the decimal and determine the number of bytes to encode it:
+		if not isinstance(value, PinchDecimal): raise PinchInvalidCodingException()
+		if not 0 <= value.exponent <= 255: raise PinchInvalidCodingException()
+		if not value.digits >= 0: raise PinchInvalidCodingException()
+
+		digit_octet_count = 1
+		digits = value.digits >> 8
+
+		while digits > 0:
+			digit_octet_count += 1
+			digits = digits >> 8
+
+			if digit_octet_count > 8: raise PinchInvalidCodingException()
+
+		# Write the tag and encoded decimal:
+		self._file.write(chr(PACKED_PRIMATIVE_BUFFER_BYTE | (digit_octet_count + 2)))
+		self._file.write(chr(value.exponent))
+
+		if value.sign:
+			self._file.write(chr(0x80))
+		else:
+			self._file.write(chr(0x00))
+
+		digits = value.digits
+
+		self._file.write(chr(digits & 0xff))
+		digits = digits >> 8
+
+		while digits > 0:
+			self._file.write(chr(digits & 0xff))
+			digits = digits >> 8
 
 	# Decoder Members:
 
@@ -780,4 +837,26 @@ class PinchEncoder(object):
 
 	def close_sequence(self):
 		pass
+
+def decode_from_file(factory, file):
+	decoder = PinchDecoder(file)
+
+	return decoder.decode_required_structure(factory, None)
+
+def decode(factory, encoded):
+	decoder = PinchDecoder(cStringIO.StringIO(encoded))
+
+	return decoder.decode_required_structure(factory, None)
+
+def encode_to_file(value, file):
+	encoder = PinchEncoder(file)
+
+	return encoder.encode_required_structure(value, None)
+
+def encode(value):
+	encoder = PinchEncoder(cStringIO.StringIO())
+
+	encoder.encode_required_structure(value, None)
+
+	return encoder._file.getvalue()
 

@@ -64,7 +64,7 @@ namespace Interlace.Pinch.Languages.Python
         {
         }
 
-        static Regex _identifierRegex = new Regex(@"\G[A-Z]?[^A-Z]+");
+        static Regex _identifierRegex = new Regex(@"\G([A-Z]?[^A-Z]+|[A-Z])");
 
         internal static string ToPrivateIdentifier(string identifier)
         {
@@ -79,7 +79,7 @@ namespace Interlace.Pinch.Languages.Python
 
             while (match.Success)
             {
-                if (publicIdentifier != "") publicIdentifier += "-";
+                if (publicIdentifier != "") publicIdentifier += "_";
 
                 publicIdentifier += match.Value.ToLower();
 
@@ -110,10 +110,26 @@ namespace Interlace.Pinch.Languages.Python
             }
         }
 
+        public override object CreateEnumerationMemberImplementationHelper(EnumerationMember member) 
+        {
+            return new PythonEnumerationMember(member);
+        }
+
+        public override object CreateProtocolImplementationHelper(Protocol protocol, PropertyDictionary options)
+        {
+            return new PythonProtocol(protocol, options);
+        }
+
         public override void GenerateFiles(Generator generator, Document document)
         {
-            generator.GenerateFile(
-                Path.Combine(generator.DestinationPath, generator.BaseName + ".py"), Templates.PythonTemplate, "file", "Document", document);
+            foreach (Protocol protocol in document.Protocols)
+            {
+                PythonProtocol pythonProtocol = protocol.Implementation as PythonProtocol;
+
+                generator.GenerateFile(
+                    Path.Combine(generator.DestinationPath, pythonProtocol.ModuleName + ".py"),
+                    Templates.PythonTemplate, "file", "Protocol", protocol);
+            }
         }
     }
 }

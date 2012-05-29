@@ -86,7 +86,15 @@ namespace Interlace.Pinch.Languages.Python
         {
             get
             {
-                return PythonLanguage.ToPrivateIdentifier(_member.Identifier);
+                return PythonLanguage.ToPublicIdentifier(_member.Identifier);
+            }
+        }
+
+        public override string PropertyIdentifier
+        {
+            get 
+            {
+                return PythonLanguage.ToPublicIdentifier(_member.Identifier);
             }
         }
 
@@ -94,7 +102,7 @@ namespace Interlace.Pinch.Languages.Python
         {
             get 
             {
-                return PythonLanguage.ToPrivateIdentifier(_member.Identifier).ToUpper();
+                return PythonLanguage.ToPublicIdentifier(_member.Identifier).ToUpper();
             }
         }
 
@@ -102,7 +110,7 @@ namespace Interlace.Pinch.Languages.Python
         {
             get
             {
-                return string.Format("{0}_count", _member.Identifier);
+                return string.Format("{0}_count", PropertyIdentifier);
             }
         }
 
