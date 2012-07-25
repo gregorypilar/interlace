@@ -290,6 +290,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Collections\AdapterCollection.cs" />
+    <Compile Include="Collections\AdapterCollectionItemEventArgs.cs" />
     <Compile Include="Collections\Bucket.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -311,6 +312,7 @@
     <Compile Include="Collections\EqualityPartitioner.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Collections\IndexedAdapterCollection.cs" />
     <Compile Include="Collections\Partitioner.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -329,6 +331,7 @@
     <Compile Include="Collections\SetComparison.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Collections\SortedAdapterCollection.cs" />
     <Compile Include="Collections\TopologicalSort.cs">
       <SubType>Code</SubType>
     </Compile>
