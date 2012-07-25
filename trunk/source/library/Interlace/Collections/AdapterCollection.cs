@@ -35,7 +35,7 @@ using System.ComponentModel;
 
 namespace Interlace.Collections
 {
-    public abstract class AdapterCollection<TAdapter, TValue, TKey> : BindingList<TAdapter>
+    public abstract class AdapterCollection<TAdapter, TValue, TKey> : TrackedBindingList<TAdapter>
     {
         protected abstract TKey GetKeyFromValue(TValue value);
         protected abstract TKey GetKeyFromAdapter(TAdapter adapter);
