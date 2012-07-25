@@ -46,11 +46,21 @@ namespace Interlace.Collections
         public event EventHandler<TrackedBindingListEventArgs<T>> Added;
         public event EventHandler<TrackedBindingListEventArgs<T>> Removed;
 
+        protected virtual void OnAdded(T item)
+        {
+            if (Added != null) Added(this, new TrackedBindingListEventArgs<T>(item));
+        }
+
+        protected virtual void OnRemoved(T item)
+        {
+            if (Removed != null) Removed(this, new TrackedBindingListEventArgs<T>(item));
+        }
+
         protected override void ClearItems()
         {
             foreach (T item in Items)
             {
-                if (Removed != null) Removed(this, new TrackedBindingListEventArgs<T>(item));
+                OnRemoved(item);
             }
 
             base.ClearItems();
@@ -60,12 +70,12 @@ namespace Interlace.Collections
         {
             base.InsertItem(index, item);
 
-            if (Added != null) Added(this, new TrackedBindingListEventArgs<T>(item));
+            OnAdded(item);
         }
 
         protected override void RemoveItem(int index)
         {
-            if (Removed != null) Removed(this, new TrackedBindingListEventArgs<T>(Items[index]));
+            OnRemoved(Items[index]);
 
             base.RemoveItem(index);
         }
@@ -76,14 +86,14 @@ namespace Interlace.Collections
 
             if (!object.ReferenceEquals(item, existingItem))
             {
-                if (Removed != null) Removed(this, new TrackedBindingListEventArgs<T>(existingItem));
+                OnRemoved(existingItem);
             }
 
             base.SetItem(index, item);
 
             if (!object.ReferenceEquals(item, existingItem))
             {
-                if (Added != null) Added(this, new TrackedBindingListEventArgs<T>(item));
+                OnAdded(item);
             }
         }
     }
