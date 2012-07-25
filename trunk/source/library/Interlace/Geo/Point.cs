@@ -150,9 +150,23 @@ namespace Interlace.Geo
 		// Points that are nearly antipodal yield no solution; a 
 		// Double.NaN is returned.
 		
-		public static double CalculateDistance(Position a, Position b, Ellipsoid e)
+        public static double CalculateDistance(Position a, Position b, Ellipsoid e)
+        {
+            double distance;
+            Angle bearing;
+
+            CalculateDistanceAndBearing(a, b, e, out distance, out bearing);
+
+            return distance;
+        }
+
+		public static void CalculateDistanceAndBearing(Position a, Position b, Ellipsoid e, out double distance, out Angle bearing)
 		{
-			if (PointsEqual(a, b, 1e-12)) return 0.0;
+            if (PointsEqual(a, b, 1e-12))
+            {
+                distance = 0.0;
+                bearing = Angle.FromAngleInDegrees(0.0);
+            }
 			
 			double lambda = Radians(b.Longitude - a.Longitude);
 			double last_lambda = 2 * Math.PI;
@@ -201,7 +215,13 @@ namespace Interlace.Geo
 			
 			// As in Vincenty 1975, "The inverse formula may give no 
 			// solution over a line between two nearly antipodal points":
-			if (loop_limit == 0) return Double.NaN;
+            if (loop_limit == 0)
+            {
+                distance = double.NaN;
+                bearing = Angle.FromAngleInDegrees(0.0);
+
+                return;
+            }
 			
 			double sqr_u = Math.Pow(Math.Cos(alpha), 2) * 
 				(e.A * e.A - e.B * e.B) / (e.B * e.B);
@@ -215,7 +235,9 @@ namespace Interlace.Geo
 						(-3 + 4 * sqr_cos_2sigma_m)
 				));
 			                                       
-			return e.B * A * (sigma - delta_sigma);
+			distance = e.B * A * (sigma - delta_sigma);
+            bearing = Angle.FromHeadingInDegrees(180.0 / Math.PI * 
+                Math.Atan2(cos_U2 * Math.Sin(lambda), cos_U1 * sin_U2 - sin_U1 * cos_U2 * Math.Cos(lambda)));
 		}
 
 		private static void TotalDegreesToDegreesMinutesSeconds(double totalDegrees, 
