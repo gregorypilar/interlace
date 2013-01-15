@@ -79,9 +79,6 @@ namespace Interlace.ReactorService
 
             _reactor = new Reactor();
             _reactor.ReactorException += new EventHandler<ServiceExceptionEventArgs>(_reactor_ReactorException);
-
-            _reactor.AddPermanentHandle(_stateRequestEvent, StateRequestEventFired);
-            _reactor.AddRepeatingTimer(new TimeSpan(0, 0, 10), ExceptionWaitTimer, null);
         }
 
         public TimeSpan StartingExceptionWaitTimeout
@@ -106,9 +103,12 @@ namespace Interlace.ReactorService
                 CloseAll();
             }
 
-            SetState(ServiceState.UpExceptionWait);
+            if (_state != ServiceState.UpExceptionWait)
+            {
+                _upExceptionWaitFinishAt = DateTime.Now + _upExceptionWaitTimeout;
+            }
 
-            _upExceptionWaitFinishAt = DateTime.Now + _upExceptionWaitTimeout;
+            SetState(ServiceState.UpExceptionWait);
 
             e.Handled = true;
         }
@@ -187,6 +187,9 @@ namespace Interlace.ReactorService
         void ThreadMain()
         {
             ServiceHostImplementation host = new ServiceHostImplementation(_reactor, _defaultEnvironment, _services);
+            
+            _reactor.AddPermanentHandle(_stateRequestEvent, StateRequestEventFired);
+            _reactor.AddRepeatingTimer(new TimeSpan(0, 0, 10), ExceptionWaitTimer, null);
 
             bool permanentServicesOpened = OpenListOfServices(_permanentServices, host, 
                 ServiceExceptionKind.DuringPermanentOpen, ServiceExceptionKind.DuringPermanentOpenAbort);
