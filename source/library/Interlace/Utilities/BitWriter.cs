@@ -29,93 +29,57 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 #endregion
 
-namespace Interlace.Binding
+// Portions of this code were originally developed for Bit Plantation internal use.
+// (Portions Copyright © 2006 Bit Plantation)
+
+namespace Interlace.Utilities
 {
-    using Views;
-
-    public class BinderController
+    public class BitWriter
     {
-        Binder _binder;
-        List<BinderViewBase> _views;
-        IBinderModel _model;
-        bool _tracingEnabled;
+        Stream _stream;
 
-        internal BinderController(Binder binder, IBinderModel model)
+        public BitWriter(Stream stream)
         {
-            _binder = binder;
-            _views = new List<BinderViewBase>();
-            _model = model;
-            _model.Controller = this;
+            _stream = stream;
         }
 
-        public void OnModelModified()
+        public void WriteBytes(byte[] bytes)
         {
-            object newValue = _model.GetValue();
+            _stream.Write(bytes, 0, bytes.Length);
+        }
 
-#if DEBUG
-            if (_tracingEnabled)
+        public void WriteBytes(uint bytes, int byteCount)
+        {
+            if (byteCount > 4)
             {
-                Console.WriteLine(string.Format("Binder: Model ({0}) -> Views ({1}), Value \"{2}\".",
-                    _model.GetDescriptionForTracing(), _views.Count, newValue));
-            }
-#endif
-
-            foreach (BinderViewBase view in _views)
-            {
-                view.SetValue(newValue);
+                throw new InvalidOperationException("Too many bytes specified.");
             }
 
-            _binder.OnModelChanged(this);
-        }
-
-        public void OnViewModified(BinderViewBase view, object newValue)
-        {
-            _model.SetValue(newValue);
-
-#if DEBUG
-            if (_tracingEnabled)
+            for (int i = 0; i < byteCount; i++)
             {
-                Console.WriteLine(string.Format("Binder, View -> Model ({0}), Value \"{1}\".",
-                    _model.GetDescriptionForTracing(), newValue));
+                byte b = (byte)(0xff & (bytes >> (8 * (byteCount - 1 - i))));
+
+                _stream.WriteByte(b);
             }
-#endif
-
-            OnModelModified();
         }
 
-        public void ConnectBoundToObject(object boundTo)
+        public void WriteByte(byte b)
         {
-            _model.ConnectBoundToObject(boundTo);
+            _stream.WriteByte(b);
         }
 
-        public void DisconnectBoundToObject()
+        public void WriteUnsignedShort(ushort s)
         {
-            _model.DisconnectBoundToObject();
+            WriteBytes((uint)s, 2);
         }
 
-        public void AddView(BinderViewBase view)
+        public void WriteUnsignedInteger(uint i)
         {
-            view.Controller = this;
-            _views.Add(view);
-
-            OnModelModified();
-        }
-
-        internal List<BinderViewBase> Views
-        {
-            get { return _views; }
-        }
-
-        internal bool TracingEnabled
-        {
-            get { return _tracingEnabled; }
-            set
-            {
-                _tracingEnabled = value;
-            }
+            WriteBytes(i, 4);
         }
     }
 }

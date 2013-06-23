@@ -324,6 +324,7 @@
     <Compile Include="Binding\Views\BinderViewBase.cs" />
     <Compile Include="Binding\Views\CheckBoxView.cs" />
     <Compile Include="Binding\Views\ComboBoxView.cs" />
+    <Compile Include="Binding\Views\TrackBarView.cs" />
     <Compile Include="Binding\Views\PluralisedLabelView.cs" />
     <Compile Include="Binding\Views\PropertyView.cs" />
     <Compile Include="Binding\Views\TextBoxBaseView.cs" />
@@ -389,6 +390,15 @@
     <Compile Include="Collections\TrackedCollectionEventArgs.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Controls\ConsoleControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ConsoleControl.Designer.cs">
+      <DependentUpon>ConsoleControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ConsoleRow.cs" />
+    <Compile Include="Controls\DividerConsoleRow.cs" />
+    <Compile Include="Controls\TextConsoleRow.cs" />
     <Compile Include="DatabaseManagement\AssemblyDatabaseSchemaFactory.cs" />
     <Compile Include="DatabaseManagement\IDatabaseSchemaFactory.cs" />
     <Compile Include="DatabaseManagement\NpgsqlDatabaseImplementation.cs" />
@@ -862,6 +872,8 @@
     <Compile Include="Utilities\BarButtonHelper.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Utilities\BitReader.cs" />
+    <Compile Include="Utilities\BitWriter.cs" />
     <Compile Include="Utilities\ByteUtilities.cs">
       <SubType>Code</SubType>
     </Compile>
