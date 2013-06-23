@@ -45,13 +45,31 @@ namespace Interlace.ReactorUtilities
 {
     public abstract class FrameProtocol : Protocol
     {
+        bool _nativeEndian;
+
         byte[] _receiveBuffer;
         bool _receivedHeader;
         int _receiveBufferUsed;
 
+        int _maximumFrameSize = 2097152;
+
         public FrameProtocol()
         {
+            _nativeEndian = false;
+
             StartReceivingHeader();
+        }
+
+        public int MaximumFrameSize
+        {
+            get { return _maximumFrameSize; }
+            set { _maximumFrameSize = value; }
+        }
+
+        public bool NativeEndian
+        {
+            get { return _nativeEndian; }
+            set { _nativeEndian = value; }
         }
 
         void StartReceivingHeader()
@@ -93,8 +111,25 @@ namespace Interlace.ReactorUtilities
 
         void ProcessHeader()
         {
-            uint receiveSize = (uint)IPAddress.NetworkToHostOrder(
-                (int)BitConverter.ToUInt32(_receiveBuffer, 0));
+            uint receiveSize;
+
+            if (!_nativeEndian)
+            {
+                receiveSize = (uint)IPAddress.NetworkToHostOrder((int)BitConverter.ToUInt32(_receiveBuffer, 0));
+            }
+            else
+            {
+                receiveSize = BitConverter.ToUInt32(_receiveBuffer, 0);
+            }
+
+            if (receiveSize > _maximumFrameSize)
+            {
+                Connection.LoseConnection();
+
+                throw new InvalidDataException(
+                    string.Format("Frame length ({0} bytes) exceeds maximum allowed frame rate of {1} bytes", receiveSize, _maximumFrameSize)
+                    );
+            }
 
             _receiveBuffer = new byte[receiveSize];
             _receivedHeader = true;
@@ -114,7 +149,17 @@ namespace Interlace.ReactorUtilities
 
         protected void CompleteSendFrame(MemoryStream stream)
         {
-            uint networkOrderLength = (uint)IPAddress.HostToNetworkOrder((int)(stream.Length - 4));
+            uint networkOrderLength;
+            
+            if (!_nativeEndian)
+            {
+                networkOrderLength = (uint)IPAddress.HostToNetworkOrder((int)(stream.Length - 4));
+            }
+            else
+            {
+                networkOrderLength = (uint)(stream.Length - 4);
+            }
+
             stream.Seek(0, SeekOrigin.Begin);
             stream.Write(BitConverter.GetBytes(networkOrderLength), 0, 4);
 

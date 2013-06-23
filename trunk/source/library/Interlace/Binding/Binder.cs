@@ -134,6 +134,8 @@ namespace Interlace.Binding
             boundToBinder.AddBinding(propertyName, new PropertyView(this, "BoundTo", null, readOnly));
         }
 
+        public event EventHandler ModelChanged;
+
         /// <summary>
         /// The prefix that is removed from the name of an auto-bound control.
         /// </summary>
@@ -268,7 +270,7 @@ namespace Interlace.Binding
                         break;
                 }
 
-                _properties[propertyName] = new BinderController(model);
+                _properties[propertyName] = new BinderController(this, model);
             }
         }
 
@@ -386,6 +388,11 @@ namespace Interlace.Binding
             {
                 return FirstError != null;
             }
+        }
+
+        public void OnModelChanged(BinderController controller)
+        {
+            if (ModelChanged != null) ModelChanged(this, EventArgs.Empty);
         }
     }
 }
