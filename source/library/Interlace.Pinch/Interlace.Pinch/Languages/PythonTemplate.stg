@@ -50,6 +50,7 @@ class <Structure.Implementation.Identifier>(object):
     
     def __init__(self):
         <Structure.NonRemovedMembers:structure_field_constructor(); separator="\r\n">
+        pass
         
     def on_additional_future_fields(self):
         pass
@@ -204,17 +205,17 @@ self.<Member.Implementation.FieldIdentifier> = <Member:structure_member_decode_e
 
 choice_structure_properties(Member) ::= <<
 
-def get_<Member.Implementation.PropertyIdentifier>(self):
+def _get_<Member.Implementation.PropertyIdentifier>(self):
     if self._value_kind == <Member.Parent.Identifier>.<Member.Implementation.ConstantName>:
         return self._value
     else:
         return None
             
-def set_<Member.Implementation.PropertyIdentifier>(self, value):
+def _set_<Member.Implementation.PropertyIdentifier>(self, value):
     self._value = value
     self._value_kind = <Member.Parent.Identifier>.<Member.Implementation.ConstantName>
 
-<Member.Implementation.PropertyIdentifier> = property(_get_<Member.Implementation.PropertyIdentifier>, set_<Member.Implementation.PropertyIdentifier>)
+<Member.Implementation.PropertyIdentifier> = property(_get_<Member.Implementation.PropertyIdentifier>, _set_<Member.Implementation.PropertyIdentifier>)
 
 >>
 
@@ -242,28 +243,38 @@ class <Structure.Implementation.Identifier>(object):
         self._value = value
         self._value_kind = <Structure.Implementation.Identifier>._kind_by_type[type(value)]
         
-        <Structure.Members:choice_structure_properties(); separator="\r\n\r\n">
+    def _get_value(self):
+        return self._value
         
-        protocol_version = <Structure.Parent.Version>
+    value = property(_get_value)
         
-        def encode(self, encoder):
-            encoder.encode_choice_marker(self._value_kind)
-            
-            if self._value_kind == <Structure.Implementation.Identifier>.NONE:
-                raise pinch.PinchNullRequiredFieldException()
-            else:
-                if self._value_kind not in <Structure.Implementation.Identifier>._arguments_by_kind:
-                    raise pinch.PinchInvalidCodingException()
-                    
-                    encoder.encode_required_structure(self._value, <Structure.Implementation.Identifier>._arguments_by_kind[self._value_kind])
+    def _get_value_kind(self):
+        return self._value_kind 
         
-        def decode(self, decoder):
-            self._value_kind = decoder.decode_choice_marker()
-            
+    value_kind = property(_get_value_kind)
+        
+    <Structure.Members:choice_structure_properties(); separator="\r\n\r\n">
+    
+    protocol_version = <Structure.Parent.Version>
+        
+    def encode(self, encoder):
+        encoder.encode_choice_marker(self._value_kind)
+        
+        if self._value_kind == <Structure.Implementation.Identifier>.NONE:
+            raise pinch.PinchNullRequiredFieldException()
+        else:
             if self._value_kind not in <Structure.Implementation.Identifier>._arguments_by_kind:
                 raise pinch.PinchInvalidCodingException()
-            
-            self._value = decoder.decode_required_structure(<Structure.Implementation.Identifier>._factory_by_kind[self._value_kind], <Structure.Implementation.Identifier>._arguments_by_kind[self._value_kind])
+                
+            encoder.encode_required_structure(self._value, <Structure.Implementation.Identifier>._arguments_by_kind[self._value_kind])
+    
+    def decode(self, decoder):
+        self._value_kind = decoder.decode_choice_marker()
+        
+        if self._value_kind not in <Structure.Implementation.Identifier>._arguments_by_kind:
+            raise pinch.PinchInvalidCodingException()
+        
+        self._value = decoder.decode_required_structure(<Structure.Implementation.Identifier>._factory_by_kind[self._value_kind], <Structure.Implementation.Identifier>._arguments_by_kind[self._value_kind])
         
 >>
 
