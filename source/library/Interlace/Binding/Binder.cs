@@ -77,6 +77,11 @@ namespace Interlace.Binding
         static List<IAutoBindingFactory> _autoBindings;
         static List<IAutoConverterFactory> _autoConverters;
 
+        public static void RegisterAutoBindingFactory(IAutoBindingFactory factory)
+        {
+            _autoBindings.Add(factory);
+        }
+
         static Binder()
         {
             _autoBindings = new List<IAutoBindingFactory>();
